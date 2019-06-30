@@ -43,8 +43,8 @@ export default {
 
     },
 methods: {
-    ...mapActions(['GET_FIRMS', 'GET_TREE_LEVEL']),
-    test () {this.GET_FIRMS();}}
+    ...mapActions(['TEST', 'GET_FIRMS', 'GET_TREE_LEVEL']),
+    test () {this.TEST();}}
 }
 </script>
 

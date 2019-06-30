@@ -81,11 +81,57 @@ export const store = new Vuex.Store({
       }
   },
 
-  actions : {
+    actions : {
+
+        TEST: ({dispatch}) => {
+            let res = (result) => {console.log(result)}
+            let err = (error) => {console.log(error)}
+
+            dispatch('SERVER_REQUEST', {toServer: ['GetFirms'], resolve:res, reject: err});
+        },
+
+        SERVER_REQUEST: ({state, commit, dispatch}, {toServer, resolve, reject}) => {
+
+            // создаем промис для ожидания восстановления пользовательской сессии
+            let waitAuth = new Promise((resolve) => {
+                let timer = setInterval(() => {
+                    if (state.AuthState) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 500);
+            });
+
+            let url = "http://dev2.dmf.su/func";
+            let data = {'exec':JSON.stringify(toServer)};
+
+            // делаем запрос на сервер
+            return Axios({method: "post", timeout: 10000, url: url, data: data, withCredentials: true})
+                // при удачном исходе отдаем результат
+                .then(response => {resolve(response)})
+                // при ошибке
+                .catch(error => {
+                    // проверяем, не отсутствие ли авторизации
+                    if (error.response && error.response.status == 403) {
+                        // если авторизации нет, то сбрасываем переменную, чтобы появилась форма авторизации
+                        commit('SET_AUTH', false);
+                        // и ждем появления авторизации
+                        waitAuth
+                            .then(() => {
+                                // после чего опять отправляем тот же запрос
+                                dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+                            })
+                    }
+                    // если ошибка не связана с авторизацией, то отправляем ее на обработку
+                    else {reject(error)}
+                });
+        },
 
  DATA_REQUEST: function (context, payload)
     {
-       context.commit('OBJECTS_LOADING', {root: payload.root, path: payload.path});
+
+
+        context.commit('OBJECTS_LOADING', {root: payload.root, path: payload.path});
 
         let url = "http://dev2.dmf.su/func";
         let data = {'exec':JSON.stringify(payload.toServer)};
