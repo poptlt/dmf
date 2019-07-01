@@ -83,11 +83,20 @@ export const store = new Vuex.Store({
 
     actions : {
 
-        TEST: ({dispatch}) => {
-            let res = (result) => {console.log(result)}
-            let err = (error) => {console.log(error)}
+        TEST: ({state, dispatch}) => {
+            //let res = (result) => {console.log(result)}
+            //let err = (error) => {console.log(error)}
 
-            dispatch('SERVER_REQUEST', {toServer: ['GetFirms'], resolve:res, reject: err});
+            let root = state;
+            let path = ['Objects'];
+            let transform = (data) => {
+                let res = {};
+                for (let i = 0; i < data.length; i++) {
+                    res[data[i].FirmID] = {name: data[i].Name};
+                }
+                return res;
+            };
+            dispatch('GET_OBJECTS', {toServer: ['GetFirms'], root: root, path: path, transform: transform});
         },
 
         SERVER_REQUEST: ({state, commit, dispatch}, {toServer, resolve, reject}) => {
@@ -106,7 +115,7 @@ export const store = new Vuex.Store({
             let data = {'exec':JSON.stringify(toServer)};
 
             // делаем запрос на сервер
-            return Axios({method: "post", timeout: 10000, url: url, data: data, withCredentials: true})
+            return Axios({method: "post", timeout: 1000, url: url, data: data, withCredentials: true})
                 // при удачном исходе отдаем результат
                 .then(response => {resolve(response)})
                 // при ошибке
@@ -127,10 +136,54 @@ export const store = new Vuex.Store({
                 });
         },
 
+        GET_OBJECTS: ({state, commit, dispatch}, {root, path, toServer, refresh = false, transform = (data) => {return data}}) => {
+
+            // получаем текущее состояние загружаемого объекта
+            let obj = getObjectValue(root, path);
+            // загружаем объект с сервера, только если это явно запрошенное обновление
+            // или если там нет реальных данных
+            // и не трогаем объекты в состоянии загрузки (значит скоро туда придут данные с сервера)
+            if (refresh || ((obj == undefined || (typeof obj == 'object' && obj.DMF_ERROR)) && obj != 'loading')) {
+                // если данные все таки нужно загрузить текущим процессом, то
+                // ставим туда состояние загрузки, чтобы другие процессы не пытались грузить параллельно
+                commit('ADD_OBJECTS', {root: root, path: path, value: 'loading'});
+                 // обработчик положительного ответа
+                let resolve = (response) => {
+                    // если с ответом все в порядке и данные в дереве объекта в состоянии загрузки,
+                    if (response.status == 200 && getObjectValue(root, path) == 'loading') {
+                        // то записываем их в дерево, предварительно трансформировав в нужную форму
+                        commit('ADD_OBJECTS', {root: root, path: path, value: transform(response.data)});
+                    }
+                };
+
+                // обработчик ошибки
+                let reject = (error) => {
+
+                    let err = {DMF_ERROR: true};
+
+                    if (error.code === 'ECONNABORTED') {
+                        err.message = 'Не удалось дождаться ответа от сервера!';
+                        err.code = 0;
+                    }
+                    else if (error.response.status == 500) {
+                        err.message = error.response.data.Message;
+                        err.code = 500;
+                    }
+                    else {
+                        err.message = 'Системная ошибка';
+                        err.code = 999;
+                    }
+
+                    commit('ADD_OBJECTS', {root: root, path: path, value: err});
+                };
+
+                // отправляем запрос
+                dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+            }
+        },
+
  DATA_REQUEST: function (context, payload)
     {
-
-
         context.commit('OBJECTS_LOADING', {root: payload.root, path: payload.path});
 
         let url = "http://dev2.dmf.su/func";
