@@ -4,48 +4,37 @@
 
             <auth-dmf/>
 
-            <div>
-                <v-treeview :items="OBJECTS_TREE2" :load-children="GET_TREE_LEVEL"></v-treeview>
+            <div v-if="ObjectsTree != undefined && ObjectsTree !='loading'">
+                <v-treeview :items="ObjectsTree" :load-children="GET_TREE_LEVEL"></v-treeview>
             </div>
 
           <div><v-btn @click="TEST()">test</v-btn></div>
 
-    <div v-if="Objects != undefined">
-        <div v-if="typeof Objects == 'object' && Objects.DMF_ERROR">
-            <span>{{ Objects.message }}</span>
-        </div>
-         <div v-else-if="Objects == 'loading'">
-             <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        </div>
-            <ul v-else>
-                <li v-for="(obj, index) in Objects">
-                    {{ index }}
-                </li>
-            </ul>
-
-    </div>
+          <object-dmf type="list-dmf" :root="Objects"></object-dmf>
     </v-app>
 
   </div>
 </template>
 
 <script>
-import { mapGetters,  mapActions, mapState} from 'vuex'
+import { mapActions, mapState} from 'vuex'
 
 import AuthDmf from './components/AuthDMF.vue'
+import ObjectDmf from './components/ObjectDMF.vue'
 
 export default {
   name: 'app',
   components: {
-    AuthDmf
+    AuthDmf, ObjectDmf
   },
     computed: {
-    ...mapState(['Objects']),
-    ...mapGetters(['OBJECTS_TREE2'])
+    ...mapState(['Objects', 'ObjectsTree'])
 
     },
 methods: {
-    ...mapActions(['TEST', 'GET_FIRMS', 'GET_TREE_LEVEL'])}
+    ...mapActions(['TEST', 'GET_FIRMS', 'GET_TREE_LEVEL'])},
+
+    created() {this.$store.dispatch('GET_FIRMS')}
 }
 </script>
 
