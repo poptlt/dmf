@@ -167,44 +167,33 @@ export const store = new Vuex.Store({
 
             let root = state;
             let path1 = ['Objects'];
-            let transform1 = (data) => {
+            let transform = (data) => {
                 let res = {};
                 for (let i = 0; i < data.length; i++) {
-                    res[data[i].FirmID] = {name: data[i].Name};
+                    res[data[i].FirmID] = {name: data[i].Name, FirmID: data[i].FirmID, ID: data[i].FirmID};
+                    if (data[i].NodesQnt > 0) {res[data[i].FirmID].Children = []}
+                    if (data[i].LSQnt > 0) {res[data[i].FirmID].LS = []}
                 }
                 return res;
             };
-            dispatch('GET_OBJECTS', {toServer: ['GetFirms'], root: root, path: path1, transform: transform1});
+            dispatch('GET_OBJECTS', {toServer: ['GetFirms'], root: root, path: path1, transform: transform});
+         },
 
-            let path2 = ['ObjectsTree'];
-            let transform2 = (data) => {
+        GET_TREE_LEVEL: ({dispatch}, {root}) => {
+
+            let toServer = ['TreeNodes', root.FirmID, root.ID, true];
+
+            let transform = (data) => {
                 let res = [];
                 for (let i = 0; i < data.length; i++) {
-                    res.push({id: data[i].FirmID, name: data[i].Name, FirmID: data[i].FirmID, children: []});
-                }
-                return res;
-            };
-            dispatch('GET_OBJECTS', {toServer: ['GetFirms'], root: root, path: path2, transform: transform2});
-        },
-
-        GET_TREE_LEVEL: ({state, dispatch, commit}, payload) => {
-
-            let toServer = ['TreeNodes', payload.FirmID, payload.id, true];
-
-            let resolve = ({data}) => {
-                let root = payload.children;
-                for (let i = 0; i < data.length; i++) {
-                    let node = {id: data[i].NodeID, name: data[i].NodeName, FirmID: data[i].FirmID};
-                    if (data[i].NodesQnt > 0) {node.children = []}
-                    commit('ADD_TREE_LEVEL', {root: root, data: node});
+                    let node = {ID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName}
+                    if (data[i].NodesQnt > 0) {node.Children = []}
+                    if (data[i].LSQnt > 0) {node.LS = []}
+                    res.push(node);
                 }
             }
 
-            let reject = (error) => {
-                console.log(toDMFerror(error))
-            }
-
-            return dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+            dispatch('GET_OBJECTS', {toServer: toServer, root: root, path: ['Children'], transform: transform1});
         }
     }
 })
