@@ -9,7 +9,7 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import Vuelidate from 'vuelidate'
 Vue.use(Vuelidate)
 
-// test123
+// test123kh,lk
 
 import { store } from './store'
 

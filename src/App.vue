@@ -1,4 +1,4 @@
-<template>
+<!--<template>
   <div id="app">
       <v-app>
 
@@ -14,6 +14,31 @@
     </v-app>
 
   </div>
+</template>-->
+
+<template>
+    <div id="app" style="height: 100%">
+        <auth-dmf/>
+        <v-layout column v-show="AuthState" style="height: 100%">
+            <v-layout shrink wrap align-center>
+                <template v-for="(panel, i) in panels">
+                    <v-icon v-if="i>0" v-bind:class="classes[i].button">
+                        arrow_forward_ios
+                    </v-icon>
+                    <v-btn v-bind:class="classes[i].button" v-on:click="show(i-1)">
+                        {{ panel.label }}
+                    </v-btn>
+
+                </template>
+
+            </v-layout>
+            <v-layout grow>
+                <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': panel.width}" style="border: 1px solid black" v-bind:class="classes[i].panel">
+                    <Panel :label="panel.label" :first="panel.first" :type="panel.type" v-on:add="add" v-on:delete="del(i)"/>
+                </div>
+            </v-layout>
+        </v-layout>
+    </div>
 </template>
 
 <script>
@@ -22,21 +47,146 @@ import { mapActions, mapState} from 'vuex'
 import AuthDmf from './components/AuthDMF.vue'
 import ObjectDmf from './components/ObjectDMF.vue'
 
+import Panel from './components/Panel.vue'
+
 export default {
-  name: 'app',
-  components: {
-    AuthDmf, ObjectDmf
-  },
-    computed: {
-    ...mapState(['Objects', 'ObjectsTree'])
-
+    name: 'app',
+    components:
+    {
+        AuthDmf, ObjectDmf, Panel
     },
-methods: {
-    ...mapActions(['TEST', 'GET_FIRMS', 'GET_TREE_LEVEL'])},
+    data: function()
+    {
+        return{
 
-    created() {this.$store.dispatch('GET_FIRMS')}
+            panels:
+            [
+                {width: 2, type: "Tree", label: "Главная", first: true},
+                {width: 1, label: "Вторая",},
+                {width: 1, label: "Третья"}
+            ],
+        }
+    },
+    computed:
+    {
+        ...mapState(['Objects', 'ObjectsTree', 'AuthState']),
+        classes: function()
+        {
+            let res=[], left=[1, 2, 3], classname=['sm-and-down', 'md-only', 'lg-and-up'];
+
+            for(let i=this.panels.length-1; i>=0; i--)
+            {
+                res[i]={"panel": {}, "button": {}};
+
+                for(let j=0; j<3; j++)
+                {
+                    res[i].panel['hidden-'+classname[j]] = (left[j]>0) ? false : true;
+
+                    res[i].button['hidden-'+classname[j]] = (left[j]>0) ? true: false;
+
+                    left[j]-=this.panels[i].width;
+                }
+            }
+
+            return res;
+        }
+    },
+    methods:
+    {
+        ...mapActions(['TEST', 'GET_FIRMS', 'GET_TREE_LEVEL']),
+        show: function(i)
+        {
+            while(this.panels.length>i+1) this.panels.pop();
+        },
+        add: function(type)
+        {
+            this.panels.push({type: type});
+        },
+        del: function(i)
+        {
+            while(this.panels.length>i) this.panels.pop();
+        }
+    },
+    created()
+    {
+        this.$store.dispatch('GET_FIRMS')
+    }
 }
 </script>
 
-<style>
-</style>
+<!--<template>
+    <div id="app" style="display: flex; flex-direction: column; height: 100%">
+        <div style="display: flex">
+            <v-btn v-for="i in panels.length" v-bind:class="classes[i-1].button" v-on:click="show(i-1)">{{ i }}</v-btn>
+        </div>
+        <div style="display: flex; height: 100%">
+            <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': panel.type}" style="border: 1px solid black" v-bind:class="classes[i].panel">
+                {{panel.type}}<Panel :first="panel.first" v-on:add="add" v-on:delete="del(i)"/>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+
+
+
+
+export default {
+    components:
+    {
+        Panel
+    },
+    data: function()
+    {
+        return{
+
+            panels:
+            [
+                {type: 2, first: true},
+                {type: 1},
+                {type: 1}
+            ],
+        }
+    },
+    computed:
+    {
+        classes: function()
+        {
+            let res=[], left=[1, 2, 3], classname=['sm-and-down', 'md-only', 'lg-and-up'];
+
+            for(let i=this.panels.length-1; i>=0; i--)
+            {
+                res[i]={"panel": {}, "button": {}};
+
+                for(let j=0; j<3; j++)
+                {
+                    res[i].panel['hidden-'+classname[j]] = (left[j]>0) ? false : true;
+
+                    res[i].button['hidden-'+classname[j]] = (left[j]>0) ? true: false;
+
+                    left[j]-=this.panels[i].type;
+                }
+            }
+
+            return res;
+        }
+    },
+    methods:
+    {
+        show: function(i)
+        {
+            while(this.panels.length>i+1) this.panels.pop();
+        },
+        add: function(type)
+        {
+            this.panels.push({type: type});
+        },
+        del: function(i)
+        {
+            while(this.panels.length>i) this.panels.pop();
+        }
+    }
+}
+</script>-->
+
