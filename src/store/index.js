@@ -193,7 +193,7 @@ export const store = new Vuex.Store({
                 }
             }
 
-            dispatch('GET_OBJECTS', {toServer: toServer, root: root, path: ['Children'], transform: transform1});
+            dispatch('GET_OBJECTS', {toServer: toServer, root: root, path: ['Children'], transform: transform});
         }
     }
 })
