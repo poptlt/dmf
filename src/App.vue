@@ -30,6 +30,7 @@
                     </v-btn>
 
                 </template>
+                <v-btn @click="testing">тестирование</v-btn>
 
             </v-layout>
             <v-layout grow>
@@ -105,6 +106,10 @@ export default {
         del: function(i)
         {
             while(this.panels.length>i) this.panels.pop();
+        },
+        testing: function()
+        {
+            this.$store.dispatch('TEST');
         }
     },
     created()

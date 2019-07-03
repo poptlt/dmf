@@ -7,7 +7,7 @@
             </v-btn>
         </v-layout>
         <div class="grow" style="overflow: auto">
-            <component :is="type" :depth="3"/>
+            <component :is="type"/>
             <!--<v-btn v-on:click="onAdd(1)">Добавить 1</v-btn><br>
             <v-btn v-on:click="onAdd(2)">Добавить 2</v-btn><br>-->
         </div>
