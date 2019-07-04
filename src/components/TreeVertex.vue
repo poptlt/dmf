@@ -20,6 +20,9 @@
                 </template>
             </div>
             <div style="font-size: 18px; padding-bottom: 5px">{{root.Name}}</div>
+            <div v-if="root.LSQnt" style="font-size: 18px">
+                <div @click="showLS" style="border-radius: 5px; background-color: blue; color: white; padding: 3px; margin: 3px">ЛС</div>
+            </div>
         </div>
 
         <div v-if="opened && root.Children!='loading' && root.Children!=null" style="padding-left: 10px">
@@ -29,7 +32,7 @@
                         <div style="height: 10px; flex-shrink: 0; border-left: 1px solid blue; border-bottom: 1px solid blue"></div>
                         <div v-if="i+1<root.Children.length" style="flex-grow: 1; border-left: 1px solid blue"></div>
                     </div>
-                    <TreeVertex :root="child"/>
+                    <TreeVertex :root="child" :addPanel="addPanel"/>
                 </div>
 
         </div>
@@ -48,15 +51,10 @@ export default {
             opened: false,
         }
     },
-    props:
-    {
-        root: {},
-        noParent:
-        {default: false}
-    },
+    props: ["root", "addPanel"],
     methods:
     {
-        ...mapActions(['GET_TREE_LEVEL']),
+        ...mapActions(['GET_TREE_LEVEL', 'GET_LS_LIST']),
         expand: function()
         {
             if(this.root.Children!="loading")
@@ -68,6 +66,12 @@ export default {
                     this.opened=true;
                 }
             }
+        },
+        showLS: function()
+        {
+            this.addPanel("LSList", this.root.Name, {FirmID: this.root.FirmID, ObjectID: this.root.ID});
+
+            this.GET_LS_LIST({FirmID: this.root.FirmID, ObjectID: this.root.ID});
         }
     }
 }

@@ -25,7 +25,7 @@
                     <v-icon v-if="i>0" v-bind:class="classes[i].button">
                         arrow_forward_ios
                     </v-icon>
-                    <v-btn v-bind:class="classes[i].button" v-on:click="show(i)">
+                    <v-btn v-bind:class="classes[i].button" v-on:click="showPanel(i)">
                         {{ panel.label }}
                     </v-btn>
 
@@ -34,8 +34,8 @@
 
             </header>
             <div style="display: flex; flex-grow: 1">
-                <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': panel.width}" style="border: 1px solid black; height: 100%" v-bind:class="classes[i].panel">
-                    <Panel :label="panel.label" :first="i==0" :type="panel.type" v-on:add="add" v-on:delete="del(i)"/>
+                <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': widths[panel.type]}" style="border: 1px solid black; height: 100%" v-bind:class="classes[i].panel">
+                    <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
                 </div>
             </div>
         </div>
@@ -62,10 +62,14 @@ export default {
 
             panels:
             [
-                {width: 2, type: "Tree", label: "Главная"},
-                {width: 1, label: "Вторая",},
-                {width: 1, label: "Третья"}
+                {type: "Tree", label: "Главная"},
+                //{width: 1, label: "Вторая",},
+                //{width: 1, label: "Третья"}
             ],
+            widths:
+            {
+                Tree: 1, LSList: 1
+            }
         }
     },
     computed:
@@ -85,7 +89,7 @@ export default {
 
                     res[i].button['hidden-'+classname[j]] = (left[j]>0) ? true: false;
 
-                    left[j]-=this.panels[i].width;
+                    left[j]-=this.widths[this.panels[i].type];
                 }
             }
 
@@ -95,15 +99,15 @@ export default {
     methods:
     {
         ...mapActions(['TEST', 'GET_FIRMS', 'GET_TREE_LEVEL']),
-        show: function(i)
+        showPanel: function(i)
         {
             while(this.panels.length>i+1) this.panels.pop();
         },
-        add: function(type)
+        addPanel: function(type, label, info)
         {
-            this.panels.push({type: type});
+            this.panels.push({type: type, label: label, info: info});
         },
-        del: function(i)
+        deletePanel: function(i)
         {
             while(this.panels.length>i) this.panels.pop();
         },

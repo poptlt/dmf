@@ -2,7 +2,7 @@
 
     <div style="padding: 10px">
         <template v-if="roots!='loading'">
-            <TreeVertex v-for="(val, key) in roots" :root="val" :noParent="true"/>
+            <TreeVertex v-for="(val, key) in roots" :root="val" :noParent="true" :addPanel="addPanel"/>
         </template>
         <div v-else style="display: flex; justify-content: center; align-items: center">
             <v-progress-circular :size="50" indeterminate style="color: blue"></v-progress-circular>
@@ -19,6 +19,7 @@ import { mapState } from 'vuex';
 
 export default {
     components: {TreeVertex},
+    props: ["addPanel"],
     computed:
     {
         ...mapState({roots: "Objects"})
