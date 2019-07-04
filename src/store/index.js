@@ -1,13 +1,57 @@
+function getObjectValue(root, path) {
+    if (path.length == 0) {
+        return root
+    }
+    else {
+
+        let current = root;
+        for (let i = 0; i < path.length; i++) {
+
+            let key = path[i];
+            if (typeof current != 'object') {
+                current = {};
+            }
+            if (current[key] == undefined) {
+                Vue.set(current, key, null);
+            }
+
+            current = current[key];
+        }
+        return current;
+
+    }
+}
 
 function setObjectValue(root, path, value) {
     if (path.length == 0) {
         root = value
     }
     else {
+
+        let current = root;
         for (let i = 0; i < path.length - 1; i++) {
-            root = root[path[i]];
+
+            let key = path[i];
+            if (typeof current != 'object') {
+                current = {};
+            }
+            if (current[key] == undefined) {
+                Vue.set(current, key, null);
+            }
+
+            current = current[key];
         }
-        root[path[path.length - 1]] = value;
+
+        let key = path[path.length - 1];
+        if (typeof current != 'object') {
+            current = {};
+        }
+        if (current[key] == undefined) {
+            Vue.set(current, key, value);
+        }
+        else {
+            current[key] = value;
+        }
     }
 }
 
@@ -30,17 +74,6 @@ function toDMFerror(error) {
     return err;
 }
 
-function getObjectValue(root, path) {
-    if (path.length == 0) {
-        return root
-    }
-    else {
-        for (let i = 0; i < path.length - 1; i++) {
-            root = root[path[i]];
-        }
-        return root[path[path.length - 1]];
-    }
-}
 
 import Vue from 'vue'
 import Vuex from 'vuex'
@@ -76,7 +109,9 @@ export const store = new Vuex.Store({
 
         TEST: ({state, dispatch}) => {
 
+            Vue.set(state.Objects, 'test', {});
             console.log(state);
+
 
         },
 
@@ -192,10 +227,23 @@ export const store = new Vuex.Store({
             dispatch('GET_OBJECTS', {toServer: toServer, root: root, path: ['Children'], transform: transform});
         },
 
-        GET_LS_LIST: ({dispatch}, {FirmID, ObjectID}) => {
+        GET_LS_LIST: ({state, dispatch}, {FirmID, ObjectID}) => {
+
             console.log(FirmID);
             console.log(ObjectID);
 
+            let toServer = ['LSList', ObjectID, FirmID];
+
+            let transform = (data) => {
+                let res = [];
+                for (let i = 0; i < data.length; i++) {
+                    let ls = {ID: data[i].LSID, Number: data[i].Number, Balance: data[i].Balance};
+                    res.push(ls);
+                }
+                return res;
+            }
+
+            dispatch('GET_OBJECTS', {toServer: toServer, root: state.Objects, path: [FirmID, 'Objects', ObjectID, 'LSList'], transform: transform});
         }
     }
 })
