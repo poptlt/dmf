@@ -169,7 +169,7 @@ export const store = new Vuex.Store({
             let transform = (data) => {
                 let res = {};
                 for (let i = 0; i < data.length; i++) {
-                    res[data[i].FirmID] = {Name: data[i].Name, FirmID: data[i].FirmID, ID: data[i].FirmID, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
+                    res[data[i].FirmID] = {Name: data[i].Name, FirmID: data[i].FirmID, ID: data[i].FirmID, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null, Objects: {}};
                 }
                 return res;
             };
@@ -190,6 +190,12 @@ export const store = new Vuex.Store({
             }
 
             dispatch('GET_OBJECTS', {toServer: toServer, root: root, path: ['Children'], transform: transform});
+        },
+
+        GET_LS_LIST: ({dispatch}, {FirmID, ObjectID}) => {
+            console.log(FirmID);
+            console.log(ObjectID);
+
         }
     }
 })
