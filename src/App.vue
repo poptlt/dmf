@@ -19,23 +19,23 @@
 <template>
     <div id="app" style="height: 100%;">
         <auth-dmf/>
-        <div column v-show="AuthState" style="height: 100%; display: flex; flex-direction: column; overflow: hidden">
-            <div style="display: flex; flex-wrap: wrap; align-content: center">
+        <div column v-show="AuthState" style="height: 100%; display: flex; flex-direction: column;">
+            <header style="display: flex; flex-wrap: wrap; align-items: center">
                 <template v-for="(panel, i) in panels">
                     <v-icon v-if="i>0" v-bind:class="classes[i].button">
                         arrow_forward_ios
                     </v-icon>
-                    <v-btn v-bind:class="classes[i].button" v-on:click="show(i-1)">
+                    <v-btn v-bind:class="classes[i].button" v-on:click="show(i)">
                         {{ panel.label }}
                     </v-btn>
 
                 </template>
                 <v-btn @click="testing">тестирование</v-btn>
 
-            </div>
-            <div style="display: flex">
-                <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': panel.width}" style="height: 100%; border: 1px solid black" v-bind:class="classes[i].panel">
-                    <Panel :label="panel.label" :first="panel.first" :type="panel.type" v-on:add="add" v-on:delete="del(i)"/>
+            </header>
+            <div style="display: flex; flex-grow: 1">
+                <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': panel.width}" style="border: 1px solid black; height: 100%" v-bind:class="classes[i].panel">
+                    <Panel :label="panel.label" :first="i==0" :type="panel.type" v-on:add="add" v-on:delete="del(i)"/>
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@ export default {
 
             panels:
             [
-                {width: 2, type: "Tree", label: "Главная", first: true},
+                {width: 2, type: "Tree", label: "Главная"},
                 {width: 1, label: "Вторая",},
                 {width: 1, label: "Третья"}
             ],
