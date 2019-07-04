@@ -50,8 +50,7 @@ import Axios from 'axios'
 export const store = new Vuex.Store({
   state: {
       AuthState: true,
-      Objects: undefined,
-      ObjectsTree: undefined
+      Objects: null
   },
 
     getters : {
@@ -125,7 +124,7 @@ export const store = new Vuex.Store({
             // загружаем объект с сервера, только если это явно запрошенное обновление
             // или если там нет реальных данных
             // и не трогаем объекты в состоянии загрузки (значит скоро туда придут данные с сервера)
-            if (refresh || ((obj == undefined || (typeof obj == 'object' && obj.DMF_ERROR)) && obj != 'loading')) {
+            if (refresh || ((obj == null || (typeof obj == 'object' && obj.DMF_ERROR)) && obj != 'loading')) {
                 // если данные все таки нужно загрузить текущим процессом, то
                 // ставим туда состояние загрузки, чтобы другие процессы не пытались грузить параллельно
                 commit('ADD_OBJECTS', {root: root, path: path, value: 'loading'});
@@ -170,9 +169,7 @@ export const store = new Vuex.Store({
             let transform = (data) => {
                 let res = {};
                 for (let i = 0; i < data.length; i++) {
-                    res[data[i].FirmID] = {name: data[i].Name, FirmID: data[i].FirmID, ID: data[i].FirmID};
-                    if (data[i].NodesQnt > 0) {res[data[i].FirmID].Children = []}
-                    if (data[i].LSQnt > 0) {res[data[i].FirmID].LS = []}
+                    res[data[i].FirmID] = {Name: data[i].Name, FirmID: data[i].FirmID, ID: data[i].FirmID, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
                 }
                 return res;
             };
@@ -186,11 +183,10 @@ export const store = new Vuex.Store({
             let transform = (data) => {
                 let res = [];
                 for (let i = 0; i < data.length; i++) {
-                    let node = {ID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName}
-                    if (data[i].NodesQnt > 0) {node.Children = []}
-                    if (data[i].LSQnt > 0) {node.LS = []}
+                    let node = {ID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
                     res.push(node);
                 }
+                return res;
             }
 
             dispatch('GET_OBJECTS', {toServer: toServer, root: root, path: ['Children'], transform: transform});

@@ -17,10 +17,10 @@
 </template>-->
 
 <template>
-    <div id="app" style="height: 100%">
+    <div id="app" style="height: 100%;">
         <auth-dmf/>
-        <v-layout column v-show="AuthState" style="height: 100%">
-            <v-layout shrink wrap align-center>
+        <div column v-show="AuthState" style="height: 100%; display: flex; flex-direction: column; overflow: hidden">
+            <div style="display: flex; flex-wrap: wrap; align-content: center">
                 <template v-for="(panel, i) in panels">
                     <v-icon v-if="i>0" v-bind:class="classes[i].button">
                         arrow_forward_ios
@@ -32,13 +32,13 @@
                 </template>
                 <v-btn @click="testing">тестирование</v-btn>
 
-            </v-layout>
-            <v-layout grow>
-                <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': panel.width}" style="border: 1px solid black" v-bind:class="classes[i].panel">
+            </div>
+            <div style="display: flex">
+                <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': panel.width}" style="height: 100%; border: 1px solid black" v-bind:class="classes[i].panel">
                     <Panel :label="panel.label" :first="panel.first" :type="panel.type" v-on:add="add" v-on:delete="del(i)"/>
                 </div>
-            </v-layout>
-        </v-layout>
+            </div>
+        </div>
     </div>
 </template>
 

@@ -10,7 +10,7 @@
     </div>-->
 
     <div style="padding: 10px">
-        <TreeVertex v-for="root in roots" :root="root" :noParent="true"/>
+        <TreeVertex v-for="(val, key) in roots" :root="val" :noParent="true"/>
     </div>
 
 </template>
@@ -19,6 +19,8 @@
 
 import TreeVertex from './TreeVertex.vue';
 
+import { mapState } from 'vuex';
+
 export default {
     //name: "Tree",
     components: {TreeVertex},
@@ -26,7 +28,7 @@ export default {
     {
         return{
 
-            roots:
+            /*roots:
             [
                 {
                     label: "ИП Зиннатуллин Рустам Равилович, Самарская обл, г Тольятти",
@@ -60,8 +62,13 @@ export default {
                         }
                     ]
                 }
-            ]
+            ]*/
+
         }
+    },
+    computed:
+    {
+        ...mapState({roots: "Objects"})
     }
 }
 </script>
