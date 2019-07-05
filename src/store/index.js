@@ -6,8 +6,6 @@ function getObjectValue(root, path) {
     }
     else {
 
-        console.log(path);
-
         let current = root;
 
         if(current[path[0]] == undefined) current[path[0]] = null;
@@ -19,27 +17,15 @@ function getObjectValue(root, path) {
                 current[key] = {};
             }
 
-            //console.log(i);
-            //console
-            //console.log(current[key]);
 
             if (current[key][key2] == undefined) {
-
-                //console.log(current[key]);
 
                 Vue.set(current[key], key2, null);
 
             }
 
-            //console.log(i);
-
-
             current = current[key];
-
-
         }
-
-        console.log("here");
 
         return current[path[path.length-1]];
 
@@ -47,6 +33,9 @@ function getObjectValue(root, path) {
 }
 
 function setObjectValue(root, path, value) {
+
+    console.log(value);
+
     if (path.length == 0) {
         root = value
     }
@@ -180,7 +169,6 @@ export const store = new Vuex.Store({
 
             // получаем текущее состояние загружаемого объекта
             let obj = getObjectValue(root, path);
-            console.log(obj);
             // загружаем объект с сервера, только если это явно запрошенное обновление
             // или если там нет реальных данных
             // и не трогаем объекты в состоянии загрузки (значит скоро туда придут данные с сервера)
@@ -190,7 +178,6 @@ export const store = new Vuex.Store({
                 commit('ADD_OBJECTS', {root: root, path: path, value: 'loading'});
                  // обработчик положительного ответа
                 let resolve = (response) => {
-                    console.log(response);
                     // если с ответом все в порядке и данные в дереве объекта в состоянии загрузки,
                     if (response.status == 200 && getObjectValue(root, path) == 'loading') {
                         // то записываем их в дерево, предварительно трансформировав в нужную форму
@@ -254,9 +241,6 @@ export const store = new Vuex.Store({
         },
 
         GET_LS_LIST: ({state, dispatch}, {FirmID, ObjectID}) => {
-
-            console.log(FirmID);
-            console.log(ObjectID);
 
             let toServer = ['LSList', ObjectID, FirmID];
 

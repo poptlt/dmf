@@ -71,7 +71,7 @@ export default {
         {
             this.addPanel("LSList", this.root.Name, {FirmID: this.root.FirmID, ObjectID: this.root.ID});
 
-            this.GET_LS_LIST({FirmID: this.root.FirmID, ObjectID: this.root.ID});
+            //this.GET_LS_LIST({FirmID: this.root.FirmID, ObjectID: this.root.ID});
         }
     }
 }
