@@ -1,23 +1,47 @@
 function getObjectValue(root, path) {
+
+
     if (path.length == 0) {
         return root
     }
     else {
 
-        let current = root;
-        for (let i = 0; i < path.length; i++) {
+        console.log(path);
 
-            let key = path[i];
-            if (typeof current != 'object') {
-                current = {};
+        let current = root;
+
+        if(current[path[0]] == undefined) current[path[0]] = null;
+
+        for (let i = 1; i < path.length; i++) {
+
+            let key = path[i-1], key2 = path[i];
+            if (typeof current[key] != 'object' || current[key]==null) {
+                current[key] = {};
             }
-            if (current[key] == undefined) {
-                Vue.set(current, key, null);
+
+            //console.log(i);
+            //console
+            //console.log(current[key]);
+
+            if (current[key][key2] == undefined) {
+
+                //console.log(current[key]);
+
+                Vue.set(current[key], key2, null);
+
             }
+
+            //console.log(i);
+
 
             current = current[key];
+
+
         }
-        return current;
+
+        console.log("here");
+
+        return current[path[path.length-1]];
 
     }
 }
@@ -109,7 +133,7 @@ export const store = new Vuex.Store({
 
         TEST: ({state, dispatch}) => {
 
-            Vue.set(state.Objects, 'test', {});
+            //Vue.set(state.Objects, 'test', {});
             console.log(state);
 
 
@@ -156,6 +180,7 @@ export const store = new Vuex.Store({
 
             // получаем текущее состояние загружаемого объекта
             let obj = getObjectValue(root, path);
+            console.log(obj);
             // загружаем объект с сервера, только если это явно запрошенное обновление
             // или если там нет реальных данных
             // и не трогаем объекты в состоянии загрузки (значит скоро туда придут данные с сервера)
@@ -165,6 +190,7 @@ export const store = new Vuex.Store({
                 commit('ADD_OBJECTS', {root: root, path: path, value: 'loading'});
                  // обработчик положительного ответа
                 let resolve = (response) => {
+                    console.log(response);
                     // если с ответом все в порядке и данные в дереве объекта в состоянии загрузки,
                     if (response.status == 200 && getObjectValue(root, path) == 'loading') {
                         // то записываем их в дерево, предварительно трансформировав в нужную форму
