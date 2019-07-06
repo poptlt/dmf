@@ -74,7 +74,7 @@ export default {
     },
     computed:
     {
-        ...mapState(['Objects', 'ObjectsTree', 'AuthState']),
+        ...mapState(['Objects', 'AuthState']),
         classes: function()
         {
             let res=[], left=[1, 2, 3], classname=['sm-and-down', 'md-only', 'lg-and-up'];
@@ -118,7 +118,7 @@ export default {
     },
     created()
     {
-        this.$store.dispatch('GET_FIRMS')
+        this.$store.dispatch('INIT')
     }
 }
 </script>

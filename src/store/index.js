@@ -1,70 +1,3 @@
-function getObjectValue(root, path) {
-
-
-    if (path.length == 0) {
-        return root
-    }
-    else {
-
-        let current = root;
-
-        if(current[path[0]] == undefined) current[path[0]] = null;
-
-        for (let i = 1; i < path.length; i++) {
-
-            let key = path[i-1], key2 = path[i];
-            if (typeof current[key] != 'object' || current[key]==null) {
-                current[key] = {};
-            }
-
-
-            if (current[key][key2] == undefined) {
-
-                Vue.set(current[key], key2, null);
-
-            }
-
-            current = current[key];
-        }
-
-        return current[path[path.length-1]];
-
-    }
-}
-
-function setObjectValue(root, path, value) {
-
-    if (path.length == 0) {
-        root = value
-    }
-    else {
-
-        let current = root;
-        for (let i = 0; i < path.length - 1; i++) {
-
-            let key = path[i];
-            if (typeof current != 'object') {
-                current = {};
-            }
-            if (current[key] == undefined) {
-                Vue.set(current, key, null);
-            }
-
-            current = current[key];
-        }
-
-        let key = path[path.length - 1];
-        if (typeof current != 'object') {
-            current = {};
-        }
-        if (current[key] == undefined) {
-            Vue.set(current, key, value);
-        }
-        else {
-            current[key] = value;
-        }
-    }
-}
 
 function toDMFerror(error) {
     let err = {DMF_ERROR: true};
@@ -124,7 +57,7 @@ function checkRequest(root, object, request) {
 }
 
 function setObjectsValue(root, object, value) {
-
+    
     // на всякий случай проверяем, что переданный путь является объектом
     if (object === null || typeof object != 'object') {
         throw 'Системная ошибка! Переданный путь не является объектом!';
@@ -147,7 +80,7 @@ function setObjectsValue(root, object, value) {
             Vue.set(root, key, {});
         }
 
-        if (object[key] != null && typeof object[key] == 'object') {
+        if (object[key] != null && typeof object[key] == 'object' && Object.keys(object[key]).length > 0 && !Array.isArray(object[key])) {
             setObjectsValue(root[key], object[key], value);
         }
         else {
@@ -197,7 +130,7 @@ export const store = new Vuex.Store({
     actions : {
 
         INIT: ({state, dispatch}) => {
-
+            
             let transform = (data) => {
                 return {Objects: data}
             }
@@ -221,12 +154,9 @@ export const store = new Vuex.Store({
 
                 // в случае положительного ответа от сервера
                 let resolve = (response) => {
-
+                                        
                     let data = transform(response.data);
                     setObjectsValue(root, data, undefined);
-
-
-
 
                 }
 
@@ -249,9 +179,9 @@ export const store = new Vuex.Store({
                 let list = [];
                 let objs = {};
                 for (let i = 0; i < data.length; i++) {
-                    let node = {ID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
+                    let node = {ObjectID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
                     list.push(node);
-                    objs[data[i].NodeID] = {Name: data[i].NodeName, Children: null};
+                    objs[data[i].NodeID] = {Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt};
                 }
                 if (ObjectID == FirmID) {
                     return {Objects: objs, Children: list};
@@ -259,7 +189,6 @@ export const store = new Vuex.Store({
                 else {
                     objs[ObjectID] = {Children: list};
                     let res = {Objects: objs};
-                    console.log(res);
                     return res;
                 }
             }
@@ -270,7 +199,7 @@ export const store = new Vuex.Store({
 
         TEST: ({state, dispatch}) => {
 
-            if (state.Objects === null) {
+            /*if (state.Objects === null) {
                 dispatch('INIT', {})
             }
             else {
@@ -286,10 +215,10 @@ export const store = new Vuex.Store({
                         }
                     }
                 }
-            }
+            }*/
 
 
-console.log(state.Objects);
+            console.log(state.Objects);
         },
 
         SERVER_REQUEST: ({state, commit, dispatch}, {toServer, resolve, reject}) => {
