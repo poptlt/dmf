@@ -34,8 +34,6 @@ function getObjectValue(root, path) {
 
 function setObjectValue(root, path, value) {
 
-    console.log(value);
-
     if (path.length == 0) {
         root = value
     }
@@ -87,6 +85,81 @@ function toDMFerror(error) {
     return err;
 }
 
+function isDMFerror(obj) {
+    if (obj != null && typeof obj == 'object' && obj.DMF_ERROR) {return true}
+    else {return false}
+}
+
+function checkRequest(root, object, request) {
+
+    // на всякий случай проверяем, что переданный путь является объектом
+    if (object === null || typeof object != 'object') {
+        throw 'Системная ошибка! Переданный путь не является объектом!';
+    }
+
+    // и в нем должен быть хотя бы один ключ
+    if (Object.keys(object).length == 0) {
+        throw 'Системная ошибка! В переданном пути нет ни одного ключа!';
+    }
+
+    // корень данных не может быть не объектом
+    if (root === null || typeof root != 'object') {
+        return true;
+    }
+    else {
+        for (let key in object) {
+            // если ключа в существующих данных нет,
+            if (root[key] == undefined) {
+                // то запрос уже необходимо выполнить
+                return true;
+            }
+
+            if (object[key] != null && typeof object[key] == 'object') {
+                request = checkRequest(root[key], object[key], request);
+            }
+        }
+    }
+
+    return request;
+}
+
+function setObjectsValue(root, object, value) {
+
+    // на всякий случай проверяем, что переданный путь является объектом
+    if (object === null || typeof object != 'object') {
+        throw 'Системная ошибка! Переданный путь не является объектом!';
+    }
+
+    // и в нем должен быть хотя бы один ключ
+    if (Object.keys(object).length == 0) {
+        throw 'Системная ошибка! В переданном пути нет ни одного ключа!';
+    }
+
+    // корень данных не может быть не объектом
+    if (root === null || typeof root != 'object') {
+        root = {}
+    }
+
+    for (let key in object) {
+        // если ключа в существующих данных нет,
+        if (root[key] == undefined) {
+            // то добавляем этот ключ
+            Vue.set(root, key, {});
+        }
+
+        if (object[key] != null && typeof object[key] == 'object') {
+            setObjectsValue(root[key], object[key], value);
+        }
+        else {
+            if (value != undefined) {
+                root[key] = value;
+            }
+            else {
+                root[key] = object[key]
+            }
+        }
+    }
+}
 
 import Vue from 'vue'
 import Vuex from 'vuex'
@@ -110,8 +183,11 @@ export const store = new Vuex.Store({
         SET_AUTH : (state, value) => {
             state.AuthState = value;
         },
-        ADD_OBJECTS: (state, {root, path, value}) => {
-            setObjectValue(root, path, value);
+        ADD_OBJECTS: (state, {root, object, value}) => {
+            setObjectValue(root, object, value);
+        },
+        SET_OBJECTS_VALUE: (state, {root, path, value}) => {
+            setObjectsValue(root, path, value)
         },
         ADD_TREE_LEVEL: (state, {root, data}) => {
             root.push(data);
@@ -120,12 +196,100 @@ export const store = new Vuex.Store({
 
     actions : {
 
+        INIT: ({state, dispatch}) => {
+
+            let transform = (data) => {
+                return {Objects: data}
+            }
+
+            dispatch('LOAD_OBJECTS', {root: state, object: {Objects: null}, toServer: ['Init'], refresh: true, transform: transform});
+        },
+
+        LOAD_OBJECTS: ({state, commit, dispatch}, {root, object, toServer, refresh = false, transform = (data) => {return data}}) => {
+
+
+            // если у нас идет обновление данных, то запрос однозначно нужно исполнить
+            let request = refresh;
+            // если необходимость запроса пока отсутствует, то уточняем его по данным
+            if (!request) {request = checkRequest(root, object, request)}
+
+            // если выяснилось, что запрос необходимо выполнить
+            if (request) {
+
+                // добавляем в существующие данные все не существующие необходимые ключи и проставляем значение null
+                setObjectsValue(root, object, null);
+
+                // в случае положительного ответа от сервера
+                let resolve = (response) => {
+
+                    let data = transform(response.data);
+                    setObjectsValue(root, data, undefined);
+
+
+
+
+                }
+
+                let reject = (error) => { console.log(error);
+                     setObjectsValue(root, object, toDMFerror(error));
+                }
+
+                // отправляем подготовленный запрос
+                dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+            }
+        },
+
+        LOAD_TREE_LEVEL: ({state, dispatch}, {FirmID, ObjectID = FirmID, hiddenEmpty = true}) => {
+
+            let root = state.Objects[FirmID];
+            let object = (ObjectID == FirmID) ? {Children: null, Objects: null} : {Objects: {[ObjectID]: {Children: null}}};
+            let toServer = ['TreeNodes', FirmID, ObjectID, hiddenEmpty];
+
+            let transform = (data) => {
+                let list = [];
+                let objs = {};
+                for (let i = 0; i < data.length; i++) {
+                    let node = {ID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
+                    list.push(node);
+                    objs[data[i].NodeID] = {Name: data[i].NodeName, Children: null};
+                }
+                if (ObjectID == FirmID) {
+                    return {Objects: objs, Children: list};
+                }
+                else {
+                    objs[ObjectID] = {Children: list};
+                    let res = {Objects: objs};
+                    console.log(res);
+                    return res;
+                }
+            }
+
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },
+
+
         TEST: ({state, dispatch}) => {
 
-            //Vue.set(state.Objects, 'test', {});
-            console.log(state);
+            if (state.Objects === null) {
+                dispatch('INIT', {})
+            }
+            else {
+                 for (let FirmID in state.Objects) {
+
+                    if (state.Objects[FirmID].Objects == undefined || state.Objects[FirmID].Objects === null) {
+                        dispatch('LOAD_TREE_LEVEL', {FirmID: FirmID});
+                    }
+                     else {
+                        for (let obj in state.Objects[FirmID].Objects) {
+
+                        dispatch('LOAD_TREE_LEVEL', {FirmID: FirmID, ObjectID: obj});
+                        }
+                    }
+                }
+            }
 
 
+console.log(state.Objects);
         },
 
         SERVER_REQUEST: ({state, commit, dispatch}, {toServer, resolve, reject}) => {
