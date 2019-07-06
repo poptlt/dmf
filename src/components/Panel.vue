@@ -6,7 +6,7 @@
                 <span><v-icon>close</v-icon></span>
             </v-btn>
         </div>
-        <div style="overflow: auto;">
+        <div style="overflow: auto; flex-grow: 1">
             <component :is="type" :info="info" :addPanel="addPanel"/>
         </div>
     </div>

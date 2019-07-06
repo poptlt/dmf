@@ -33,7 +33,7 @@
                 <v-btn @click="testing">тестирование</v-btn>
 
             </header>
-            <div style="display: flex; flex-grow: 1">
+            <div style="display: flex; flex-grow: 1; overflow: hidden">
                 <div v-for="(panel, i) in panels" v-bind:style="{'flex-grow': widths[panel.type]}" style="border: 1px solid black; height: 100%" v-bind:class="classes[i].panel">
                     <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
                 </div>

@@ -1,11 +1,14 @@
 <template>
     <div v-if="List!=null">
-        <div v-if="List!='loading'">
+        <!--<div v-if="List!='loading'">
             <div v-for="LS in List">
                 {{LS}}
             </div>
         </div>
         <div v-else style="display: flex; justify-content: center; align-items: center">
+            <v-progress-circular :size="50" indeterminate style="color: blue"></v-progress-circular>
+        </div>-->
+        <div style="display: flex; justify-content: center; align-items: center">
             <v-progress-circular :size="50" indeterminate style="color: blue"></v-progress-circular>
         </div>
     </div>
