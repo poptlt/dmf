@@ -196,6 +196,30 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
 
+        LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID}) => {
+
+            let root = state.Objects[FirmID];
+            let object = (ObjectID == FirmID) ? {LS: null} : {Objects: {[ObjectID]: {LS: null}}};
+            let toServer = ['LSList', ObjectID, FirmID];
+            let transform = (data) => {
+                let list = [];
+                let objs = {};
+                for (let i = 0; i < data.length; i++) {
+                    let item = {ObjectID: data[i].LSID};
+                    list.push(item);
+                    objs[data[i].LSID] = {Number: data[i].Number, Balance:data[i].Balance};
+                    if (ObjectID == FirmID) {
+                        return {Objects: objs, LS: list};
+                    }
+                    else {
+                        objs[ObjectID] = {LS: list};
+                        return {Objects: objs};
+                    }
+                }
+            }
+
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },
 
         TEST: ({state, dispatch}) => {
 
