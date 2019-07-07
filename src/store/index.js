@@ -214,13 +214,13 @@ export const store = new Vuex.Store({
                     let item = {ObjectID: data[i].LSID};
                     list.push(item);
                     objs[data[i].LSID] = {Number: data[i].Number, Balance:data[i].Balance};
-                    if (ObjectID == FirmID) {
-                        return {Objects: objs, LS: list};
-                    }
-                    else {
-                        objs[ObjectID] = {LS: list};
-                        return {Objects: objs};
-                    }
+                 }
+                if (ObjectID == FirmID) {
+                    return {Objects: objs, LS: list};
+                }
+                else {
+                    objs[ObjectID] = {LS: list};
+                    return {Objects: objs};
                 }
             }
 
