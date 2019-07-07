@@ -1,3 +1,7 @@
+import Vue from 'vue'
+import Vuex from 'vuex'
+Vue.use(Vuex);
+import Axios from 'axios'
 
 function toDMFerror(error) {
     let err = {DMF_ERROR: true};
@@ -6,7 +10,7 @@ function toDMFerror(error) {
         err.message = 'Не удалось дождаться ответа от сервера!';
         err.code = 0;
     }
-    else if (error.response.status == 500) {
+    else if (error.response =! undefined && error.response.status != undefined && error.response.status == 500) {
         err.message = error.response.data.Message;
         err.code = 500;
     }
@@ -76,13 +80,15 @@ function setObjectsValue(root, object, value) {
     for (let key in object) {
         // если ключа в существующих данных нет,
         if (root[key] == undefined) {
-            // то добавляем этот ключ
+            // то добавляем этот ключ и для начала предполагаем, что дерево продолжается дальше
             Vue.set(root, key, {});
         }
 
+        // если на следующем уровне вставляемых данных объект (массив не считаем за объект), то продолжаем растить дерево
         if (object[key] != null && typeof object[key] == 'object' && Object.keys(object[key]).length > 0 && !Array.isArray(object[key])) {
             setObjectsValue(root[key], object[key], value);
         }
+        // иначе вставляем в данные значение
         else {
             if (value != undefined) {
                 root[key] = value;
@@ -94,11 +100,6 @@ function setObjectsValue(root, object, value) {
     }
 }
 
-import Vue from 'vue'
-import Vuex from 'vuex'
-Vue.use(Vuex);
-import Axios from 'axios'
-
 export const store = new Vuex.Store({
   state: {
       AuthState: true,
@@ -106,28 +107,33 @@ export const store = new Vuex.Store({
   },
 
     getters : {
-        OBJECTS: state => {
-            return state.Objects;},
-        OBJECTS_TREE: state => {
-            return state.ObjectsTree;},
     },
 
     mutations: {
         SET_AUTH : (state, value) => {
             state.AuthState = value;
         },
-        ADD_OBJECTS: (state, {root, object, value}) => {
-            setObjectValue(root, object, value);
-        },
         SET_OBJECTS_VALUE: (state, {root, path, value}) => {
             setObjectsValue(root, path, value)
         },
-        ADD_TREE_LEVEL: (state, {root, data}) => {
-            root.push(data);
-        }
     },
 
     actions : {
+
+        AUTH: (context, payload) => {
+            Axios({method: "post", timeout: 15000, url: "http://dev2.dmf.su/func/login", data: payload, withCredentials: true})
+                .then(function (response) {
+                    console.log("прошло");
+                    console.log(response);
+                    if (response.status == 200) {
+                        context.commit('SET_AUTH', true)
+                    }
+                })
+                .catch(function (error) {
+                    console.log("авторизация ошибка");
+                    console.log(error);
+                });
+        },
 
         INIT: ({state, dispatch}) => {
             
@@ -282,95 +288,5 @@ export const store = new Vuex.Store({
                 });
         },
 
-        GET_OBJECTS: ({state, commit, dispatch}, {root, path, toServer, refresh = false, transform = (data) => {return data}}) => {
-
-            // получаем текущее состояние загружаемого объекта
-            let obj = getObjectValue(root, path);
-            // загружаем объект с сервера, только если это явно запрошенное обновление
-            // или если там нет реальных данных
-            // и не трогаем объекты в состоянии загрузки (значит скоро туда придут данные с сервера)
-            if (refresh || ((obj == null || (typeof obj == 'object' && obj.DMF_ERROR)) && obj != 'loading')) {
-                // если данные все таки нужно загрузить текущим процессом, то
-                // ставим туда состояние загрузки, чтобы другие процессы не пытались грузить параллельно
-                commit('ADD_OBJECTS', {root: root, path: path, value: 'loading'});
-                 // обработчик положительного ответа
-                let resolve = (response) => {
-                    // если с ответом все в порядке и данные в дереве объекта в состоянии загрузки,
-                    if (response.status == 200 && getObjectValue(root, path) == 'loading') {
-                        // то записываем их в дерево, предварительно трансформировав в нужную форму
-                        commit('ADD_OBJECTS', {root: root, path: path, value: transform(response.data)});
-                    }
-                };
-
-                // обработчик ошибки
-                let reject = (error) => {
-                   commit('ADD_OBJECTS', {root: root, path: path, value: toDMFerror(error)});
-                };
-
-                // отправляем запрос
-                return dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
-            }
-        },
-
-        AUTH: (context, payload) => {
-            Axios({method: "post", timeout: 15000, url: "http://dev2.dmf.su/func/login", data: payload, withCredentials: true})
-                .then(function (response) {
-                    console.log("прошло");
-                    console.log(response);
-                    if (response.status == 200) {
-                        context.commit('SET_AUTH', true)
-                    }
-                })
-                .catch(function (error) {
-                    console.log("авторизация ошибка");
-                    console.log(error);
-                });
-        },
-
-        GET_FIRMS: ({state, dispatch}) => {
-
-            let root = state;
-            let path1 = ['Objects'];
-            let transform = (data) => {
-                let res = {};
-                for (let i = 0; i < data.length; i++) {
-                    res[data[i].FirmID] = {Name: data[i].Name, FirmID: data[i].FirmID, ID: data[i].FirmID, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null, Objects: {}};
-                }
-                return res;
-            };
-            dispatch('GET_OBJECTS', {toServer: ['GetFirms'], root: root, path: path1, transform: transform});
-         },
-
-        GET_TREE_LEVEL: ({dispatch}, {root}) => {
-
-            let toServer = ['TreeNodes', root.FirmID, root.ID, true];
-
-            let transform = (data) => {
-                let res = [];
-                for (let i = 0; i < data.length; i++) {
-                    let node = {ID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
-                    res.push(node);
-                }
-                return res;
-            }
-
-            dispatch('GET_OBJECTS', {toServer: toServer, root: root, path: ['Children'], transform: transform});
-        },
-
-        GET_LS_LIST: ({state, dispatch}, {FirmID, ObjectID}) => {
-
-            let toServer = ['LSList', ObjectID, FirmID];
-
-            let transform = (data) => {
-                let res = [];
-                for (let i = 0; i < data.length; i++) {
-                    let ls = {ID: data[i].LSID, Number: data[i].Number, Balance: data[i].Balance};
-                    res.push(ls);
-                }
-                return res;
-            }
-
-            dispatch('GET_OBJECTS', {toServer: toServer, root: state.Objects, path: [FirmID, 'Objects', ObjectID, 'LSList'], transform: transform});
-        }
     }
 })
