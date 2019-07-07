@@ -182,7 +182,6 @@ export const store = new Vuex.Store({
             let toServer = ['TreeNodes', FirmID, ObjectID, hiddenEmpty];
 
             let transform = (data) => {
-
                 let res = {[ObjectID]: {Children: []}};
                 for (let i = 0; i < data.length; i++) {
                     res[ObjectID].Children.push({ObjectID: data[i].NodeID, Name:  data[i].NodeName});
@@ -197,23 +196,16 @@ export const store = new Vuex.Store({
         LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID}) => {
 
             let root = state.Objects[FirmID];
-            let object = (ObjectID == FirmID) ? {LS: null} : {Objects: {[ObjectID]: {LS: null}}};
+            let object = {[ObjectID]: {LS: null}};
             let toServer = ['LSList', ObjectID, FirmID];
+
             let transform = (data) => {
-                let list = [];
-                let objs = {};
+                let res = {[ObjectID]: {LS: []}};
                 for (let i = 0; i < data.length; i++) {
-                    let item = {ObjectID: data[i].LSID};
-                    list.push(item);
-                    objs[data[i].LSID] = {Number: data[i].Number, Balance:data[i].Balance};
-                 }
-                if (ObjectID == FirmID) {
-                    return {Objects: objs, LS: list};
+                    res[ObjectID].LS.push({ObjectID: data[i].LSID});
+                    res[ data[i].LSID] = {Number: data[i].Number, Balance:data[i].Balance};
                 }
-                else {
-                    objs[ObjectID] = {LS: list};
-                    return {Objects: objs};
-                }
+                return res;
             }
 
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
