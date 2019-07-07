@@ -6,6 +6,7 @@
                 <template v-slot:items="props">
                 <tr>
                     <td class="text-xs-right">{{ props.item.Number }}</td>
+                    <td class="text-xs-right">{{ props.item.AdressAdd }}</td>
                     <td class="text-xs-right">{{ props.item.Balance }}</td>
                 </tr>
                 </template>
@@ -30,7 +31,8 @@ export default {
             headers:
             [
                 {text: "Номер", value: "Number"},
-                {text: "Баланс", value: "Balance"}
+                {text: "Квартира", value: "AdressAdd"},
+                {text: "Баланс", value: "Balance"},
             ]
         }
     },
@@ -41,12 +43,16 @@ export default {
         {
             let FirmID = this.info.FirmID, ObjectID = this.info.ObjectID;
             
+            console.log(this.Objects[FirmID][ObjectID]);
+            
             return this.Objects[FirmID][ObjectID];
         },
         List: function()
         {
             if(this.root.LS === undefined)
             {
+                console.log("called");
+                
                 this.LOAD_LS_LIST({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID});
             }
                         
