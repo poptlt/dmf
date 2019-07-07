@@ -178,23 +178,15 @@ export const store = new Vuex.Store({
         LOAD_TREE_LEVEL: ({state, dispatch}, {FirmID, ObjectID = FirmID, hiddenEmpty = true}) => {
 
             let root = state.Objects[FirmID];
-            let object = (ObjectID == FirmID) ? {Children: null, Objects: null} : {Objects: {[ObjectID]: {Children: null}}};
+            let object = {[ObjectID]: {Children: null}};
             let toServer = ['TreeNodes', FirmID, ObjectID, hiddenEmpty];
 
             let transform = (data) => {
-                let list = [];
-                let objs = {};
+
+                let res = {[ObjectID]: {Children: []}};
                 for (let i = 0; i < data.length; i++) {
-                    let node = {ObjectID: data[i].NodeID, FirmID: data[i].FirmID, Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt, Children: null};
-                    list.push(node);
-                    objs[data[i].NodeID] = {Name: data[i].NodeName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt};
-                }
-                if (ObjectID == FirmID) {
-                    return {Objects: objs, Children: list};
-                }
-                else {
-                    objs[ObjectID] = {Children: list};
-                    let res = {Objects: objs};
+                    res[ObjectID].Children.push({ObjectID: data[i].NodeID, Name:  data[i].NodeName});
+                    res[ data[i].NodeID] = {Name: data[i].NodeFullName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt};
                     return res;
                 }
             }
