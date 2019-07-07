@@ -1,16 +1,17 @@
 <template>
-    <div v-if="List!=null">
+    <div v-if="List !== undefined">
+        {{List}}
         <!--<div v-if="List!='loading'">
             <div v-for="LS in List">
-                {{LS}}
+                
             </div>
         </div>
         <div v-else style="display: flex; justify-content: center; align-items: center">
             <v-progress-circular :size="50" indeterminate style="color: blue"></v-progress-circular>
         </div>-->
-        <div style="display: flex; justify-content: center; align-items: center">
+        <!--<div style="display: flex; justify-content: center; align-items: center">
             <v-progress-circular :size="50" indeterminate style="color: blue"></v-progress-circular>
-        </div>
+        </div>-->
     </div>
 
 </template>
@@ -23,35 +24,32 @@ export default {
     props: ["info"],
     computed:
     {
-        ...mapState({root: "Objects"}),
+        ...mapState(["Objects"]),
+        root: function()
+        {
+            let FirmID = this.info.FirmID, ObjectID = this.info.ObjectID;
+            
+            console.log(FirmID);
+            console.log(ObjectID);
+            
+            return (ObjectID) ? this.Objects[FirmID].Objects[ObjectID] : this.Objects[FirmID];
+        },
         List: function()
         {
-            let Firm = this.info.FirmID, ID = this.info.ObjectID, root=this.root;
-
-            if(root[Firm].Objects[ID] && root[Firm].Objects[ID].LSList)
+            if(this.root.LS === undefined)
             {
-                console.log("found");
-
-                if(root[Firm].Objects[ID].LSList == "loading") console.log("loading");
-                else console.log(root[Firm].Objects[ID].LSList);
-
-                return root[Firm].Objects[ID].LSList;
+                this.LOAD_LS_LIST({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID});
             }
-            else
-            {
-                console.log("called");
-
-                console.log(null);
-
-                this.GET_LS_LIST({FirmID: Firm, ObjectID: ID});
-                return null;
-            }
+            
+            console.log(this.root.LS);
+            
+            return this.root.LS;
         },
 
     },
     methods:
     {
-        ...mapActions(['GET_LS_LIST']),
+        ...mapActions(['LOAD_LS_LIST']),
     }
 }
 </script>

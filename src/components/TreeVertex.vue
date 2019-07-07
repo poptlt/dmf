@@ -83,7 +83,7 @@ export default {
         },
         showLS: function()
         {
-            this.addPanel("LSList", this.root.Name, {FirmID: this.root.FirmID, ObjectID: this.root.ID});
+            this.addPanel("LSList", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID});
 
             //this.GET_LS_LIST({FirmID: this.root.FirmID, ObjectID: this.root.ID});
         }
