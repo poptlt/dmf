@@ -187,8 +187,8 @@ export const store = new Vuex.Store({
                 for (let i = 0; i < data.length; i++) {
                     res[ObjectID].Children.push({ObjectID: data[i].NodeID, Name:  data[i].NodeName});
                     res[ data[i].NodeID] = {Name: data[i].NodeFullName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt};
-                    return res;
                 }
+                return res;
             }
 
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});

@@ -1,17 +1,18 @@
 <template>
     <div v-if="List !== undefined">
-        {{List}}
-        <!--<div v-if="List!='loading'">
-            <div v-for="LS in List">
-                
-            </div>
-        </div>
-        <div v-else style="display: flex; justify-content: center; align-items: center">
-            <v-progress-circular :size="50" indeterminate style="color: blue"></v-progress-circular>
-        </div>-->
-        <!--<div style="display: flex; justify-content: center; align-items: center">
-            <v-progress-circular :size="50" indeterminate style="color: blue"></v-progress-circular>
-        </div>-->
+       
+            <v-app>
+            <v-data-table :headers="headers" :items="items" >
+                <template v-slot:items="props">
+                <tr>
+                    <td class="text-xs-right">{{ props.item.Number }}</td>
+                    <td class="text-xs-right">{{ props.item.Balance }}</td>
+                </tr>
+                </template>
+            </v-data-table>
+            </v-app>
+        
+        
     </div>
 
 </template>
@@ -22,6 +23,17 @@ import { mapActions, mapState } from 'vuex';
 
 export default {
     props: ["info"],
+    data: function()
+    {
+        return {
+            
+            headers:
+            [
+                {text: "Номер", value: "Number"},
+                {text: "Баланс", value: "Balance"}
+            ]
+        }
+    },
     computed:
     {
         ...mapState(["Objects"]),
@@ -29,10 +41,7 @@ export default {
         {
             let FirmID = this.info.FirmID, ObjectID = this.info.ObjectID;
             
-            console.log(FirmID);
-            console.log(ObjectID);
-            
-            return (ObjectID) ? this.Objects[FirmID].Objects[ObjectID] : this.Objects[FirmID];
+            return this.Objects[FirmID][ObjectID];
         },
         List: function()
         {
@@ -40,11 +49,23 @@ export default {
             {
                 this.LOAD_LS_LIST({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID});
             }
-            
-            console.log(this.root.LS);
-            
+                        
             return this.root.LS;
         },
+        items: function()
+        {            
+            let res = [];
+            if(this.List)
+            {
+                for(let i=0; i<this.List.length; i++)
+                {
+                    let ID = this.List[i].ObjectID;
+                    res.push(this.Objects[this.info.FirmID][ID]);
+                }
+            }
+                        
+            return res;
+        }
 
     },
     methods:
