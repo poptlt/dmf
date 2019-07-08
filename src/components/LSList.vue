@@ -2,7 +2,7 @@
     <div v-if="List !== undefined">
        
             <v-app>
-            <v-data-table :headers="headers" :items="items" >
+            <v-data-table :headers="headers" :items="items" disable-initial-sort hide-headers hide-actions>
                 <template v-slot:items="props">
                 <tr>
                     <td class="text-xs-right">{{ props.item.Number }}</td>
