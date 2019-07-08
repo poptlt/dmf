@@ -211,6 +211,20 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
 
+        LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID}) => {
+
+            let root = state.Objects[FirmID][ObjectID];
+            let object = {Props: null, CalcParams: null};
+            let toServer = ['GetObject', ObjectID, FirmID];
+            let transform = (data) => {
+
+
+                return data;
+            }
+
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },
+
         TEST: ({state, dispatch}) => {
 
             /*if (state.Objects === null) {
