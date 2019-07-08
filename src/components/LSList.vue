@@ -1,18 +1,32 @@
 <template>
     <div v-if="List !== undefined">
        
-            <v-app>
-            <v-data-table :headers="headers" :items="items"  :loading="(List==null) ? true : false" hide-actions disable-initial-sort>
+
+            <v-data-table :headers="headers" :items="items"  :loading="(List==null) ? true : false" hide-actions disable-initial-sort class="subheading">
                 <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
+                <template v-slot:no-data>
+                    <center>
+                        <v-progress-circular :size="50" color="blue" indeterminate/>
+                    </center>
+                </template>
+
+                <template v-slot:headers="props">
+                    <tr>
+                        <th v-for="header in props.headers" style="font-size: 18px; padding: 10px" class="font-weight-bold black--text blue lighten-4">
+                            {{ header.text }}
+                        </th>
+                    </tr>
+                </template>
+
                 <template v-slot:items="props">
-                <tr>
-                    <td class="text-xs-right">{{ props.item.Number }}</td>
-                    <td class="text-xs-right">{{ props.item.AdressAdd }}</td>
-                    <td class="text-xs-right">{{ props.item.Balance }}</td>
+                <tr @click="showObject(props.item.ID)">
+                    <td style="font-size: 18px; padding: 10px" class="text-xs-center">{{ props.item.Number }}</td>
+                    <td style="font-size: 18px; padding: 10px" class="text-xs-center">{{ props.item.AdressAdd }}</td>
+                    <td style="font-size: 18px; padding: 10px" class="text-xs-right">{{ props.item.Balance }}</td>
                 </tr>
                 </template>
             </v-data-table>
-            </v-app>
+
         
         
     </div>
@@ -24,16 +38,16 @@
 import { mapActions, mapState } from 'vuex';
 
 export default {
-    props: ["info"],
+    props: ["info", "addPanel"],
     data: function()
     {
         return {
             
             headers:
             [
-                {text: "Номер", value: "Number"},
-                {text: "Квартира", value: "AdressAdd"},
-                {text: "Баланс", value: "Balance"},
+                {text: "Лицевой счет", value: "Number", sortable: false},
+                {text: "Квартира", value: "AdressAdd", sortable: false},
+                {text: "Задолжность", value: "Balance", sortable: false},
             ]
         }
     },
@@ -50,10 +64,10 @@ export default {
         {
             if(this.root.LS === undefined)
             {
-                console.log("called");
-                
                 this.LOAD_LS_LIST({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID});
             }
+
+            console.log(this.root.LS);
                         
             return this.root.LS;
         },
@@ -66,8 +80,11 @@ export default {
                 {
                     let ID = this.List[i].ObjectID;
                     res.push(this.Objects[this.info.FirmID][ID]);
+                    res[res.length-1].ID = ID;
                 }
             }
+
+            console.log(res);
                         
             return res;
         }
@@ -76,6 +93,12 @@ export default {
     methods:
     {
         ...mapActions(['LOAD_LS_LIST']),
+        showObject: function(ID)
+        {
+            let FirmID = this.info.FirmID, Name = this.Objects[FirmID][ID].Number;
+
+            this.addPanel("Object", Name, {FirmID: FirmID, ObjectID: ID});
+        }
     }
 }
 </script>

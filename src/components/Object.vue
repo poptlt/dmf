@@ -1,7 +1,7 @@
 <template>
     <div v-if="PropsItems !== undefined && CalcParamsItems !== undefined">
         <div v-if="PropsItems !== null && CalcParamsItems !== null">
-            <v-expansion-panel>
+            <v-expansion-panel expand>
                 <v-expansion-panel-content>
                     <template v-slot:header>
                       <div>Реквизиты</div>

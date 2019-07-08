@@ -1,12 +1,13 @@
 <template>
     <div style="display: flex; flex-direction: column; height: 100%">
-        <div v-if="!main" style="display: flex; " class="cyan">
+        <div v-if="!main" style="display: flex" class="cyan">
             <h2 style="flex-grow: 1" class="white--text pa-2">{{ label }}</h2>
             <v-btn v-on:click="remove" fab small dark color="red">
                 <span><v-icon>close</v-icon></span>
             </v-btn>
         </div>
         <div style="overflow: auto; flex-grow: 1">
+            <h2 v-if="!main" class="text-xs-center">{{ Objects[info.FirmID][info.FirmID].Name }}</h2>
             <component :is="type" :info="info" :addPanel="addPanel"/>
         </div>
     </div>
@@ -19,6 +20,8 @@ import Tree from './Tree.vue'
 import LSList from './LSList.vue'
 
 import Object from './Object.vue'
+
+import { mapState } from 'vuex';
 
 export default {
     components:
@@ -45,6 +48,10 @@ export default {
         info: {},
         addPanel: {}
 
+    },
+    computed:
+    {
+        ...mapState(["Objects"]),
     },
     methods:
     {
