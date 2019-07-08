@@ -185,7 +185,7 @@ export const store = new Vuex.Store({
                 let res = {[ObjectID]: {Children: []}};
                 for (let i = 0; i < data.length; i++) {
                     res[ObjectID].Children.push({ObjectID: data[i].NodeID, Name:  data[i].NodeName});
-                    res[ data[i].NodeID] = {Name: data[i].NodeFullName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt};
+                    res[ data[i].NodeID] = {Type: data[i].Type, Name: data[i].NodeFullName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt};
                 }
                 return res;
             }
