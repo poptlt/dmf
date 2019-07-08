@@ -218,8 +218,7 @@ export const store = new Vuex.Store({
             let toServer = ['GetObject', ObjectID, FirmID];
             let transform = (data) => {
 
-
-                return data;
+                return data.Data;
             }
 
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});

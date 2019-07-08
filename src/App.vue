@@ -68,7 +68,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1
+                Tree: 1, LSList: 1, Object: 1
             }
         }
     },

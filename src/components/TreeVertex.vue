@@ -19,7 +19,7 @@
                     </div>
                 </template>
             </div>
-            <div style="font-size: 18px; padding-bottom: 10px">{{Name}}</div>
+            <div @click="showObject" style="font-size: 18px; padding-bottom: 10px">{{Name}}</div>
             <div v-if="root.LSQnt" style="font-size: 18px">
                 <div @click="showLS" style="border-radius: 5px; background-color: blue; color: white; padding-left: 3px; padding-right: 3px; margin-left: 3px">ЛС({{ root.LSQnt }})</div>
             </div>
@@ -80,6 +80,10 @@ export default {
             this.addPanel("LSList", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID});
 
             //this.GET_LS_LIST({FirmID: this.root.FirmID, ObjectID: this.root.ID});
+        },
+        showObject: function()
+        {
+            this.addPanel("Object", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID});
         }
     }
 }

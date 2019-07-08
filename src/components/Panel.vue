@@ -18,10 +18,12 @@ import Tree from './Tree.vue'
 
 import LSList from './LSList.vue'
 
+import Object from './Object.vue'
+
 export default {
     components:
     {
-        Tree, LSList
+        Tree, LSList, Object
     },
     props:
     {

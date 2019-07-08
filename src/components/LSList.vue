@@ -2,7 +2,8 @@
     <div v-if="List !== undefined">
        
             <v-app>
-            <v-data-table :headers="headers" :items="items" disable-initial-sort hide-headers hide-actions>
+            <v-data-table :headers="headers" :items="items"  :loading="(List==null) ? true : false" hide-actions disable-initial-sort>
+                <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
                 <template v-slot:items="props">
                 <tr>
                     <td class="text-xs-right">{{ props.item.Number }}</td>
@@ -42,9 +43,7 @@ export default {
         root: function()
         {
             let FirmID = this.info.FirmID, ObjectID = this.info.ObjectID;
-            
-            console.log(this.Objects[FirmID][ObjectID]);
-            
+
             return this.Objects[FirmID][ObjectID];
         },
         List: function()
