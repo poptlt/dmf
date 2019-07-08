@@ -213,9 +213,21 @@ export const store = new Vuex.Store({
 
         LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID}) => {
 
+            let ObjectType = state.Objects[FirmID][ObjectID].Type;
+
             let root = state.Objects[FirmID][ObjectID];
+
             let object = {Props: null, CalcParams: null};
+            if (ObjectType == 'Firm') {
+                object['Tariffs'] = null;
+                object['BankAccounts'] = null;
+            }
+            if (ObjectType == 'LS') {
+                object['Turnover'] = null;
+            }
+
             let toServer = ['GetObject', ObjectID, FirmID];
+
             let transform = (data) => {
 
                 return data.Data;
