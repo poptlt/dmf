@@ -203,7 +203,7 @@ export const store = new Vuex.Store({
                 let res = {[ObjectID]: {LS: []}};
                 for (let i = 0; i < data.length; i++) {
                     res[ObjectID].LS.push({ObjectID: data[i].LSID});
-                    res[ data[i].LSID] = {Number: data[i].Number, Balance: data[i].Balance, AdressAdd: data[i].AdressAdd};
+                    res[ data[i].LSID] = {Type: 'LS', Number: data[i].Number, Balance: data[i].Balance, AdressAdd: data[i].AdressAdd};
                 }
                 return res;
             }
