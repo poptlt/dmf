@@ -150,24 +150,26 @@ export const store = new Vuex.Store({
             // если у нас идет обновление данных, то запрос однозначно нужно исполнить
             let request = refresh;
             // если необходимость запроса пока отсутствует, то уточняем его по данным
-            if (!request) {request = checkRequest(root, object, request)}
+            if (!request) {request = checkRequest(root, object, false)}
 
             // если выяснилось, что запрос необходимо выполнить
             if (request) {
 
                 // добавляем в существующие данные все не существующие необходимые ключи и проставляем значение null
-                setObjectsValue(root, object, null);
+                commit('SET_OBJECTS_VALUE', {root: root, path: object, value: null});
 
                 // в случае положительного ответа от сервера
                 let resolve = (response) => {
                                         
                     let data = transform(response.data);
-                    setObjectsValue(root, data, undefined);
+                    commit('SET_OBJECTS_VALUE', {root: root, path: data, value: undefined});
+                    //setObjectsValue(root, data, undefined);
 
                 }
 
                 let reject = (error) => { console.log(error);
-                     setObjectsValue(root, object, toDMFerror(error));
+                    commit('SET_OBJECTS_VALUE', {root: root, path: object, value: toDMFerror(error)});
+                     //setObjectsValue(root, object, toDMFerror(error));
                 }
 
                 // отправляем подготовленный запрос
@@ -193,7 +195,7 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
 
-        LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID}) => {
+        LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID, refresh = false}) => {
 
             let root = state.Objects[FirmID];
             let object = {[ObjectID]: {LS: null}};
@@ -202,13 +204,13 @@ export const store = new Vuex.Store({
             let transform = (data) => {
                 let res = {[ObjectID]: {LS: []}};
                 for (let i = 0; i < data.length; i++) {
-                    res[ObjectID].LS.push({ObjectID: data[i].LSID});
-                    res[ data[i].LSID] = {Type: 'LS', Number: data[i].Number, Balance: data[i].Balance, AdressAdd: data[i].AdressAdd};
+                    res[ObjectID].LS.push({ObjectID: data[i].LSID, Balance: data[i].Balance});
+                    res[ data[i].LSID] = {Type: 'LS', Name: data[i].LSName, Number: data[i].Number, AdressAdd: data[i].AdressAdd};
                 }
                 return res;
             }
 
-            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform, refresh: refresh});
         },
 
         LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID}) => {
@@ -258,6 +260,7 @@ export const store = new Vuex.Store({
 
 
             console.log(state.Objects);
+
         },
 
         SERVER_REQUEST: ({state, commit, dispatch}, {toServer, resolve, reject}) => {

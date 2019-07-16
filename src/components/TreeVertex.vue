@@ -1,39 +1,37 @@
 <template>
     <div>
-        <div style="display: flex">
-            <div style="width: 30px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start">
-                <div v-if="root.ChildrenQnt == 0" style="width: 20px; height: 10px; border-bottom: 1px solid blue"/>
+        <div class="d-flex">
+            <div style="width: 30px" class="flex-grow-0 d-flex flex-column align-items-start">
+                <div v-if="root.ChildrenQnt == 0" style="width: 20px; height: 10px" class="flex-grow-0 border-bottom border-primary"/>
                 <template v-else>
+                    <div style="width: 20px; height: 20px" class="flex-grow-0 d-flex justify-content-center align-items-center border border-primary rounded-circle text-primary" @click="expand">
 
-                    <div style="width: 20px; height: 20px; border: 1px solid blue; border-radius: 10px; display: flex; justify-content: center; align-items: center" @click="expand">
+                        <font-awesome-icon v-if="!opened" icon="plus"/>
 
-                        <v-icon v-if="!opened" size="18" style="color: blue">add</v-icon>
+                        <font-awesome-icon v-else-if="opened && root.Children !== null" icon="minus"/>
 
-                        <v-icon v-else-if="opened && root.Children !== null" size="18" style="color: blue">remove</v-icon>
-
-                        <v-progress-circular v-else :size="12" :width="2" indeterminate style="color: blue"></v-progress-circular>
+                        <font-awesome-icon v-else icon="spinner" pulse/>
 
                     </div>
-                    <div v-show="opened && root.Children !== null" style="flex-grow: 1; padding-left: 10px">
-                        <div style="height: 100%; border-left: 1px solid blue"/>
+                    <div v-show="opened && root.Children !== null" style="padding-left: 10px">
+                        <div style="height: 100%" class="border-left border-primary"/>
                     </div>
                 </template>
             </div>
-            <div @click="showObject" style="font-size: 18px; padding-bottom: 10px">{{Name}}</div>
-            <div v-if="root.LSQnt" style="font-size: 18px">
-                <div @click="showLS" style="border-radius: 5px; background-color: blue; color: white; padding-left: 3px; padding-right: 3px; margin-left: 3px">ЛС({{ root.LSQnt }})</div>
+            <div @click="showObject" style="padding-bottom: 10px" class="flex-grow-0">{{Name}}</div>
+            <div v-if="root.LSQnt" class="flex-grow-0 pl-2">
+                <button @click="showLS" class="btn btn-sm btn-primary p-0" style="font-size: inherit">ЛС({{ root.LSQnt }})</button>
             </div>
         </div>
-
         <div v-if="opened && root.Children !== null" style="padding-left: 10px">
 
-                <div v-for="(child, i) in root.Children" style="display: flex">
-                    <div style="width: 10px; flex-shrink: 0; display: flex; flex-direction: column">
-                        <div style="height: 10px; flex-shrink: 0; border-left: 1px solid blue; border-bottom: 1px solid blue"></div>
-                        <div v-if="i+1<Object.keys(root.Children).length" style="flex-grow: 1; border-left: 1px solid blue"></div>
-                    </div>
-                    <TreeVertex :FirmID="FirmID" :ObjectID="child.ObjectID" :Name="child.Name" :addPanel="addPanel"/>
+            <div v-for="(child, i) in root.Children" class="d-flex">
+                <div style="width: 10px" class="flex-grow-0 d-flex flex-column">
+                    <div style="height: 10px" class="flex-grow-0 border-left border-bottom border-primary"></div>
+                    <div v-if="i+1<Object.keys(root.Children).length" class="border-left border-primary"></div>
                 </div>
+                <TreeVertex :FirmID="FirmID" :ObjectID="child.ObjectID" :Name="child.Name" :addPanel="addPanel"/>
+            </div>
 
         </div>
     </div>
@@ -62,7 +60,7 @@ export default {
     props: ["addPanel", "FirmID", "ObjectID", "Name"],
     methods:
     {
-        ...mapActions(['LOAD_TREE_LEVEL', 'GET_LS_LIST']),
+        ...mapActions(['LOAD_TREE_LEVEL', 'LOAD_LS_LIST']),
         expand: function()
         {
             if(this.root.Children !== null)
@@ -77,9 +75,15 @@ export default {
         },
         showLS: function()
         {
-            this.addPanel("LSList", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID});
+            let FirmID = this.FirmID, ObjectID = this.ObjectID, func=this.LOAD_LS_LIST;
 
-            //this.GET_LS_LIST({FirmID: this.root.FirmID, ObjectID: this.root.ID});
+            this.addPanel("LSList", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID},
+            function()
+            {
+                console.log("here");
+
+                func({FirmID: FirmID, ObjectID: ObjectID, refresh: true});
+            });
         },
         showObject: function()
         {
