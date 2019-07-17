@@ -11,8 +11,8 @@
             </button>
         </div>
         <div style="overflow: auto">
-            <h5 v-if="!main" class="text-xs-center">{{ Objects[info.FirmID][info.FirmID].Name }}</h5>
-            <component :is="type" :info="info" :addPanel="addPanel"/>
+            <!--<h5 v-if="!main" class="text-xs-center">{{ Objects[info.FirmID][info.FirmID].Name }}</h5>-->
+            <component :is="type" ref="content" :info="info" :addPanel="addPanel"/>
         </div>
     </div>
 
@@ -51,15 +51,7 @@ export default {
             default: ""
         },
         info: {},
-        addPanel: {},
-        reload:
-        {
-            type: Function,
-            default: function()
-            {
-                console.log("no reloading defined");
-            }
-        }
+        addPanel: {}
 
     },
     computed:
@@ -71,6 +63,10 @@ export default {
         remove: function()
         {
             this.$emit('delete');
+        },
+        reload: function()
+        {
+            this.$refs.content.reload();
         }
     }
 }

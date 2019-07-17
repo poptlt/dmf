@@ -197,23 +197,27 @@ export const store = new Vuex.Store({
 
         LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID, refresh = false}) => {
 
-            let root = state.Objects[FirmID];
-            let object = {[ObjectID]: {LS: null}};
+            //let root = state.Objects[FirmID];
+            let root = state.Objects;
+            //let object = {[ObjectID]: {LS: null}};
+            let object = { [FirmID]: {[ObjectID]: {LS: null}} };
+
             let toServer = ['LSList', ObjectID, FirmID];
 
             let transform = (data) => {
-                let res = {[ObjectID]: {LS: []}};
+                object[FirmID][ObjectID].LS = [];
+
                 for (let i = 0; i < data.length; i++) {
-                    res[ObjectID].LS.push({ObjectID: data[i].LSID, Balance: data[i].Balance});
-                    res[ data[i].LSID] = {Type: 'LS', Name: data[i].LSName, Number: data[i].Number, AdressAdd: data[i].AdressAdd};
+                    object[FirmID][ObjectID].LS.push({ObjectID: data[i].LSID, Balance: data[i].Balance});
+                    object[FirmID][ data[i].LSID] = {Type: 'LS', Name: data[i].LSName, Number: data[i].Number, AdressAdd: data[i].AdressAdd};
                 }
-                return res;
+                return object;
             }
 
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform, refresh: refresh});
         },
 
-        LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID}) => {
+        LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID, refresh = false}) => {
 
             let ObjectType = state.Objects[FirmID][ObjectID].Type;
 
@@ -235,7 +239,7 @@ export const store = new Vuex.Store({
                 return data.Data;
             }
 
-            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform, refresh: refresh});
         },
 
         TEST: ({state, dispatch}) => {

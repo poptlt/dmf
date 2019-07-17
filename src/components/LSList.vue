@@ -26,11 +26,15 @@ export default {
         {
             let FirmID = this.info.FirmID, ObjectID = this.info.ObjectID;
 
-            return this.Objects[FirmID][ObjectID];
+            if(this.Objects && this.Objects[FirmID] && this.Objects[FirmID][ObjectID])
+            {
+                return this.Objects[FirmID][ObjectID];
+            }
+            else return null;
         },
         List: function()
         {
-            if(this.root.LS)
+            if(this.root && this.root.LS)
             {
                 let res = [];
 
@@ -46,10 +50,7 @@ export default {
             }
             else
             {
-                if(this.root.LS === undefined)
-                {
-                    this.LOAD_LS_LIST({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID});
-                }
+                if(!this.root || this.root.LS === undefined) this.reload();
                 return null;
             }
         }
@@ -62,6 +63,10 @@ export default {
             let FirmID = this.info.FirmID, Name = this.Objects[FirmID][ID].Name;
 
             this.addPanel("Object", Name, {FirmID: FirmID, ObjectID: ID});
+        },
+        reload: function()
+        {
+            this.LOAD_LS_LIST({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID, refresh: true});
         }
     }
 }

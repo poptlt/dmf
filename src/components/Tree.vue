@@ -39,6 +39,15 @@ export default {
     computed:
     {
         ...mapState({roots: "Objects"})
+    },
+    methods:
+    {
+        reload: function()
+        {
+            //console.log("not ready yet");
+
+            this.$store.dispatch('INIT');
+        }
     }
 }
 </script>
