@@ -6,14 +6,14 @@
                 <template v-else>
                     <div style="width: 20px; height: 20px" class="flex-grow-0 d-flex justify-content-center align-items-center border border-primary rounded-circle text-primary" @click="expand">
 
-                        <font-awesome-icon v-if="!opened" icon="plus"/>
+                        <font-awesome-icon v-if="root.Children === null" icon="spinner" pulse/>
 
-                        <font-awesome-icon v-else-if="opened && root.Children !== null" icon="minus"/>
+                        <font-awesome-icon v-else-if="!opened || root.Children.DMF_ERROR" icon="plus"/>
 
-                        <font-awesome-icon v-else icon="spinner" pulse/>
+                        <font-awesome-icon v-else icon="minus"/>
 
                     </div>
-                    <div v-show="opened && root.Children !== null" style="padding-left: 10px">
+                    <div v-show="opened && root.Children !== null && !root.Children.DMF_ERROR" style="padding-left: 10px">
                         <div style="height: 100%" class="border-left border-primary"/>
                     </div>
                 </template>
@@ -23,7 +23,7 @@
                 <button @click="showLS" class="btn btn-sm btn-primary p-0" style="font-size: inherit">ЛС({{ root.LSQnt }})</button>
             </div>
         </div>
-        <div v-if="opened && root.Children !== null" style="padding-left: 10px">
+        <div v-if="opened && root.Children !== null && !root.Children.DMF_ERROR" style="padding-left: 10px">
 
             <div v-for="(child, i) in root.Children" class="d-flex">
                 <div style="width: 10px" class="flex-grow-0 d-flex flex-column">
@@ -65,7 +65,14 @@ export default {
         {
             if(this.root.Children !== null)
             {                
-                if(this.opened) this.opened=false;
+                if(this.opened)
+                {
+                    if(this.root.Children.DMF_ERROR)
+                    {
+                        this.LOAD_TREE_LEVEL({FirmID: this.FirmID, ObjectID: this.ObjectID});
+                    }
+                    else this.opened=false;
+                }
                 else
                 {
                     if(!this.root.Children) this.LOAD_TREE_LEVEL({FirmID: this.FirmID, ObjectID: this.ObjectID});
@@ -75,19 +82,13 @@ export default {
         },
         showLS: function()
         {
-            let FirmID = this.FirmID, ObjectID = this.ObjectID, func=this.LOAD_LS_LIST;
+            let FirmID = this.FirmID, ObjectID = this.ObjectID;
 
-            this.addPanel("LSList", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID},
-            function()
-            {
-                console.log("here");
-
-                func({FirmID: FirmID, ObjectID: ObjectID, refresh: true});
-            });
+            this.addPanel("LSList", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID});
         },
         showObject: function()
         {
-            this.addPanel("Object", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID});
+            this.addPanel("Object", this.root.Name, {FirmID: this.FirmID, ObjectID: this.ObjectID, ObjectType: this.root.Type});
         }
     }
 }

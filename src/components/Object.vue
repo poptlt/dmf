@@ -4,7 +4,12 @@
             <b-card-header @click="collapse(propsID)">Реквизиты</b-card-header>
             <b-collapse :id="propsID" visible :accordion="accordionID">
                 <b-card-body class="p-0">
-                    <table v-if="props" class="table table-hover">
+
+                    <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                    <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
+
+                    <table v-else class="table table-hover">
                         <tbody>
                             <tr v-for="item in props">
                                 <td>{{ item.PropName }}</td>
@@ -12,7 +17,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <center v-else class="text-primary"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
                 </b-card-body>
             </b-collapse>
         </b-card>
@@ -21,7 +26,12 @@
             <b-card-header @click="collapse(calcParamsID)">Параметры расчетов</b-card-header>
             <b-collapse :id="calcParamsID" visible :accordion="accordionID">
                 <b-card-body class="p-0">
-                    <table v-if="calcParams" class="table table-hover">
+
+                    <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                    <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
+
+                    <table v-else class="table table-hover">
                         <tbody>
                             <tr v-for="item in calcParams">
                                 <td>{{ item.ParamName }}</td>
@@ -29,16 +39,21 @@
                             </tr>
                         </tbody>
                     </table>
-                    <center v-else class="text-primary"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
                 </b-card-body>
             </b-collapse>
         </b-card>
 
-        <b-card v-if="root.Type == 'Firm'" no-body>
+        <b-card v-if="ObjectType == 'Firm'" no-body>
             <b-card-header @click="collapse(tariffsID)">Тарифы</b-card-header>
             <b-collapse :id="tariffsID" visible :accordion="accordionID">
                 <b-card-body class="p-0">
-                    <table v-if="tariffs" class="table table-hover">
+
+                    <center v-if="!tariffs" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                    <div v-else-if="tariffs.DMF_ERROR" class="alert alert-danger">{{ tariffs.message }}</div>
+
+                    <table v-else class="table table-hover">
                         <tbody>
                             <tr v-for="item in tariffs">
                                 <td>{{ item.TariffName }}</td>
@@ -46,16 +61,21 @@
                             </tr>
                         </tbody>
                     </table>
-                    <center v-else class="text-primary"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
                 </b-card-body>
             </b-collapse>
         </b-card>
 
-        <b-card v-if="root.Type == 'Firm'" no-body>
+        <b-card v-if="ObjectType == 'Firm'" no-body>
             <b-card-header @click="collapse(bankAccountsID)">Расчётные счета</b-card-header>
             <b-collapse :id="bankAccountsID" visible :accordion="accordionID">
                 <b-card-body class="p-0">
-                    <div v-if="bankAccounts" class="p-2">
+
+                    <center v-if="!bankAccounts" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                    <div v-else-if="bankAccounts.DMF_ERROR" class="alert alert-danger">{{ bankAccounts.message }}</div>
+
+                    <div v-else class="p-2">
                         <b-card v-for="account in bankAccounts" no-body>
                             <b-card-header @click="collapse(bankAccountsID+account.BankAccountID)">{{ account.BankAccountNumber }}</b-card-header>
                             <b-collapse :id="bankAccountsID+account.BankAccountID" visible :accordion="bankAccountsID+'accordion'">
@@ -79,27 +99,33 @@
                             </b-collapse>
                         </b-card>
                     </div>
-                    <center v-else class="text-primary"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
                 </b-card-body>
             </b-collapse>
         </b-card>
 
-        <!--<b-card v-if="root.Type == 'LS'" no-body>
-            <b-card-header @click="collapse(turnoverID)">Тарифы</b-card-header>
+        <b-card v-if="ObjectType == 'LS'" no-body>
+            <b-card-header @click="collapse(turnoverID)">Баланс</b-card-header>
             <b-collapse :id="turnoverID" visible :accordion="accordionID">
                 <b-card-body class="p-0">
-                    <table v-if="turnover" class="table table-hover">
+
+                    <center v-if="!turnover" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                    <div v-else-if="turnover.DMF_ERROR" class="alert alert-danger">{{ turnover.message }}</div>
+
+                    <table v-else class="table table-hover">
                         <tbody>
                             <tr v-for="item in turnover">
-                                <td></td>
-                                <td class="text-right"></td>
+                                <td>{{ item.Date.substr(0, 10) }}</td>
+                                <td class="text-right" :class="{'text-success': (item.Type=='Credit'), 'text-danger': (item.Type=='Debit')}">{{ item.Sum }}</td>
+                                <td>{{ item.DocumentName }}</td>
                             </tr>
                         </tbody>
                     </table>
-                    <center v-else class="text-primary"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
                 </b-card-body>
             </b-collapse>
-        </b-card>-->
+        </b-card>
     </div>
 </template>
 
@@ -108,7 +134,7 @@
 import { mapActions, mapState } from 'vuex';
 
 export default {
-    props: ["info"],
+    props: ["FirmID", "ObjectID", "ObjectType"],
     data: function()
     {
         return {
@@ -116,7 +142,8 @@ export default {
             propsID: this.randomID(),
             calcParamsID: this.randomID(),
             tariffsID: this.randomID(),
-            bankAccountsID: this.randomID()
+            bankAccountsID: this.randomID(),
+            turnoverID: this.randomID()
         }
     },
     computed:
@@ -124,35 +151,66 @@ export default {
         ...mapState(["Objects"]),
         root: function()
         {
-            let FirmID = this.info.FirmID, ObjectID = this.info.ObjectID;
-
-            return this.Objects[FirmID][ObjectID];
+            if(this.Objects && this.Objects[this.FirmID] && this.Objects[this.FirmID][this.ObjectID])
+            {
+                return this.Objects[this.FirmID][this.ObjectID];
+            }
+            else return null;
         },
         props: function()
         {
-            console.log(this.root);
+            if(this.root && this.root.Props) return this.root.Props;
+            else
+            {
+                if(!this.root || this.root.Props === undefined) this.reload();
 
-            if(this.root.Props === undefined) this.reload();
-
-            return this.root.Props;
+                return null;
+            }
         },
         calcParams: function()
         {
-            if(this.root.CalcParams === undefined) this.reload();
+            if(this.root && this.root.CalcParams) return this.root.CalcParams;
+            else
+            {
+                if(!this.root || this.root.CalcParams === undefined) this.reload();
 
-            return this.root.CalcParams;
+                return null;
+            }
         },
         tariffs: function()
         {
-            if(this.root.Tariffs === undefined) this.reload();
+            if(this.root && this.root.Tariffs) return this.root.Tariffs;
+            else
+            {
+                if(!this.root || this.root.Tariffs === undefined) this.reload();
 
-            return this.root.Tariffs;
+                return null;
+            }
         },
         bankAccounts: function()
         {
-            if(this.root.BankAccounts === undefined) this.reload();
+            if(this.root && this.root.BankAccounts) return this.root.BankAccounts;
+            else
+            {
+                if(!this.root || this.root.BankAccounts === undefined) this.reload();
 
-            return this.root.BankAccounts;
+                return null;
+            }
+        },
+        turnover: function()
+        {
+            if(this.root && this.root.Turnover)
+            {
+                console.log(this.root.Turnover);
+
+                return this.root.Turnover;
+            }
+            else
+            {
+                if(!this.root || this.root.Turnover === undefined) this.reload();
+
+                return null;
+            }
         }
     },
     methods:
@@ -168,7 +226,7 @@ export default {
         },
         reload: function()
         {
-            this.LOAD_OBJECT({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID, refresh: true});
+            this.LOAD_OBJECT({FirmID: this.FirmID, ObjectID: this.ObjectID, ObjectType: this.ObjectType, refresh: true});
         }
     }
 }

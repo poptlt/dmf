@@ -10,7 +10,7 @@ function toDMFerror(error) {
         err.message = 'Не удалось дождаться ответа от сервера!';
         err.code = 0;
     }
-    else if (error.response =! undefined && error.response.status != undefined && error.response.status == 500) {
+    else if (error.response != undefined && error.response.status != undefined && error.response.status == 500) {
         err.message = error.response.data.Message;
         err.code = 500;
     }
@@ -144,7 +144,7 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: state, object: {Objects: null}, toServer: ['Init'], refresh: true, transform: transform});
         },
 
-        LOAD_OBJECTS: ({state, commit, dispatch}, {root, object, toServer, refresh = false, transform = (data) => {return data}}) => {
+        LOAD_OBJECTS: ({state, commit, dispatch}, {root, object, toServer, refresh = true, transform = (data) => {return data}}) => {
 
 
             // если у нас идет обновление данных, то запрос однозначно нужно исполнить
@@ -195,11 +195,10 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
 
-        LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID, refresh = false}) => {
+        LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID}) => {
 
-            //let root = state.Objects[FirmID];
             let root = state.Objects;
-            //let object = {[ObjectID]: {LS: null}};
+
             let object = { [FirmID]: {[ObjectID]: {LS: null}} };
 
             let toServer = ['LSList', ObjectID, FirmID];
@@ -214,32 +213,33 @@ export const store = new Vuex.Store({
                 return object;
             }
 
-            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform, refresh: refresh});
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
 
-        LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID, refresh = false}) => {
+        LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID, ObjectType}) => {
 
-            let ObjectType = state.Objects[FirmID][ObjectID].Type;
+            let root = state.Objects;
 
-            let root = state.Objects[FirmID][ObjectID];
+            let object = { [FirmID]: {[ObjectID]: {Props: null, CalcParams: null}} };
 
-            let object = {Props: null, CalcParams: null};
             if (ObjectType == 'Firm') {
-                object['Tariffs'] = null;
-                object['BankAccounts'] = null;
+                object[FirmID][ObjectID]['Tariffs'] = null;
+                object[FirmID][ObjectID]['BankAccounts'] = null;
             }
             if (ObjectType == 'LS') {
-                object['Turnover'] = null;
+                object[FirmID][ObjectID]['Turnover'] = null;
             }
 
             let toServer = ['GetObject', ObjectID, FirmID];
 
             let transform = (data) => {
 
-                return data.Data;
+                object[FirmID][ObjectID] = data.Data;
+
+                return object;
             }
 
-            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform, refresh: refresh});
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
 
         TEST: ({state, dispatch}) => {
@@ -285,7 +285,10 @@ export const store = new Vuex.Store({
             // делаем запрос на сервер
             return Axios({method: "post", timeout: 15000, url: url, data: data, withCredentials: true})
                 // при удачном исходе отдаем результат
-                .then(response => {resolve(response)})
+                .then(response => {
+                    if(Math.random() < 0.5 ) resolve(response);
+                    else reject({});
+                })
                 // при ошибке
                 .catch(error => {
                     // проверяем, не отсутствие ли авторизации

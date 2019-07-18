@@ -15,7 +15,7 @@
 
             <div class="flex-fill d-flex" style="overflow: hidden">
                 <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border" v-bind:style="{width: (100 * widths[panel.type])+'%'}">
-                    <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel" :reload="panel.reload"/>
+                    <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
                 </div>
             </div>
         </div>
@@ -26,7 +26,6 @@
 import { mapActions, mapState} from 'vuex'
 
 import AuthDmf from './components/AuthDMF.vue'
-import ObjectDmf from './components/ObjectDMF.vue'
 
 import Panel from './components/Panel.vue'
 
@@ -34,14 +33,14 @@ export default {
     name: 'app',
     components:
     {
-        AuthDmf, ObjectDmf, Panel
+        AuthDmf, Panel
     },
     data: function()
     {
         return {
             panels:
             [
-                {type: "Tree", label: "Главная", }
+                {type: "Tree", label: "Главная"}
             ],
             widths:
             {
@@ -93,9 +92,7 @@ export default {
         },
         addPanel: function(type, label, info, reload)
         {
-            if(reload) reload();
-
-            this.panels.push({type: type, label: label, info: info, reload: reload});
+            this.panels.push({type: type, label: label, info: info});
         },
         deletePanel: function(i)
         {
@@ -106,10 +103,10 @@ export default {
             this.$store.dispatch('TEST');
         }
     },
-    created()
+    /*created()
     {
         this.$store.dispatch('INIT')
-    }
+    }*/
 }
 </script>
 

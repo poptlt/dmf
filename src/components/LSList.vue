@@ -1,6 +1,10 @@
 <template>
     <div>
-        <table v-if="List" class="table table-hover">
+        <center v-if="!List" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+        <div v-else-if="List.DMF_ERROR" class="alert alert-danger">{{ List.message }}</div>
+
+        <table v-else class="table table-hover">
             <tbody>
                 <tr v-for="LS in List" @click="showObject(LS.ID)">
                     <td>{{ LS.Number }}</td>
@@ -9,7 +13,7 @@
                 </tr>
             </tbody>
         </table>
-        <center v-else class="text-primary"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
     </div>
 </template>
 
@@ -18,17 +22,15 @@
 import { mapActions, mapState } from 'vuex';
 
 export default {
-    props: ["info", "addPanel"],
+    props: ["FirmID", "ObjectID", "addPanel"],
     computed:
     {
         ...mapState(["Objects"]),
         root: function()
         {
-            let FirmID = this.info.FirmID, ObjectID = this.info.ObjectID;
-
-            if(this.Objects && this.Objects[FirmID] && this.Objects[FirmID][ObjectID])
+            if(this.Objects && this.Objects[this.FirmID] && this.Objects[this.FirmID][this.ObjectID])
             {
-                return this.Objects[FirmID][ObjectID];
+                return this.Objects[this.FirmID][this.ObjectID];
             }
             else return null;
         },
@@ -36,6 +38,8 @@ export default {
         {
             if(this.root && this.root.LS)
             {
+                if(this.root.LS.DMF_ERROR) return this.root.LS;
+
                 let res = [];
 
                 for(let i=0; i<this.root.LS.length; i++)
@@ -43,8 +47,8 @@ export default {
                     res[i] = {};
                     res[i].ID = this.root.LS[i].ObjectID;
                     res[i].Balance = this.root.LS[i].Balance;
-                    res[i].Number = this.Objects[this.info.FirmID][res[i].ID].Number;
-                    res[i].AdressAdd = this.Objects[this.info.FirmID][res[i].ID].AdressAdd;
+                    res[i].Number = this.Objects[this.FirmID][res[i].ID].Number;
+                    res[i].AdressAdd = this.Objects[this.FirmID][res[i].ID].AdressAdd;
                 }
                 return res;
             }
@@ -60,13 +64,13 @@ export default {
         ...mapActions(['LOAD_LS_LIST']),
         showObject: function(ID)
         {
-            let FirmID = this.info.FirmID, Name = this.Objects[FirmID][ID].Name;
+            let Name = this.Objects[this.FirmID][ID].Name, ObjectType = this.Objects[this.FirmID][ID].Type;
 
-            this.addPanel("Object", Name, {FirmID: FirmID, ObjectID: ID});
+            this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ID, ObjectType: ObjectType});
         },
         reload: function()
         {
-            this.LOAD_LS_LIST({FirmID: this.info.FirmID, ObjectID: this.info.ObjectID, refresh: true});
+            this.LOAD_LS_LIST({FirmID: this.FirmID, ObjectID: this.ObjectID, refresh: true});
         }
     }
 }
