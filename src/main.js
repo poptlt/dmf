@@ -33,6 +33,26 @@ import { store } from './store'
 
 Vue.config.productionTip = false
 
+// глобальная примесь для доступа к данным по пути
+// если путь где-либо прерывается, то возвращается undefined
+// иначе возвращаются собственно данные
+Vue.mixin({
+    methods: {
+        dataState: (root, path) => {
+             for(let i = 0; i < path.length; i++)
+                {
+                    if (root === undefined) {return undefined}
+                    if (root === null) {return undefined}
+                    if (typeof root != 'object') {return undefined}
+                    if (root[path[i]] === undefined) {return undefined}
+                    root = root[path[i]];
+                } 
+            return root;
+        }
+    }
+})
+
+
 new Vue({
     store,
   render: h => h(App),

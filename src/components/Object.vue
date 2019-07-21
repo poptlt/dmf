@@ -11,7 +11,7 @@
 
                     <table v-else class="table table-hover">
                         <tbody>
-                            <tr v-for="item in props">
+                            <tr v-for="(item, ID) in props" @click="showPropHistory(ID, item.PropName)">
                                 <td>{{ item.PropName }}</td>
                                 <td>{{ item.Value }}</td>
                             </tr>
@@ -134,7 +134,7 @@
 import { mapActions, mapState } from 'vuex';
 
 export default {
-    props: ["FirmID", "ObjectID", "ObjectType"],
+    props: ["FirmID", "ObjectID", "ObjectType", "addPanel"],
     data: function()
     {
         return {
@@ -227,6 +227,10 @@ export default {
         reload: function()
         {
             this.LOAD_OBJECT({FirmID: this.FirmID, ObjectID: this.ObjectID, ObjectType: this.ObjectType, refresh: true});
+        },
+        showPropHistory: function(PropID, PropName)
+        {
+            this.addPanel("PropHistory", this.Objects[this.FirmID][this.ObjectID].Name + ' ' + PropName, {FirmID: this.FirmID, ObjectID: this.ObjectID, PropID: PropID});
         }
     }
 }

@@ -25,13 +25,15 @@ import Tree from './Tree.vue'
 import LSList from './LSList.vue'
 
 import Object from './Object.vue'
+    
+import PropHistory from './PropHistory.vue'
 
 import { mapState } from 'vuex';
 
 export default {
     components:
     {
-        Tree, LSList, Object
+        Tree, LSList, Object, PropHistory
     },
     props:
     {

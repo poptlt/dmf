@@ -29,7 +29,7 @@ export default {
         ...mapState(["Objects"]),
         roots: function()
         {
-            if(!this.Objects) this.reload();
+            if(this.Objects === undefined) this.reload();
 
             return this.Objects;
         }

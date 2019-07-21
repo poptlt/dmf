@@ -1,9 +1,9 @@
 <template>
-    <div>
-        <center v-if="!List" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+    <div v-if="isNotEmpty">
+        <center v-if="List === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
         <div v-else-if="List.DMF_ERROR" class="alert alert-danger">{{ List.message }}</div>
-
+        
         <table v-else class="table table-hover">
             <tbody>
                 <tr v-for="LS in List" @click="showObject(LS.ID)">
@@ -13,7 +13,7 @@
                 </tr>
             </tbody>
         </table>
-
+        
     </div>
 </template>
 
@@ -26,39 +26,47 @@ export default {
     computed:
     {
         ...mapState(["Objects"]),
-        root: function()
-        {
-            if(this.Objects && this.Objects[this.FirmID] && this.Objects[this.FirmID][this.ObjectID])
-            {
-                return this.Objects[this.FirmID][this.ObjectID];
+        
+        isNotEmpty: function() {
+             let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'LS']);
+            
+            if (data === undefined) {
+                this.reload(); 
+                let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'LS']);
+                if (data === undefined) {return false}
+                else {return true}
             }
-            else return null;
+            else {return true}            
         },
-        List: function()
-        {
-            if(this.root && this.root.LS)
-            {
-                if(this.root.LS.DMF_ERROR) return this.root.LS;
-
-                let res = [];
-
-                for(let i=0; i<this.root.LS.length; i++)
-                {
-                    res[i] = {};
-                    res[i].ID = this.root.LS[i].ObjectID;
-                    res[i].Balance = this.root.LS[i].Balance;
-                    res[i].Number = this.Objects[this.FirmID][res[i].ID].Number;
-                    res[i].AdressAdd = this.Objects[this.FirmID][res[i].ID].AdressAdd;
-                }
-                return res;
+        
+        List: function() { 
+            
+            let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'LS']);
+ 
+            if (data === undefined) {
+                
+                console.log("undef");
+                
+                return undefined;
             }
-            else
-            {
-                if(!this.root || this.root.LS === undefined) this.reload();
-                return null;
+            
+            if (data === null) {return null}
+            
+            if (data.DMF_ERROR) {return data}
+
+            let res = [];
+
+            for(let i=0; i<data.length; i++) {
+                res[i] = {};
+                res[i].ID = data[i].ObjectID;
+                res[i].Balance = data[i].Balance;
+                res[i].Number = this.Objects[this.FirmID][res[i].ID].Number;
+                res[i].AdressAdd = this.Objects[this.FirmID][res[i].ID].AdressAdd;
             }
+            return res;             
         }
     },
+    
     methods:
     {
         ...mapActions(['LOAD_LS_LIST']),
@@ -71,6 +79,16 @@ export default {
         reload: function()
         {
             this.LOAD_LS_LIST({FirmID: this.FirmID, ObjectID: this.ObjectID, refresh: true});
+        },
+        root: function()
+        {
+            //console.log("computing root");
+            
+            if(this.Objects && this.Objects[this.FirmID] && this.Objects[this.FirmID][this.ObjectID])
+            {
+                return this.Objects[this.FirmID][this.ObjectID];
+            }
+            else return undefined;
         }
     }
 }

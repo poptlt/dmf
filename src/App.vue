@@ -44,7 +44,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1, Object: 2
+                Tree: 1, LSList: 1, Object: 2, PropHistory: 1
             }
         }
     },
@@ -91,7 +91,7 @@ export default {
             while(this.panels.length>i+1) this.panels.pop();
         },
         addPanel: function(type, label, info, reload)
-        {
+        {            
             this.panels.push({type: type, label: label, info: info});
         },
         deletePanel: function(i)

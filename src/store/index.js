@@ -79,10 +79,14 @@ function setObjectsValue(root, object, value) {
 
     for (let key in object) {
         // если ключа в существующих данных нет,
-        if (root[key] == undefined) {
+        if (root[key] === undefined) {
+            
+            
+            
             // то добавляем этот ключ и для начала предполагаем, что дерево продолжается дальше
             Vue.set(root, key, {});
         }
+        if(root[key] === null) root[key] = {};
 
         // если на следующем уровне вставляемых данных объект (массив не считаем за объект), то продолжаем растить дерево
         if (object[key] != null && typeof object[key] == 'object' && Object.keys(object[key]).length > 0 && !Array.isArray(object[key])) {
@@ -103,7 +107,8 @@ function setObjectsValue(root, object, value) {
 export const store = new Vuex.Store({
   state: {
       AuthState: true,
-      Objects: null
+      Objects: undefined,
+      Types: undefined
   },
 
     getters : {
@@ -137,16 +142,20 @@ export const store = new Vuex.Store({
 
         INIT: ({state, dispatch}) => {
             
+        
+            
             let transform = (data) => {
-                return {Objects: data}
+                return {Objects: data.Firms, Types: data.Types}
             }
 
-            dispatch('LOAD_OBJECTS', {root: state, object: {Objects: null}, toServer: ['Init'], refresh: true, transform: transform});
+            dispatch('LOAD_OBJECTS', {root: state, object: {Objects: null, Types: null}, toServer: ['Init'], refresh: true, transform: transform});
         },
 
         LOAD_OBJECTS: ({state, commit, dispatch}, {root, object, toServer, refresh = true, transform = (data) => {return data}}) => {
 
-
+            
+            
+            
             // если у нас идет обновление данных, то запрос однозначно нужно исполнить
             let request = refresh;
             // если необходимость запроса пока отсутствует, то уточняем его по данным
@@ -154,7 +163,7 @@ export const store = new Vuex.Store({
 
             // если выяснилось, что запрос необходимо выполнить
             if (request) {
-
+                                
                 // добавляем в существующие данные все не существующие необходимые ключи и проставляем значение null
                 commit('SET_OBJECTS_VALUE', {root: root, path: object, value: null});
 
@@ -168,6 +177,7 @@ export const store = new Vuex.Store({
                 }
 
                 let reject = (error) => { console.log(error);
+                                                             
                     commit('SET_OBJECTS_VALUE', {root: root, path: object, value: toDMFerror(error)});
                      //setObjectsValue(root, object, toDMFerror(error));
                 }
@@ -196,7 +206,7 @@ export const store = new Vuex.Store({
         },
 
         LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID}) => {
-
+                        
             let root = state.Objects;
 
             let object = { [FirmID]: {[ObjectID]: {LS: null}} };
@@ -204,6 +214,8 @@ export const store = new Vuex.Store({
             let toServer = ['LSList', ObjectID, FirmID];
 
             let transform = (data) => {
+                
+                
                 object[FirmID][ObjectID].LS = [];
 
                 for (let i = 0; i < data.length; i++) {
@@ -233,13 +245,60 @@ export const store = new Vuex.Store({
             let toServer = ['GetObject', ObjectID, FirmID];
 
             let transform = (data) => {
-
+                
+                let props = data.Data.Props;
+                
+                data.Data.Props = {};
+                
+                for(let i=0; i<props.length; i++)
+                {
+                    data.Data.Props[props[i].PropID] = {PropName: props[i].PropName, Value: props[i].Value};
+                }
+                
                 object[FirmID][ObjectID] = data.Data;
 
                 return object;
             }
 
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },
+        
+        LOAD_PROP_HISTORY: ({state, dispatch}, {ObjectID, FirmID, PropID}) => {
+            
+            let root = state.Objects;
+            
+            let object = { [FirmID]: { [ObjectID]: { 'Props': { [PropID]: { 'History': null } } } } };
+            
+            let toServer = ['ObjectPropDetails', ObjectID, FirmID, PropID];
+            
+            let transform = (data) => {
+                                
+                object[FirmID][ObjectID]['Props'][PropID]['History'] = data.Data;
+                
+                return object;
+            }
+            
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },
+        
+        WRITE_PROP: ({state, dispatch}, {ObjectID, FirmID, PropID, Date, Value, func}) => {
+            
+            let toServer = ['ObjectPropWrite', ObjectID, FirmID, PropID, Date, Value];
+            
+            function resolve(data)
+            {
+                dispatch('LOAD_PROP_HISTORY', {ObjectID: ObjectID, FirmID: FirmID, PropID: PropID});
+                
+                func({});
+            }
+            
+            function reject(data)
+            {
+                func({error: true, message: toDMFerror(data).message});
+                
+            }
+            
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject})
         },
 
         TEST: ({state, dispatch}) => {
@@ -263,7 +322,7 @@ export const store = new Vuex.Store({
             }*/
 
 
-            console.log(state.Objects);
+            console.log(state);
 
         },
 
@@ -286,8 +345,7 @@ export const store = new Vuex.Store({
             return Axios({method: "post", timeout: 15000, url: url, data: data, withCredentials: true})
                 // при удачном исходе отдаем результат
                 .then(response => {
-                    if(Math.random() < 0.5 ) resolve(response);
-                    else reject({});
+                    resolve(response);
                 })
                 // при ошибке
                 .catch(error => {
