@@ -246,16 +246,42 @@ export const store = new Vuex.Store({
 
             let transform = (data) => {
                 
-                let props = data.Data.Props;
+                data = data.Data; //ключи ObjectName и ObjectType уже не нужны
                 
-                data.Data.Props = {};
+                let props = data.Props, idCnt=1;
                 
-                for(let i=0; i<props.length; i++)
+                data.Props = {};
+                
+                props.forEach(item => {
+                    
+                    let id = item.PropID;
+                    if(!item.Editable) id = "id"+idCnt, idCnt++;
+                    
+                    data.Props[id] = {PropName: item.PropName, Value: item.Value, Editable: item.Editable};
+                });
+                
+                let params = data.CalcParams;
+                
+                data.CalcParams = {};
+                
+                params.forEach(item => {
+                    
+                    data.CalcParams[item.ParamID] = {ParamName: item.ParamName, Value: item.Value};
+                });
+                
+                if(data.Tariffs)
                 {
-                    data.Data.Props[props[i].PropID] = {PropName: props[i].PropName, Value: props[i].Value};
+                    let tariffs = data.Tariffs;
+                    
+                    data.Tariffs = {};
+                    
+                    tariffs.forEach(item => {
+                        
+                        data.Tariffs[item.TariffID] = {TariffName: item.TariffName, Value: item.Value};
+                    })
                 }
                 
-                object[FirmID][ObjectID] = data.Data;
+                object[FirmID][ObjectID] = data;
 
                 return object;
             }
@@ -263,17 +289,27 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
         
-        LOAD_PROP_HISTORY: ({state, dispatch}, {ObjectID, FirmID, PropID}) => {
+        LOAD_HISTORY: ({state, dispatch}, {ObjectID, FirmID, AttrType, AttrID}) => {
             
             let root = state.Objects;
             
-            let object = { [FirmID]: { [ObjectID]: { 'Props': { [PropID]: { 'History': null } } } } };
+            let object = { [FirmID]: { [ObjectID]: { [AttrType]: { [AttrID]: { 'History': null } } } } };
             
-            let toServer = ['ObjectPropDetails', ObjectID, FirmID, PropID];
+            let toServer;
+            
+            if(AttrType == "Props") toServer = ['ObjectPropDetails', ObjectID, FirmID, AttrID];
+            
+            if(AttrType == "CalcParams") toServer = ['CalcParamDetails', ObjectID, FirmID, AttrID];
+            
+            if(AttrType == "Tariffs") toServer = ['TariffValueDetails', FirmID, AttrID];
             
             let transform = (data) => {
-                                
-                object[FirmID][ObjectID]['Props'][PropID]['History'] = data.Data;
+                
+                console.log(data);
+                
+                if(AttrType != "Tariffs") data = data.Data;
+                
+                object[FirmID][ObjectID][AttrType][AttrID]['History'] = data;
                 
                 return object;
             }
@@ -281,9 +317,9 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
         
-        WRITE_PROP: ({state, dispatch}, {ObjectID, FirmID, PropID, Date, Value, func}) => {
+        WRITE_HISTORY: ({state, dispatch}, {ObjectID, FirmID, PropID, Date, Value, func}) => {
             
-            let toServer = ['ObjectPropWrite', ObjectID, FirmID, PropID, Date, Value];
+            /*let toServer = ['ObjectPropWrite', ObjectID, FirmID, PropID, Date, Value];
             
             function resolve(data)
             {
@@ -298,7 +334,7 @@ export const store = new Vuex.Store({
                 
             }
             
-            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject})
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject})*/
         },
 
         TEST: ({state, dispatch}) => {

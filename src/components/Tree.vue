@@ -37,7 +37,7 @@ export default {
     methods:
     {
         reload: function()
-        {
+        {            
             this.$store.dispatch('INIT');
         }
     }

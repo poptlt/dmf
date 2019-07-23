@@ -44,7 +44,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1, Object: 2, PropHistory: 1
+                Tree: 1, LSList: 1, Object: 2, History: 1
             }
         }
     },

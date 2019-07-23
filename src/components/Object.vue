@@ -11,7 +11,7 @@
 
                     <table v-else class="table table-hover">
                         <tbody>
-                            <tr v-for="(item, ID) in props" @click="showPropHistory(ID, item.PropName)">
+                            <tr v-for="(item, ID) in props" @click="if(item.Editable) showHistory('Props', ID, item.PropName);">
                                 <td>{{ item.PropName }}</td>
                                 <td>{{ item.Value }}</td>
                             </tr>
@@ -33,7 +33,7 @@
 
                     <table v-else class="table table-hover">
                         <tbody>
-                            <tr v-for="item in calcParams">
+                            <tr v-for="(item, ID) in calcParams" @click="showHistory('CalcParams', ID, item.ParamName)">
                                 <td>{{ item.ParamName }}</td>
                                 <td>{{ item.Value }}</td>
                             </tr>
@@ -55,7 +55,7 @@
 
                     <table v-else class="table table-hover">
                         <tbody>
-                            <tr v-for="item in tariffs">
+                            <tr v-for="(item, ID) in tariffs" @click="showHistory('Tariffs', ID, item.TariffName)">
                                 <td>{{ item.TariffName }}</td>
                                 <td class="text-right">{{ item.Value }}</td>
                             </tr>
@@ -228,9 +228,9 @@ export default {
         {
             this.LOAD_OBJECT({FirmID: this.FirmID, ObjectID: this.ObjectID, ObjectType: this.ObjectType, refresh: true});
         },
-        showPropHistory: function(PropID, PropName)
+        showHistory: function(AttrType, AttrID, Name)
         {
-            this.addPanel("PropHistory", this.Objects[this.FirmID][this.ObjectID].Name + ' ' + PropName, {FirmID: this.FirmID, ObjectID: this.ObjectID, PropID: PropID});
+            this.addPanel("History", this.Objects[this.FirmID][this.ObjectID].Name + ' ' + Name, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
         }
     }
 }

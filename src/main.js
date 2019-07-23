@@ -37,6 +37,13 @@ Vue.config.productionTip = false
 // если путь где-либо прерывается, то возвращается undefined
 // иначе возвращаются собственно данные
 Vue.mixin({
+    data: function()
+    {
+        return {
+            
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]   
+        }
+    },
     methods: {
         dataState: (root, path) => {
              for(let i = 0; i < path.length; i++)
