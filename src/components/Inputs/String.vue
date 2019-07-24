@@ -15,9 +15,15 @@ export default {
     {
         change: function()
         {
-            let val = (this.value.length <= this.Length) ? this.value : undefined;
+            let val = (this.value.length >0 && this.value.length <= this.Length) ? this.value : undefined;
             
             this.$emit("change", val);
+        },
+        clear: function()
+        {
+            this.value = "";
+            
+            this.change();
         }
     }
         

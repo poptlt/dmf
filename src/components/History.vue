@@ -1,7 +1,9 @@
 <template>
-    <div v-if="History !== undefined && type">
+    <div v-if="History !== undefined">
         
-        <center v-if="History === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+        <div v-if="waiting">waiting...</div>
+        
+        <center v-else-if="History === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
         <div v-else-if="History.DMF_ERROR" class="alert alert-danger">{{ History.message }}</div>
         
@@ -10,53 +12,29 @@
             <table class="table table-hover">
                 <tbody>
                     <tr v-for="item in History">
-                        <td class="p-1">
-                            <button v-if="item.delete" class="btn btn-danger btn-sm">
+                        <td>
+                            <button v-if="item.delete" class="btn btn-danger btn-sm m-1">
                                 <font-awesome-icon icon="times"/>
                             </button>
                         </td>
-                        <td class="p-0">
-                            <div class="d-flex flex-wrap">
-                                <div class=" p-2">{{ item.Date }}</div>
-                                <div class="p-2">{{ item.Value }}</div>
-                                <div v-if="item.NodeID" class="flex-grow-0 p-2">{{ item.NodeName }}</div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="p-1">
-                            <button class="btn btn-success btn-sm">
-                                <font-awesome-icon icon="plus"/>
-                            </button>
-                        </td>
-                        <td class="p-0">
-                            <Datepicker :value="propDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates"/>
-                            
-                            <component :is="type.Type" v-bind="type" v-on:change="change"/>
-                        </td>
+                        <td>{{ item.Date }}</td>
+                        <td>{{ item.Value }}<span v-if="item.NodeName"> ( {{ item.NodeName }} )</span></td>
                     </tr>
                 </tbody>
-            </table> 
+            </table>
+            <div v-if="type" class="d-flex">
+                <button v-if="newValue !== undefined" @click="add" class="btn btn-success btn-sm">
+                    <font-awesome-icon icon="plus"/>
+                </button>
+
+                <Datepicker :value="newDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates" :bootstrap-styling="true" style="width: 120px"/>
+
+                <component :is="type.Type" v-bind="type" v-on:change="changeValue"/>
+
+            </div>
+            
             
         </template>
-        <!--<table v-else class="table table-hover">
-            <tbody>
-                <tr v-for="item in History">
-                    <td>{{ item.Date }}</td>
-                    <td>{{ item.Value }}</td>
-                </tr>
-                <div class="d-flex">
-                    <div><Datepicker :value="propDate" :monday-first="true" :language="ru" format="MMMM yyyy" minimum-view="month" v-on:selected="changeDate"></Datepicker></div>
-                    <div><input type="text" v-model="propValue"></div>
-                    <button @click="addProp">Добавить</button>
-                </div>
-                </tr>
-                <Datepicker :value="propDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView"></Datepicker>
-            </tbody>
-        </table>-->
-        
-        
-        
     </div>
 </template>
 
@@ -70,27 +48,27 @@ import {ru} from 'vuejs-datepicker/dist/locale';
     
 import String from './Inputs/String.vue';
     
-import Number from './Inputs/Number.vue';
-
 export default {
     props: ["FirmID", "ObjectID", "AttrType", "AttrID"],
     components:
     {
-        Datepicker, String, Number
+        Datepicker, String
     },
     data: function()
     {
         return {
             
             ru: ru,
-            propValue: '',
-            propDate: new Date(),
             lastDate: new Date(1980, 1),
             calendarView: (this.AttrType == "Props") ? "day" : "month",
             disabledDates:
             {
                 to: new Date(1980, 0)
-            }
+            },
+            newValue: undefined,
+            newDate: new Date(),
+            waiting: false,
+            message: undefined
         }
     },
     computed:
@@ -202,9 +180,37 @@ export default {
         {
             this.LOAD_HISTORY({FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID});
         },
-        change: function(val)
+        changeDate: function(date)
         {
-            console.log(val);
+            this.newDate = date;
+        },
+        changeValue: function(val)
+        {
+            this.newValue = val;
+        },
+        clear: function()
+        {
+            this.$refs.input.clear();
+        },
+        add: function()
+        {
+            let th = this;
+            
+            function ok()
+            {
+                th.waiting = false;
+            }
+            
+            function error(message)
+            {
+                th.waiting = false;
+                
+                alert(message);
+            }
+            
+            this.waiting = true;
+            
+            this.WRITE_HISTORY({FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: this.newDate, value: this.newValue})
         }
     }
 }
