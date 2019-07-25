@@ -55,6 +55,36 @@ Vue.mixin({
                     root = root[path[i]];
                 } 
             return root;
+        },
+        
+        dateForServer: (date, type) => {
+            
+            let year = date.getFullYear(), month = date.getMonth()+1, day = date.getDate();
+            
+            if(type == "month")
+            {
+                return year + "-" + (month<10 ? "0" : "") + month + "-01T00:00:00";
+            }
+            
+            if(type == "day")
+            {
+                return year + "-" + (month<10 ? "0" : "") + month + "-" + (day<10 ? "0" : "") + day + "T00:00:00";
+            }
+        },
+        
+        dateForClient: (date, type) => {
+            
+            let year = date.getFullYear(), month = date.getMonth(), day = date.getDate();
+            
+            if(type == "month")
+            {
+                this.monthNames[month] + " " + year;
+            }
+            
+            if(type == "day")
+            {
+                return (day<10 ? "0" : "") + day + "." + (month+1<10 ? "0" : "") + (month + 1) + "." + year;
+            }
         }
     }
 })

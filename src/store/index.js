@@ -317,9 +317,46 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
         
-        WRITE_HISTORY: ({state, dispatch}, {ObjectID, FirmID, PropID, Date, Value, func}) => {
+        WRITE_HISTORY: ({state, dispatch}, {operation, ObjectID, FirmID, AttrType, AttrID, date, value, accepted, rejected}) => {
             
-            /*let toServer = ['ObjectPropWrite', ObjectID, FirmID, PropID, Date, Value];
+            let resolve = () => {
+                
+                dispatch('LOAD_HISTORY', {ObjectID: ObjectID, FirmID: FirmID, AttrType: AttrType, AttrID: AttrID});
+                
+                accepted();
+            }
+            
+            let reject = (data) => {
+                
+                rejected( (toDMFerror(data)).message);
+            }
+            
+            let toServer;
+            
+            if(operation == "add")
+            {
+                if(AttrType == "Props") toServer = ['ObjectPropWrite', ObjectID, FirmID, AttrID, date, value];
+                
+                if(AttrType == "CalcParams") toServer = ['CalcParamWrite', ObjectID, FirmID, AttrID, date, value];
+                
+                if(AttrType == "Tariffs") toServer = ['TariffValueWrite', FirmID, AttrID, date, value];
+            }
+            
+            if(operation == "delete")
+            {
+                if(AttrType == "Props") toServer = ['ObjectPropDelete', ObjectID, FirmID, AttrID, date];
+                
+                if(AttrType == "CalcParams") toServer = ['CalcParamDelete', ObjectID, FirmID, AttrID, date];
+                
+                if(AttrType == "Tariffs") toServer = ['TariffValueDelete', FirmID, AttrID, date];
+            }
+            
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },
+        
+        /*WRITE_HISTORY: ({state, dispatch}, {ObjectID, FirmID, PropID, Date, Value, func}) => {
+            
+            let toServer = ['ObjectPropWrite', ObjectID, FirmID, PropID, Date, Value];
             
             function resolve(data)
             {
@@ -334,8 +371,8 @@ export const store = new Vuex.Store({
                 
             }
             
-            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject})*/
-        },
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject})
+        },*/
 
         TEST: ({state, dispatch}) => {
 

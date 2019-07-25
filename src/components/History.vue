@@ -1,41 +1,53 @@
 <template>
-    <div v-if="History !== undefined">
+
+    <center v-if="state == 'changing'">{{ message }}</center>
         
-        <div v-if="waiting">waiting...</div>
-        
-        <center v-else-if="History === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-        <div v-else-if="History.DMF_ERROR" class="alert alert-danger">{{ History.message }}</div>
-        
-        <template v-else>
-            
-            <table class="table table-hover">
-                <tbody>
-                    <tr v-for="item in History">
-                        <td>
-                            <button v-if="item.delete" class="btn btn-danger btn-sm m-1">
-                                <font-awesome-icon icon="times"/>
-                            </button>
-                        </td>
-                        <td>{{ item.Date }}</td>
-                        <td>{{ item.Value }}<span v-if="item.NodeName"> ( {{ item.NodeName }} )</span></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div v-if="type" class="d-flex">
-                <button v-if="newValue !== undefined" @click="add" class="btn btn-success btn-sm">
-                    <font-awesome-icon icon="plus"/>
-                </button>
-
-                <Datepicker :value="newDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates" :bootstrap-styling="true" style="width: 120px"/>
-
-                <component :is="type.Type" v-bind="type" v-on:change="changeValue"/>
-
-            </div>
-            
-            
-        </template>
+    <div v-else-if="state == 'done'" :class="{alert: true, 'alert-success': !error, 'alert-danger': error}" class="d-flex">
+        <div>{{ message }}</div>
+        <button @click="state = 'show'" class="flex-grow-0"><font-awesome-icon icon="times"/></button>
     </div>
+    
+    <div v-else>
+        
+        <template v-if="History !== undefined">
+                
+            <center v-if="History === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+            <div v-else-if="History.DMF_ERROR" class="alert alert-danger">{{ History.message }}</div>
+
+            <template v-else>
+
+                <table class="table table-hover">
+                    <tbody>
+                        <tr v-for="item in History">
+                            <td>
+                                <button v-if="item.delete" @click="Delete(item.delete)" class="btn btn-danger btn-sm m-1">
+                                    <font-awesome-icon icon="times"/>
+                                </button>
+                            </td>
+                            <td>{{ item.Date }}</td>
+                            <td>{{ item.Value }}<span v-if="item.NodeName"> ( {{ item.NodeName }} )</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div v-if="type" class="d-flex">
+                    <button v-if="newValue !== undefined" @click="add" class="btn btn-success btn-sm">
+                        <font-awesome-icon icon="plus"/>
+                    </button>
+
+                    <Datepicker v-on:selected="changeDate" :value="newDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates" :bootstrap-styling="true" style="width: 120px"/>
+
+                    <component :is="type.Type" v-bind="type" v-on:change="changeValue"/>
+
+                </div>
+
+
+            </template>
+
+        </template>
+
+    </div>
+
 </template>
 
 <script>
@@ -48,11 +60,13 @@ import {ru} from 'vuejs-datepicker/dist/locale';
     
 import String from './Inputs/String.vue';
     
+//import Number from './Inputs/Number.vue';
+    
 export default {
     props: ["FirmID", "ObjectID", "AttrType", "AttrID"],
     components:
     {
-        Datepicker, String
+        Datepicker, String, //Number
     },
     data: function()
     {
@@ -67,8 +81,10 @@ export default {
             },
             newValue: undefined,
             newDate: new Date(),
-            waiting: false,
-            message: undefined
+            
+            state: "show",
+            message: "",
+            error: false
         }
     },
     computed:
@@ -111,7 +127,7 @@ export default {
                         if(this.disabledDates.to < date)
                         {
                             this.disabledDates.to = date;
-                            res[i].delete = true;
+                            res[i].delete = data[i].Date;
                         }
                     }
                     else res[i].NodeID = data[i].NodeID, res[i].NodeName = data[i].NodeName;
@@ -121,11 +137,17 @@ export default {
                     if(this.disabledDates.to < date)
                     {
                         this.disabledDates.to = date;
-                        res[i].delete = true;
+                        
+                        
+                        console.log(data[i].Date);
+                        
+                        res[i].delete = data[i].Date;
                     }
                 }
                 
             }
+            
+            console.log(res);
             
             return res;
         },
@@ -142,39 +164,10 @@ export default {
     methods:
     {
         ...mapActions(['LOAD_HISTORY', 'WRITE_HISTORY']),
-        /*reload: function()
-        {
-            this.LOAD_PROP_HISTORY({FirmID: this.FirmID, ObjectID: this.ObjectID, PropID: this.PropID});
-        },
-        addProp: function()
-        {
-            function func(res)
-            {
-                if(res.error)
-                {
-                    console.log("Ошибка: "+res.message);
-                }
-                else console.log("Все ок");
-            }
-            
-            this.WRITE_PROP({ObjectID: this.ObjectID, FirmID: this.FirmID, PropID: this.PropID, Date: this.propDate.toISOString(), Value: this.propValue, func: func});
-        },
-        changeDate: function(Date)
-        {
-            this.propDate = Date;
-        },*/
         dateFormatter: function(date)
-        {            
-            let year = date.getFullYear(), month = date.getMonth(), day = date.getDate();
-            
-            if(this.AttrType == "Props")
-            {
-                return (day<10 ? "0" : "") + day + "." + (month+1<10 ? "0" : "") + (month + 1) + "." + year;
-            }
-            else
-            {
-                return this.monthNames[month] + " " + year;    
-            }
+        {                        
+            if(this.AttrType == "Props") return this.dateForClient(date, "day");
+            else return this.dateForClient(date, "month");
         },
         reload: function()
         {
@@ -196,21 +189,48 @@ export default {
         {
             let th = this;
             
-            function ok()
+            function accepted()
             {
-                th.waiting = false;
+                th.state = "done", th.error = false;
+                th.message = "Запись добавлена";
             }
             
-            function error(message)
+            function rejected(message)
             {
-                th.waiting = false;
-                
-                alert(message);
+                th.state = "done", th.error = true;
+                th.message = "Произошла ошибка при добавлении записи: " + message;
             }
             
-            this.waiting = true;
+            let date = this.newDate;
             
-            this.WRITE_HISTORY({FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: this.newDate, value: this.newValue})
+            if(this.AttrType == "Props") date = this.dateForServer(date, "day");
+            else date = this.dateForServer(date, "month");
+                        
+            this.state = "changing", this.message = "Добавление записи...";
+            
+            this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, value: this.newValue, accepted: accepted, rejected: rejected});
+        },
+        Delete: function(date)
+        {
+            console.log("here");
+            
+            let th = this;
+            
+            function accepted()
+            {
+                th.state = "done", th.error = false;
+                th.message = "Запись удалена";
+            }
+            
+            function rejected(message)
+            {
+                th.state = "done", th.error = true;
+                th.message = "Произошла ошибка при удалении записи: " + message;
+            }
+            
+            this.state = "changing", this.message = "Удаление записи...";
+            
+            this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, accepted: accepted, rejected: rejected})
         }
     }
 }
