@@ -48,8 +48,10 @@
             <b-card-header @click="collapse(tariffsID)">Тарифы</b-card-header>
             <b-collapse :id="tariffsID" visible :accordion="accordionID">
                 <b-card-body class="p-0">
-
-                    <center v-if="!tariffs" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+                    
+                    <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
+                    
+                    <!--<center v-if="!tariffs" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
                     <div v-else-if="tariffs.DMF_ERROR" class="alert alert-danger">{{ tariffs.message }}</div>
 
@@ -60,7 +62,7 @@
                                 <td class="text-right">{{ item.Value }}</td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table>-->
 
                 </b-card-body>
             </b-collapse>
@@ -83,7 +85,7 @@
                                     <div>Неопознанные платежи:</div>
                                     <table class="table table-hover">
                                         <tbody>
-                                            <tr v-for="payment in account.FailPayments">
+                                            <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID, '')">
                                                 <td>
                                                     <div class="d-flex flex-wrap">
                                                         <div class="flex-grow-0 p-2">{{ payment.Date }}</div>
@@ -115,10 +117,10 @@
 
                     <table v-else class="table table-hover">
                         <tbody>
-                            <tr v-for="item in turnover">
-                                <td>{{ item.Date.substr(0, 10) }}</td>
+                            <tr v-for="item in turnover" @click="showDocument(item.DocumentID, item.DocumentName)">
+                                <td>{{ item.Date }}</td>
                                 <td class="text-right" :class="{'text-success': (item.Type=='Credit'), 'text-danger': (item.Type=='Debit')}">{{ item.Sum }}</td>
-                                <td>{{ item.DocumentName }}</td>
+                                <td>{{ item.Comment }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -132,9 +134,15 @@
 <script>
 
 import { mapActions, mapState } from 'vuex';
+    
+import Tariffs from './Tariffs.vue';
 
 export default {
     props: ["FirmID", "ObjectID", "ObjectType", "addPanel"],
+    components:
+    {
+        Tariffs
+    },
     data: function()
     {
         return {
@@ -201,9 +209,21 @@ export default {
         {
             if(this.root && this.root.Turnover)
             {
-                console.log(this.root.Turnover);
-
-                return this.root.Turnover;
+                if(this.root.Turnover.DMF_ERROR) return this.root.Turnover;
+                
+                let res = [];
+                
+                this.root.Turnover.forEach((item) => {
+                    
+                    let t = {};
+                    for(let key in item) t[key] = item[key];
+                                        
+                    t.Date = this.dateForClient(new Date(Date.parse(t.Date)), "day");
+                    
+                    res.push(t);
+                });
+                
+                return res;
             }
             else
             {
@@ -231,6 +251,10 @@ export default {
         showHistory: function(AttrType, AttrID, Name)
         {
             this.addPanel("History", this.Objects[this.FirmID][this.ObjectID].Name + ' ' + Name, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
+        },
+        showDocument: function(ID, Name)
+        {
+            this.addPanel("Document", Name, {DocumentID: ID});
         }
     }
 }

@@ -36,14 +36,11 @@ Vue.config.productionTip = false
 // глобальная примесь для доступа к данным по пути
 // если путь где-либо прерывается, то возвращается undefined
 // иначе возвращаются собственно данные
+
+let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
 Vue.mixin({
-    data: function()
-    {
-        return {
-            
-            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]   
-        }
-    },
+    
     methods: {
         dataState: (root, path) => {
              for(let i = 0; i < path.length; i++)
@@ -73,12 +70,12 @@ Vue.mixin({
         },
         
         dateForClient: (date, type) => {
-            
+                        
             let year = date.getFullYear(), month = date.getMonth(), day = date.getDate();
             
             if(type == "month")
             {
-                this.monthNames[month] + " " + year;
+                return monthNames[month] + " " + year;
             }
             
             if(type == "day")

@@ -2,7 +2,7 @@
     <div id="app" style="height: 100%;">
         <auth-dmf/>
 
-        <div v-show="AuthState" class="d-flex flex-column" style="height: 100%">
+        <div v-if="AuthState" class="d-flex flex-column" style="height: 100%">
 
             <b-navbar variant="info" class="flex-grow-0">
                 <b-dropdown boundary="window">
@@ -44,7 +44,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1, Object: 1, History: 1
+                Tree: 1, LSList: 1, Object: 1, History: 1, Document: 1
             }
         }
     },

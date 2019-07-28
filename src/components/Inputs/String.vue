@@ -1,5 +1,5 @@
 <template>
-    <input type="text" class="form-control" v-model="value" v-on:input="change">
+    <input v-if="created" type="text" class="form-control" v-model="value" v-on:input="change">
 </template>
 
 <script>
@@ -8,7 +8,16 @@ export default {
     data: function()
     {
         return {
-            value: ""
+            value: "",
+        }
+    },
+    computed:
+    {
+        created: function()
+        {
+            this.$emit("change", undefined);
+            
+            return true;
         }
     },
     methods:

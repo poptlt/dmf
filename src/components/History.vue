@@ -20,7 +20,7 @@
                 <table class="table table-hover">
                     <tbody>
                         <tr v-for="item in History">
-                            <td>
+                            <td class="p-0">
                                 <button v-if="item.delete" @click="Delete(item.delete)" class="btn btn-danger btn-sm m-1">
                                     <font-awesome-icon icon="times"/>
                                 </button>
@@ -30,16 +30,22 @@
                         </tr>
                     </tbody>
                 </table>
+                
                 <div v-if="type" class="d-flex">
-                    <button v-if="newValue !== undefined" @click="add" class="btn btn-success btn-sm">
-                        <font-awesome-icon icon="plus"/>
-                    </button>
+                    
+                    <div class="flex-grow-0 p-1">
+                        <button v-if="newValue !== undefined" @click="add" class="btn btn-success btn-sm">
+                            <font-awesome-icon icon="plus"/>
+                        </button>
+                    </div>
+                    
+                    <Datepicker ref="datepicker" v-model="newDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates" :bootstrap-styling="true" style="width: 140px" class="flex-shrink-0"/>
 
-                    <Datepicker v-on:selected="changeDate" :value="newDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates" :bootstrap-styling="true" style="width: 120px"/>
-
-                    <component :is="type.Type" v-bind="type" v-on:change="changeValue"/>
+                    <component :is="type.Type" v-bind="type" v-on:change="changeValue" class="mx-1"/>
 
                 </div>
+                <div v-if="newValue === undefined" class="alert alert-warning m-1">Значение не соответствует типу</div>
+                
 
 
             </template>
@@ -60,20 +66,23 @@ import {ru} from 'vuejs-datepicker/dist/locale';
     
 import String from './Inputs/String.vue';
     
-//import Number from './Inputs/Number.vue';
+import Number from './Inputs/Number.vue';
+    
+import List from './Inputs/List.vue';
+    
+import Complex from './Inputs/Complex.vue';
     
 export default {
     props: ["FirmID", "ObjectID", "AttrType", "AttrID"],
     components:
     {
-        Datepicker, String, //Number
+        Datepicker, String, Number, List, Complex
     },
     data: function()
     {
         return {
             
             ru: ru,
-            lastDate: new Date(1980, 1),
             calendarView: (this.AttrType == "Props") ? "day" : "month",
             disabledDates:
             {
@@ -97,13 +106,14 @@ export default {
             if(data === undefined) this.reload();
             
             data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, this.AttrType, this.AttrID, 'History']);
-            
-            //if(!this.Types) return null;
-            
-            if(!data || data.DMF_ERROR) return data;
-            
-            console.log(data);
-            
+                        
+            if(!data || data.DMF_ERROR)
+            {
+                this.newDate = new Date();
+                
+                return data;
+            }
+                        
             let res = [];
             
             this.disabledDates.to = new Date(1980, 0);
@@ -117,13 +127,13 @@ export default {
                 res[i].Date = this.dateFormatter(date);
                 
                 if(this.AttrType == "Props") date.setDate(date.getDate() + 1);
-                else date.setDate(date.getMonth() + 1);
+                else date.setMonth(date.getMonth() + 1);
                 
                 if(this.AttrType == "CalcParams")
                 {
                     if(data[i].NodeID == this.ObjectID)
                     {
-                        date.
+                        
                         if(this.disabledDates.to < date)
                         {
                             this.disabledDates.to = date;
@@ -137,18 +147,14 @@ export default {
                     if(this.disabledDates.to < date)
                     {
                         this.disabledDates.to = date;
-                        
-                        
-                        console.log(data[i].Date);
-                        
                         res[i].delete = data[i].Date;
                     }
                 }
                 
             }
             
-            console.log(res);
-            
+            if(this.newDate < this.disabledDates.to) this.newDate = this.disabledDates.to;
+                        
             return res;
         },
         type: function()
@@ -173,17 +179,9 @@ export default {
         {
             this.LOAD_HISTORY({FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID});
         },
-        changeDate: function(date)
-        {
-            this.newDate = date;
-        },
         changeValue: function(val)
-        {
+        {            
             this.newValue = val;
-        },
-        clear: function()
-        {
-            this.$refs.input.clear();
         },
         add: function()
         {
@@ -211,9 +209,7 @@ export default {
             this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, value: this.newValue, accepted: accepted, rejected: rejected});
         },
         Delete: function(date)
-        {
-            console.log("here");
-            
+        {            
             let th = this;
             
             function accepted()

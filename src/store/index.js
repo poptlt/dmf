@@ -108,7 +108,8 @@ export const store = new Vuex.Store({
   state: {
       AuthState: true,
       Objects: undefined,
-      Types: undefined
+      Types: undefined,
+      Documents: undefined
   },
 
     getters : {
@@ -145,10 +146,10 @@ export const store = new Vuex.Store({
         
             
             let transform = (data) => {
-                return {Objects: data.Firms, Types: data.Types}
+                return {Objects: data.Firms, Types: data.Types, Documents: {}}
             }
 
-            dispatch('LOAD_OBJECTS', {root: state, object: {Objects: null, Types: null}, toServer: ['Init'], refresh: true, transform: transform});
+            dispatch('LOAD_OBJECTS', {root: state, object: {Objects: null, Types: null, Documents: null}, toServer: ['Init'], refresh: true, transform: transform});
         },
 
         LOAD_OBJECTS: ({state, commit, dispatch}, {root, object, toServer, refresh = true, transform = (data) => {return data}}) => {
@@ -304,9 +305,7 @@ export const store = new Vuex.Store({
             if(AttrType == "Tariffs") toServer = ['TariffValueDetails', FirmID, AttrID];
             
             let transform = (data) => {
-                
-                console.log(data);
-                
+                                
                 if(AttrType != "Tariffs") data = data.Data;
                 
                 object[FirmID][ObjectID][AttrType][AttrID]['History'] = data;
@@ -354,25 +353,46 @@ export const store = new Vuex.Store({
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
         },
         
-        /*WRITE_HISTORY: ({state, dispatch}, {ObjectID, FirmID, PropID, Date, Value, func}) => {
+        LOAD_DOCUMENT: ({state, dispatch}, {DocumentID}) => {
+        
+            let root = state.Documents;
             
-            let toServer = ['ObjectPropWrite', ObjectID, FirmID, PropID, Date, Value];
+            let object = { [DocumentID]: null };
             
-            function resolve(data)
-            {
-                dispatch('LOAD_PROP_HISTORY', {ObjectID: ObjectID, FirmID: FirmID, PropID: PropID});
+            let toServer = ['GetDoc', DocumentID];
+            
+            let transform = (data) => {
+                                
+                object[DocumentID] = data;
                 
-                func({});
+                return object;
             }
             
-            function reject(data)
-            {
-                func({error: true, message: toDMFerror(data).message});
-                
-            }
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },
+        
+        WRITE_TARIFF: ({state, dispatch}, {operation, FirmID, TariffID, TariffName, accepted, rejected}) => {
             
-            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject})
-        },*/
+            let resolve = () => {
+                
+                dispatch('LOAD_OBJECT', {ObjectID: FirmID, FirmID: FirmID, ObjectType: "Firm"});
+                
+                accepted();
+            };
+            
+            let reject = (data) => {
+                
+                rejected((toDMFerror(data)).message);
+            };
+            
+            let toServer;
+            
+            if(operation == "change") toServer = ['TariffWrite', FirmID, TariffID, TariffName];
+            
+            if(operation == "delete") toServer = ['TariffDelete', FirmID, TariffID];
+            
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },
 
         TEST: ({state, dispatch}) => {
 

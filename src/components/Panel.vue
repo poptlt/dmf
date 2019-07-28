@@ -12,7 +12,7 @@
         </div>
         <div style="overflow: auto">
             <!--<h5 v-if="!main" class="text-xs-center">{{ Objects[info.FirmID][info.FirmID].Name }}</h5>-->
-            <component :is="type" ref="content" v-bind="info" :addPanel="addPanel"/>
+            <component :is="type" ref="content" v-bind="info" :addPanel="addPanel" v-on:setLabel="setLabel"/>
         </div>
     </div>
 
@@ -27,13 +27,15 @@ import LSList from './LSList.vue'
 import Object from './Object.vue'
     
 import History from './History.vue'
+    
+import Document from './Document.vue'
 
 import { mapState } from 'vuex';
 
 export default {
     components:
     {
-        Tree, LSList, Object, History
+        Tree, LSList, Object, History, Document
     },
     props:
     {
@@ -69,6 +71,10 @@ export default {
         reload: function()
         {
             this.$refs.content.reload();
+        },
+        setLabel: function(label)
+        {
+            this.label = label;
         }
     }
 }
