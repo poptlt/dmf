@@ -146,6 +146,7 @@ export const store = new Vuex.Store({
         
             
             let transform = (data) => {
+                                
                 return {Objects: data.Firms, Types: data.Types, Documents: {}}
             }
 
@@ -248,7 +249,7 @@ export const store = new Vuex.Store({
             let transform = (data) => {
                 
                 data = data.Data; //ключи ObjectName и ObjectType уже не нужны
-                
+                                
                 let props = data.Props, idCnt=1;
                 
                 data.Props = {};
@@ -390,6 +391,25 @@ export const store = new Vuex.Store({
             if(operation == "change") toServer = ['TariffWrite', FirmID, TariffID, TariffName];
             
             if(operation == "delete") toServer = ['TariffDelete', FirmID, TariffID];
+            
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },
+        
+        WRITE_START_BALANCE: ({state, dispatch}, {FirmID, ObjectID, value, accepted, rejected}) => {
+            
+            let resolve = () => {
+                
+                dispatch('LOAD_OBJECT', {ObjectID: ObjectID, FirmID: FirmID, ObjectType: "LS"});
+                
+                accepted();
+            };
+            
+            let reject = (data) => {
+                
+                rejected((toDMFerror(data)).message);
+            };
+            
+            let toServer = ['SetLSBalance', ObjectID, value];
             
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
         },

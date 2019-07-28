@@ -26,7 +26,7 @@
                                 </button>
                             </td>
                             <td>{{ item.Date }}</td>
-                            <td>{{ item.Value }}<span v-if="item.NodeName"> ( {{ item.NodeName }} )</span></td>
+                            <td>{{ item.Value }} <a href="#" v-if="item.NodeName"> ( {{ item }} )</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -227,7 +227,8 @@ export default {
             this.state = "changing", this.message = "Удаление записи...";
             
             this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, accepted: accepted, rejected: rejected})
-        }
+        },
+        /*showObject: function()*/
     }
 }
 </script>

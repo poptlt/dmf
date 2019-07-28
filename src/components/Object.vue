@@ -50,19 +50,6 @@
                 <b-card-body class="p-0">
                     
                     <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
-                    
-                    <!--<center v-if="!tariffs" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                    <div v-else-if="tariffs.DMF_ERROR" class="alert alert-danger">{{ tariffs.message }}</div>
-
-                    <table v-else class="table table-hover">
-                        <tbody>
-                            <tr v-for="(item, ID) in tariffs" @click="showHistory('Tariffs', ID, item.TariffName)">
-                                <td>{{ item.TariffName }}</td>
-                                <td class="text-right">{{ item.Value }}</td>
-                            </tr>
-                        </tbody>
-                    </table>-->
 
                 </b-card-body>
             </b-collapse>
@@ -110,20 +97,35 @@
             <b-card-header @click="collapse(turnoverID)">Баланс</b-card-header>
             <b-collapse :id="turnoverID" visible :accordion="accordionID">
                 <b-card-body class="p-0">
-
-                    <center v-if="!turnover" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+                    
+                    <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
+                    
+                    <!--<center v-if="!turnover" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
                     <div v-else-if="turnover.DMF_ERROR" class="alert alert-danger">{{ turnover.message }}</div>
-
-                    <table v-else class="table table-hover">
-                        <tbody>
-                            <tr v-for="item in turnover" @click="showDocument(item.DocumentID, item.DocumentName)">
-                                <td>{{ item.Date }}</td>
-                                <td class="text-right" :class="{'text-success': (item.Type=='Credit'), 'text-danger': (item.Type=='Debit')}">{{ item.Sum }}</td>
-                                <td>{{ item.Comment }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    
+                    <template v-else>
+                        
+                        <div v-if="root" class="p-2">Текущая задолжность: {{ root.Balance }}</div>
+                        
+                        <div class="d-flex align-items-center">
+                            <div class="p-1">Начальная задолжность: </div>
+                            <Number :NoNegative="false" :Digits="10" :DigitsAfterPoint="2" @change="changeStartBalance" class="m-1"/>
+                            <div>
+                                <button v-if="startBalance !== undefined" @click="writeStartBalance" class="btn btn-primary btn-sm">Установить</button>
+                            </div>
+                        </div>
+                        
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr v-for="item in turnover" @click="showDocument(item.DocumentID, item.DocumentName)">
+                                    <td>{{ item.Date }}</td>
+                                    <td class="text-right" :class="{'text-success': (item.Type=='Credit'), 'text-danger': (item.Type=='Debit')}">{{ item.Sum }}</td>
+                                    <td>{{ item.Comment }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>-->
 
                 </b-card-body>
             </b-collapse>
@@ -136,12 +138,14 @@
 import { mapActions, mapState } from 'vuex';
     
 import Tariffs from './Tariffs.vue';
+    
+import Turnover from './Turnover.vue';
 
 export default {
     props: ["FirmID", "ObjectID", "ObjectType", "addPanel"],
     components:
     {
-        Tariffs
+        Tariffs, Turnover
     },
     data: function()
     {
@@ -151,7 +155,7 @@ export default {
             calcParamsID: this.randomID(),
             tariffsID: this.randomID(),
             bankAccountsID: this.randomID(),
-            turnoverID: this.randomID()
+            turnoverID: this.randomID(),            
         }
     },
     computed:
@@ -231,6 +235,13 @@ export default {
 
                 return null;
             }
+        },
+        balance: function()
+        {
+            console.log(this.root);
+            
+            if(this.root) return this.root.Balance;
+            else return undefined;
         }
     },
     methods:

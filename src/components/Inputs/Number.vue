@@ -36,6 +36,7 @@ export default {
             }
             let fst=0;
             if(this.NoNegative == false && val.length>0 && val[0]=='-') fst++;
+            
             let before, after, point=val.indexOf(".");
             if(point!=-1)
             {
