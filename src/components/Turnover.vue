@@ -80,7 +80,7 @@ export default {
             
             this.WRITE_START_BALANCE({FirmID: this.FirmID, ObjectID: this.ObjectID, value: this.startBalance, accepted: done, rejected: done});
         },
-        showDocument: function()
+        showDocument: function(ID, Name)
         {
             this.addPanel("Document", Name, {DocumentID: ID});
         }

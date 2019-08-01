@@ -109,7 +109,8 @@ export const store = new Vuex.Store({
       AuthState: true,
       Objects: undefined,
       Types: undefined,
-      Documents: undefined
+      Documents: undefined,
+      Background: {}
   },
 
     getters : {
@@ -122,6 +123,9 @@ export const store = new Vuex.Store({
         SET_OBJECTS_VALUE: (state, {root, path, value}) => {
             setObjectsValue(root, path, value)
         },
+        DELETE_KEY: (state, {root, key}) => {
+            Vue.delete(root, key);
+        }
     },
 
     actions : {
@@ -413,6 +417,115 @@ export const store = new Vuex.Store({
             
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
         },
+        
+        LOAD_CALCULATION_STATE: ({state, dispatch}, {FirmID, ObjectID, date, accepted, rejected}) => {
+            
+            let resolve = (data) => accepted(data.data["Инфо"]);
+            
+            let reject = (data) => rejected((toDMFerror(data)).message);
+            
+            let toServer = ['CalculationState', ObjectID, FirmID, date];
+            
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },
+        
+        WRITE_CALCULATION: ({state, commit, dispatch}, {operation, ObjectID, FirmID, dateClient, dateServer, accepted, rejected}) => {
+            
+            let funcName = (operation == "add") ? "Calculation" : "CalculationDelete";
+            
+            let toServer = [funcName, ObjectID, FirmID, dateServer];
+            
+            let resolve = (data) => {
+                
+                data = data.data;
+                
+                let ProcessID = data.ProcessID;
+                
+                let obj = {[FirmID]: {[ObjectID]: {[ProcessID]: {}}}};
+                
+                let process = obj[FirmID][ObjectID][ProcessID];
+                
+                process.Total = data.Qnt;
+                
+                process.Done = 0;
+                
+                process.Active = true;
+                
+                process.Type = (operation == "add") ? "начисление" : "удаление начисления";
+                
+                process.Date = dateClient;
+                
+                commit('SET_OBJECTS_VALUE', {root: state.Background, path: obj, value: undefined});
+            }
+            
+            let reject = (data) => {
+                                
+                console.log((toDMFerror(data)).message);
+            }
+                        
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },
+        
+        REMOVE_CALCULATION: ({state, commit}, {FirmID, ObjectID, ProcessID}) => {
+            
+            commit('DELETE_KEY', {root: state.Background[FirmID][ObjectID], key: ProcessID});
+            
+            if(Object.keys(state.Background[FirmID][ObjectID]).length == 0)
+            {
+                commit('DELETE_KEY', {root: state.Background[FirmID], key: ObjectID});
+            }
+            
+            if(Object.keys(state.Background[FirmID]).length == 0)
+            {
+                commit('DELETE_KEY', {root: state.Background, key: FirmID});
+            }
+        },
+        
+        RELOAD_BACKGROUND: ({state, commit, dispatch}) =>
+        {
+            for(let firm in state.Background)
+            {
+                for(let object in state.Background[firm])
+                {
+                    for(let processID in state.Background[firm][object])
+                    {
+                        let process = state.Background[firm][object][processID];
+                        
+                        if(process && process.Active)
+                        {
+                            function accepted(data)
+                            {
+                                data = data.data;
+                                
+                                let obj = {};
+                                
+                                if(data.Active) obj.Done = data.Qnt;
+                                else
+                                {
+                                    obj.Active = false;
+                                    
+                                    if(data.Error) obj.Error = data.Error;
+                                    else
+                                    {
+                                        obj.Done = data.Qnt;
+                                        obj.Total = data.Qnt;
+                                    }
+                                }
+                                
+                                commit('SET_OBJECTS_VALUE', {root: process, path: obj, value: undefined});
+                            }
+                            
+                            function rejected(data)
+                            {
+                                console.log((toDMFerror(data)).message);
+                            }
+                            
+                            dispatch('SERVER_REQUEST', {toServer: ['ProcessState', processID], resolve: accepted, reject: rejected});
+                        }
+                    }
+                }
+            }
+        },
 
         TEST: ({state, dispatch}) => {
 
@@ -480,3 +593,5 @@ export const store = new Vuex.Store({
 
     }
 })
+
+setInterval(function(){store.dispatch('RELOAD_BACKGROUND');}, 5000);

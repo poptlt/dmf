@@ -10,7 +10,7 @@
                 <font-awesome-icon icon="times" fixed-width/>
             </button>
         </div>
-        <div style="overflow: auto">
+        <div style="overflow: auto" class="pb-3">
             <!--<h5 v-if="!main" class="text-xs-center">{{ Objects[info.FirmID][info.FirmID].Name }}</h5>-->
             <component :is="type" ref="content" v-bind="info" :addPanel="addPanel" v-on:setLabel="setLabel"/>
         </div>

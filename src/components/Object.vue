@@ -99,37 +99,33 @@
                 <b-card-body class="p-0">
                     
                     <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
-                    
-                    <!--<center v-if="!turnover" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                    <div v-else-if="turnover.DMF_ERROR" class="alert alert-danger">{{ turnover.message }}</div>
-                    
-                    <template v-else>
-                        
-                        <div v-if="root" class="p-2">Текущая задолжность: {{ root.Balance }}</div>
-                        
-                        <div class="d-flex align-items-center">
-                            <div class="p-1">Начальная задолжность: </div>
-                            <Number :NoNegative="false" :Digits="10" :DigitsAfterPoint="2" @change="changeStartBalance" class="m-1"/>
-                            <div>
-                                <button v-if="startBalance !== undefined" @click="writeStartBalance" class="btn btn-primary btn-sm">Установить</button>
-                            </div>
-                        </div>
-                        
-                        <table class="table table-hover">
-                            <tbody>
-                                <tr v-for="item in turnover" @click="showDocument(item.DocumentID, item.DocumentName)">
-                                    <td>{{ item.Date }}</td>
-                                    <td class="text-right" :class="{'text-success': (item.Type=='Credit'), 'text-danger': (item.Type=='Debit')}">{{ item.Sum }}</td>
-                                    <td>{{ item.Comment }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </template>-->
 
                 </b-card-body>
             </b-collapse>
         </b-card>
+        
+        <b-card no-body>
+            <b-card-header @click="collapse(calculationID)">Начисления</b-card-header>
+            <b-collapse :id="calculationID" :accordion="accordionID">
+                <b-card-body class="p-0">
+                    
+                    <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
+
+                </b-card-body>
+            </b-collapse>
+        </b-card>
+        
+        <b-card no-body>
+            <b-card-header @click="collapse(receiptID)">Квитанция</b-card-header>
+            <b-collapse :id="receiptID" :accordion="accordionID">
+                <b-card-body class="p-0">
+                    
+                    <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
+
+                </b-card-body>
+            </b-collapse>
+        </b-card>
+        
     </div>
 </template>
 
@@ -140,12 +136,16 @@ import { mapActions, mapState } from 'vuex';
 import Tariffs from './Tariffs.vue';
     
 import Turnover from './Turnover.vue';
+    
+import Calculation from './Calculation.vue';
+    
+import Receipt from './Receipt.vue';
 
 export default {
     props: ["FirmID", "ObjectID", "ObjectType", "addPanel"],
     components:
     {
-        Tariffs, Turnover
+        Tariffs, Turnover, Calculation, Receipt
     },
     data: function()
     {
@@ -155,7 +155,9 @@ export default {
             calcParamsID: this.randomID(),
             tariffsID: this.randomID(),
             bankAccountsID: this.randomID(),
-            turnoverID: this.randomID(),            
+            turnoverID: this.randomID(),
+            calculationID: this.randomID(),
+            receiptID: this.randomID()
         }
     },
     computed:
@@ -237,9 +239,7 @@ export default {
             }
         },
         balance: function()
-        {
-            console.log(this.root);
-            
+        {            
             if(this.root) return this.root.Balance;
             else return undefined;
         }

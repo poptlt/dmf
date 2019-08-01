@@ -26,7 +26,7 @@
                                 </button>
                             </td>
                             <td>{{ item.Date }}</td>
-                            <td>{{ item.Value }} <a href="#" v-if="item.NodeName"> ( {{ item }} )</a></td>
+                            <td>{{ item.Value }} <a href="#" v-if="item.NodeName" @click="showObject(item.NodeID, item.NodeName, item.NodeType)"> ( {{ item.NodeName }} )</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -73,7 +73,7 @@ import List from './Inputs/List.vue';
 import Complex from './Inputs/Complex.vue';
     
 export default {
-    props: ["FirmID", "ObjectID", "AttrType", "AttrID"],
+    props: ["FirmID", "ObjectID", "AttrType", "AttrID", "addPanel"],
     components:
     {
         Datepicker, String, Number, List, Complex
@@ -140,7 +140,12 @@ export default {
                             res[i].delete = data[i].Date;
                         }
                     }
-                    else res[i].NodeID = data[i].NodeID, res[i].NodeName = data[i].NodeName;
+                    else
+                    {
+                        res[i].NodeID = data[i].NodeID;
+                        res[i].NodeName = data[i].NodeName;
+                        res[i].NodeType = data[i].NodeType;
+                    }
                 }
                 else
                 {
@@ -228,7 +233,10 @@ export default {
             
             this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, accepted: accepted, rejected: rejected})
         },
-        /*showObject: function()*/
+        showObject: function(ObjectID, Name, ObjectType)
+        {
+            this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ObjectID, ObjectType: ObjectType});
+        }
     }
 }
 </script>
