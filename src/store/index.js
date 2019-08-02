@@ -526,6 +526,32 @@ export const store = new Vuex.Store({
                 }
             }
         },
+        
+        FIND_LS: ({dispatch}, {str, func, timestamp}) => {
+            
+            if(str.length < 5) func("Ничего не найдено", timestamp);
+            else
+            {
+                let resolve = (data) => {
+                    
+                    data = data.data;
+                    if(data)
+                    {
+                        if(data.length) func(data, timestamp);
+                        else func("Ничего не найдено", timestamp);
+                    }
+                    else func("Слишком много", timestamp);
+                }
+                
+                let reject = (data) => {
+                    
+                    func("Ошибка при поиске: " + (toDMFerror(data)).message, timestamp);
+                }
+                
+                dispatch('SERVER_REQUEST', {toServer: ['FindLS', str], resolve: resolve, reject: reject});
+            }
+            
+        },
 
         TEST: ({state, dispatch}) => {
 

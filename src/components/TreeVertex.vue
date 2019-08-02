@@ -34,6 +34,9 @@
             </div>
 
         </div>
+        <div v-if="root.Children && root.Children.DMF_ERROR" class="d-flex">
+            <div class="flex-grow-0 alert alert-danger p-1">{{ root.Children.message }}</div>
+        </div>
     </div>
 </template>
 
