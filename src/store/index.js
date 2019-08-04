@@ -3,6 +3,16 @@ import Vuex from 'vuex'
 Vue.use(Vuex);
 import Axios from 'axios'
 
+function urlFunc() {
+    if (process.env.NODE_ENV == 'production') {return '/func'}
+    else {return 'http://dev2.dmf.su/func'}
+}
+
+function urlAuth() {
+    if (process.env.NODE_ENV == 'production') {return '/func/login'}
+    else {return 'http://dev2.dmf.su/func/login'}
+}
+
 function toDMFerror(error) {
     let err = {DMF_ERROR: true};
 
@@ -131,7 +141,7 @@ export const store = new Vuex.Store({
     actions : {
 
         AUTH: (context, payload) => {
-            Axios({method: "post", timeout: 15000, url: "http://dev2.dmf.su/func/login", data: payload, withCredentials: true})
+            Axios({method: "post", timeout: 15000, url: urlAuth(), data: payload, withCredentials: true})
                 .then(function (response) {
                     console.log("прошло");
                     console.log(response);
@@ -590,11 +600,11 @@ export const store = new Vuex.Store({
                 }, 500);
             });
 
-            let url = "http://dev2.dmf.su/func";
+            //let url = "http://dev2.dmf.su/func";
             let data = {'exec':JSON.stringify(toServer)};
 
             // делаем запрос на сервер
-            return Axios({method: "post", timeout: 15000, url: url, data: data, withCredentials: true})
+            return Axios({method: "post", timeout: 15000, url: urlFunc(), data: data, withCredentials: true})
                 // при удачном исходе отдаем результат
                 .then(response => {
                     resolve(response);
