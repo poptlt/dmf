@@ -29,7 +29,9 @@ export default {
     {
         make: function()
         {
-            window.open("http://dev.dmf.su/receipt/type1?ObjectID=" + this.ObjectID + "&FirmID=" + this.FirmID + "&Date=" + this.dateForServer(this.date, "month"));
+            let url = (process.env.NODE_ENV == 'production') ? '' : 'http://dev2.dmf.su';
+
+            window.open(url + "/receipt/type1?ObjectID=" + this.ObjectID + "&FirmID=" + this.FirmID + "&Date=" + this.dateForServer(this.date, "month"));
         },
         dateFormatter: function(date)
         {

@@ -15,7 +15,7 @@
             <div v-else-if="tariffs.DMF_ERROR" class="alert alert-danger">{{ tariffs.message }}</div>
 
             <template v-else>
-                <table class="table table-hover">
+                <table class="table">
                     <tbody>
                         <tr v-for="(item, ID) in tariffs">
 

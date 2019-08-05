@@ -9,7 +9,7 @@
 
                     <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
 
-                    <table v-else class="table table-hover">
+                    <table v-else class="table">
                         <tbody>
                             <tr v-for="(item, ID) in props" @click="if(item.Editable) showHistory('Props', ID, item.PropName);">
                                 <td>{{ item.PropName }}</td>
@@ -31,7 +31,7 @@
 
                     <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
 
-                    <table v-else class="table table-hover">
+                    <table v-else class="table">
                         <tbody>
                             <tr v-for="(item, ID) in calcParams" @click="showHistory('CalcParams', ID, item.ParamName)">
                                 <td>{{ item.ParamName }}</td>
@@ -70,7 +70,7 @@
                             <b-collapse :id="bankAccountsID+account.BankAccountID" visible :accordion="bankAccountsID+'accordion'">
                                 <b-card-body class="p-0">
                                     <div>Неопознанные платежи:</div>
-                                    <table class="table table-hover">
+                                    <table class="table">
                                         <tbody>
                                             <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID, '')">
                                                 <td>
@@ -261,7 +261,9 @@ export default {
         },
         showHistory: function(AttrType, AttrID, Name)
         {
-            this.addPanel("History", this.Objects[this.FirmID][this.ObjectID].Name + ' ' + Name, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
+            let label = ((this.root.Name) ? this.root.Name : this.root.ObjectName) + ' ' + Name;
+
+            this.addPanel("History", label, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
         },
         showDocument: function(ID, Name)
         {

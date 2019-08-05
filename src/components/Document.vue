@@ -7,7 +7,7 @@
         
         <template v-else>
             
-            <table class="table table-hover">
+            <table class="table">
                 <tbody>
                     <template v-for="(val, key) in Document">
                         <tr v-if="typeof(val) != 'object' && key != 'DocumentName'">

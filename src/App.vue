@@ -5,11 +5,12 @@
         <div v-if="AuthState" class="d-flex flex-column" style="height: 100%">
             
             <div class="flex-grow-0 d-flex bg-info p-2">
+
                 <b-dropdown ref="panelsMenu" :class="displayClass.link[0]" size="sm" boundary="window" no-caret class="flex-grow-0 mr-2">
                     <template slot="button-content">
                         <font-awesome-icon icon="bars"/>
                     </template>
-                    <div style="max-width: 80vw">
+                    <div style="max-width: 80vw; max-height: 70vh; overflow: auto" class="bg-white">
                         <template v-for="(panel, i) in panels">
 
                             <hr v-if="i" :class="displayClass.link[i]" class="m-0">
@@ -25,7 +26,7 @@
                     <template slot="button-content">
                         <font-awesome-icon icon="search"/>
                     </template>
-                    <div style="max-width: 80vw; max-height: 70vh" class="d-flex flex-column">
+                    <div style="max-width: 80vw; max-height: 70vh" class="d-flex flex-column bg-white">
                         <div class="p-2">
                             <input ref="searchInput" v-model="searchStr" @input="search" type="text" class="form-control">
                         </div>
@@ -37,6 +38,23 @@
                     </div>
                     
                 </b-dropdown>
+
+                <div></div>
+
+
+
+                <button class="flex-grow-0 btn btn-secondary btn-sm" @click="goToPage('/')">
+                    <img style="height: 20px" src="home_house_icon_124019.png">
+                    <!--<font-awesome-icon icon="home"/>-->
+                </button>
+
+                <button class="btn btn-secondary btn-sm flex-grow-0 ml-2" @click="goToPage('/profile')">
+                    <font-awesome-icon icon="user"/>
+                </button>
+
+                <button class="btn btn-secondary btn-sm flex-grow-0 ml-2" @click="goToPage('/logout')">
+                    <font-awesome-icon icon="sign-out-alt"/>
+                </button>
                 
             </div>
 
@@ -76,7 +94,9 @@ export default {
             searchStr: "",
             searchList: [],
             searchMessage: "Ничего не найдено",
-            searchTimestamp: undefined
+            searchTimestamp: undefined,
+
+            url: (process.env.NODE_ENV == 'production') ? '' : 'http://dev2.dmf.su'
             
         }
     },
@@ -167,7 +187,12 @@ export default {
             this.searchStr = "", this.searchMessage = "Ничего не найдено";
             
             this.addPanel("Object", Name, {FirmID: FirmID, ObjectID: LSID, ObjectType: "LS"});
+        },
+        goToPage: function(url)
+        {
+            window.location.replace(this.url + url);
         }
+
     },
     /*created()
     {
