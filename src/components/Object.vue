@@ -1,5 +1,12 @@
 <template>
     <div>
+        <div v-if="ObjectType == 'LS'" class="d-flex align-items-center">
+            <button @click="getUrl" class="flex-grow-0 btn btn-primary m-2">Получить url</button>
+            <div>{{ urlMessage }}</div>
+            <div hidden ref="link">link</div>
+        </div>
+
+        <div role="tablist">
         <b-card no-body>
             <b-card-header @click="collapse(propsID)">Реквизиты</b-card-header>
             <b-collapse :id="propsID" visible :accordion="accordionID">
@@ -24,7 +31,7 @@
 
         <b-card no-body>
             <b-card-header @click="collapse(calcParamsID)">Параметры расчетов</b-card-header>
-            <b-collapse :id="calcParamsID" visible :accordion="accordionID">
+            <b-collapse :id="calcParamsID" :accordion="accordionID">
                 <b-card-body class="p-0">
 
                     <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
@@ -46,7 +53,7 @@
 
         <b-card v-if="ObjectType == 'Firm'" no-body>
             <b-card-header @click="collapse(tariffsID)">Тарифы</b-card-header>
-            <b-collapse :id="tariffsID" visible :accordion="accordionID">
+            <b-collapse :id="tariffsID" :accordion="accordionID">
                 <b-card-body class="p-0">
                     
                     <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
@@ -57,7 +64,7 @@
 
         <b-card v-if="ObjectType == 'Firm'" no-body>
             <b-card-header @click="collapse(bankAccountsID)">Расчётные счета</b-card-header>
-            <b-collapse :id="bankAccountsID" visible :accordion="accordionID">
+            <b-collapse :id="bankAccountsID" :accordion="accordionID">
                 <b-card-body class="p-0">
 
                     <center v-if="!bankAccounts" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
@@ -95,7 +102,7 @@
 
         <b-card v-if="ObjectType == 'LS'" no-body>
             <b-card-header @click="collapse(turnoverID)">Баланс</b-card-header>
-            <b-collapse :id="turnoverID" visible :accordion="accordionID">
+            <b-collapse :id="turnoverID" :accordion="accordionID">
                 <b-card-body class="p-0">
                     
                     <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
@@ -125,6 +132,7 @@
                 </b-card-body>
             </b-collapse>
         </b-card>
+        </div>
         
     </div>
 </template>
@@ -157,7 +165,9 @@ export default {
             bankAccountsID: this.randomID(),
             turnoverID: this.randomID(),
             calculationID: this.randomID(),
-            receiptID: this.randomID()
+            receiptID: this.randomID(),
+
+            urlMessage: ""
         }
     },
     computed:
@@ -246,7 +256,7 @@ export default {
     },
     methods:
     {
-        ...mapActions(['LOAD_OBJECT']),
+        ...mapActions(['LOAD_OBJECT', 'GET_URL']),
         randomID: function()
         {
             return "id"+(""+Math.random()).substring(2);
@@ -268,6 +278,45 @@ export default {
         showDocument: function(ID, Name)
         {
             this.addPanel("Document", Name, {DocumentID: ID});
+        },
+        getUrl: function()
+        {
+            this.urlMessage = "Получение URL...";
+
+            let th = this;
+
+            function accepted(url)
+            {
+                th.urlMessage = "URL скопирован в буфер";
+
+                var range = document.createRange(),
+                selection = window.getSelection();
+
+                selection.removeAllRanges();
+
+                let link = th.$refs.link;
+
+                link.innerHTML = url;
+
+                link.hidden = false;
+
+                range.selectNodeContents(link);
+
+                selection.addRange(range);
+
+                document.execCommand('copy');
+
+                link.hidden=true;
+
+                selection.removeAllRanges();
+            }
+
+            function rejected(message)
+            {
+                th.urlMessage = "Произошла ошибка: " + message;
+            }
+
+            this.GET_URL({ID: this.ObjectID, accepted: accepted, rejected: rejected});
         }
     }
 }

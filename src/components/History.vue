@@ -214,7 +214,11 @@ export default {
             this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, value: this.newValue, accepted: accepted, rejected: rejected});
         },
         Delete: function(date)
-        {            
+        {
+            let ok = confirm("Вы уверены, что хотите удалить запись?");
+
+            if(!ok) return;
+
             let th = this;
             
             function accepted()

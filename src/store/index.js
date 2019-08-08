@@ -29,6 +29,11 @@ function toDMFerror(error) {
         err.code = 999;
     }
 
+    if(error.response && error.response.data && error.response.data.Log)
+    {
+        console.log(error.response.data.Log);
+    }
+
     return err;
 }
 
@@ -563,6 +568,15 @@ export const store = new Vuex.Store({
             
         },
 
+        GET_URL: ({dispatch}, {ID, accepted, rejected}) => {
+
+            let resolve = (data) => {accepted(data.data)}
+
+            let reject = (data) => {rejected((toDMFerror(data)).message)}
+
+            dispatch('SERVER_REQUEST', {toServer: ['geturl', ID, 30], resolve: resolve, reject: reject, url: "func/geturl"});
+        },
+
         TEST: ({state, dispatch}) => {
 
             /*if (state.Objects === null) {
@@ -588,7 +602,7 @@ export const store = new Vuex.Store({
 
         },
 
-        SERVER_REQUEST: ({state, commit, dispatch}, {toServer, resolve, reject}) => {
+        SERVER_REQUEST: ({state, commit, dispatch}, {toServer, resolve, reject, url = 'func'}) => {
 
             // создаем промис для ожидания восстановления пользовательской сессии
             let waitAuth = new Promise((resolve) => {
@@ -603,8 +617,10 @@ export const store = new Vuex.Store({
             //let url = "http://dev2.dmf.su/func";
             let data = {'exec':JSON.stringify(toServer)};
 
+            let sendURL = (process.env.NODE_ENV == 'production') ? '/'+url : 'http://dev2.dmf.su/'+url;
+
             // делаем запрос на сервер
-            return Axios({method: "post", timeout: 15000, url: urlFunc(), data: data, withCredentials: true})
+            return Axios({method: "post", timeout: 15000, url: sendURL/*urlFunc()*/, data: data, withCredentials: true})
                 // при удачном исходе отдаем результат
                 .then(response => {
                     resolve(response);
@@ -619,7 +635,7 @@ export const store = new Vuex.Store({
                         waitAuth
                             .then(() => {
                                 // после чего опять отправляем тот же запрос
-                                dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+                                dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject, url: url});
                             })
                     }
                     // если ошибка не связана с авторизацией, то отправляем ее на обработку

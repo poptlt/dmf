@@ -1,5 +1,5 @@
 <template>
-    <div id="app" style="height: 100%;">
+    <div id="app" style="height: 100%; font-size: 16px">
         <auth-dmf/>
 
         <div v-if="AuthState" class="d-flex flex-column" style="height: 100%">
@@ -44,8 +44,8 @@
 
 
                 <button class="flex-grow-0 btn btn-secondary btn-sm" @click="goToPage('/')">
-                    <img style="height: 20px" src="home_house_icon_124019.png">
-                    <!--<font-awesome-icon icon="home"/>-->
+                    <!--<img style="height: 20px" src="home_house_icon_124019.png">-->
+                    <font-awesome-icon icon="home"/>
                 </button>
 
                 <button class="btn btn-secondary btn-sm flex-grow-0 ml-2" @click="goToPage('/profile')">

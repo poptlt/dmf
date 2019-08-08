@@ -97,6 +97,10 @@ export default {
         },
         Delete: function(ID)
         {
+            let ok = confirm("Вы уверены, что хотите удалить тариф?");
+
+            if(!ok) return;
+
             this.newName = "", this.changeID = undefined;
             
             let th = this;
