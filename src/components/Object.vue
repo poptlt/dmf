@@ -9,7 +9,7 @@
         <div role="tablist">
         <b-card no-body>
             <b-card-header @click="collapse(propsID)">Реквизиты</b-card-header>
-            <b-collapse :id="propsID" visible :accordion="accordionID">
+            <b-collapse :id="propsID">
                 <b-card-body class="p-0">
 
                     <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
@@ -31,7 +31,7 @@
 
         <b-card no-body>
             <b-card-header @click="collapse(calcParamsID)">Параметры расчетов</b-card-header>
-            <b-collapse :id="calcParamsID" :accordion="accordionID">
+            <b-collapse :id="calcParamsID">
                 <b-card-body class="p-0">
 
                     <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
@@ -53,7 +53,7 @@
 
         <b-card v-if="ObjectType == 'Firm'" no-body>
             <b-card-header @click="collapse(tariffsID)">Тарифы</b-card-header>
-            <b-collapse :id="tariffsID" :accordion="accordionID">
+            <b-collapse :id="tariffsID">
                 <b-card-body class="p-0">
                     
                     <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
@@ -64,7 +64,7 @@
 
         <b-card v-if="ObjectType == 'Firm'" no-body>
             <b-card-header @click="collapse(bankAccountsID)">Расчётные счета</b-card-header>
-            <b-collapse :id="bankAccountsID" :accordion="accordionID">
+            <b-collapse :id="bankAccountsID">
                 <b-card-body class="p-0">
 
                     <center v-if="!bankAccounts" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
@@ -74,7 +74,7 @@
                     <div v-else class="p-2">
                         <b-card v-for="account in bankAccounts" no-body>
                             <b-card-header @click="collapse(bankAccountsID+account.BankAccountID)">{{ account.BankAccountNumber }}</b-card-header>
-                            <b-collapse :id="bankAccountsID+account.BankAccountID" visible :accordion="bankAccountsID+'accordion'">
+                            <b-collapse :id="bankAccountsID+account.BankAccountID">
                                 <b-card-body class="p-0">
                                     <div>Неопознанные платежи:</div>
                                     <table class="table">
@@ -102,7 +102,7 @@
 
         <b-card v-if="ObjectType == 'LS'" no-body>
             <b-card-header @click="collapse(turnoverID)">Баланс</b-card-header>
-            <b-collapse :id="turnoverID" :accordion="accordionID">
+            <b-collapse :id="turnoverID">
                 <b-card-body class="p-0">
                     
                     <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
@@ -113,7 +113,7 @@
         
         <b-card no-body>
             <b-card-header @click="collapse(calculationID)">Начисления</b-card-header>
-            <b-collapse :id="calculationID" :accordion="accordionID">
+            <b-collapse :id="calculationID">
                 <b-card-body class="p-0">
                     
                     <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
@@ -124,7 +124,7 @@
         
         <b-card no-body>
             <b-card-header @click="collapse(receiptID)">Квитанция</b-card-header>
-            <b-collapse :id="receiptID" :accordion="accordionID">
+            <b-collapse :id="receiptID">
                 <b-card-body class="p-0">
                     
                     <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
