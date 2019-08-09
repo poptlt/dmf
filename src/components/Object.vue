@@ -286,7 +286,7 @@ export default {
             let th = this;
 
             function accepted(url)
-            {
+            { console.log(url);
                 th.urlMessage = "URL скопирован в буфер";
 
                 var range = document.createRange(),

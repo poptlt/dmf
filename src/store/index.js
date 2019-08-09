@@ -570,11 +570,11 @@ export const store = new Vuex.Store({
 
         GET_URL: ({dispatch}, {ID, accepted, rejected}) => {
 
-            let resolve = (data) => {accepted(data.data)}
+            let resolve = (data) => {accepted(data.data.url)}
 
             let reject = (data) => {rejected((toDMFerror(data)).message)}
 
-            dispatch('SERVER_REQUEST', {toServer: ['geturl', ID, 30], resolve: resolve, reject: reject, url: "func/geturl"});
+            dispatch('SERVER_REQUEST', {toServer: {'guid': ID, 'days': 30}, resolve: resolve, reject: reject, url: "func/geturl"});
         },
 
         TEST: ({state, dispatch}) => {
