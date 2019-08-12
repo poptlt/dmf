@@ -59,7 +59,7 @@
             </div>
 
             <div class="flex-fill d-flex" style="overflow: hidden">
-                <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border" v-bind:style="{width: (100 * widths[panel.type])+'%'}">
+                <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border" v-bind:style="{width: (100 * widths[panel.type])+'%'}" style="max-width: 100vw">
                     <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
                 </div>
             </div>
@@ -89,7 +89,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1, Object: 1, History: 1, Document: 1
+                Tree: 1, LSList: 1, Object: 1, History: 1, Document: 1, CalcParams: 2
             },
             searchStr: "",
             searchList: [],

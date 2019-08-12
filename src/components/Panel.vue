@@ -30,12 +30,14 @@ import History from './History.vue'
     
 import Document from './Document.vue'
 
+import CalcParams from './CalcParams.vue'
+
 import { mapState } from 'vuex';
 
 export default {
     components:
     {
-        Tree, LSList, Object, History, Document
+        Tree, LSList, Object, History, Document, CalcParams
     },
     props:
     {

@@ -194,7 +194,6 @@ export const store = new Vuex.Store({
                     let data = transform(response.data);
                     commit('SET_OBJECTS_VALUE', {root: root, path: data, value: undefined});
                     //setObjectsValue(root, data, undefined);
-
                 }
 
                 let reject = (error) => { console.log(error);
@@ -310,6 +309,24 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
         
+        LOAD_CHILDREN_HISTORY_CALC_PARAMS: ({state, dispatch}, {FirmID, ObjectID}) => {
+
+            let root = state.Objects;
+
+            let object = { [FirmID]: { [ObjectID]: { CalcParamsInfo: null } } };
+
+            let toServer = ['GetChildrenHistoryCalcParams', ObjectID, FirmID];
+
+            let transform = (data) => {
+
+                object[FirmID][ObjectID]["CalcParamsInfo"] = data;
+
+                return object;
+            }
+
+            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },
+
         LOAD_HISTORY: ({state, dispatch}, {ObjectID, FirmID, AttrType, AttrID}) => {
             
             let root = state.Objects;

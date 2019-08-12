@@ -34,6 +34,8 @@
             <b-collapse :id="calcParamsID">
                 <b-card-body class="p-0">
 
+                    <button @click="showCalcParams" class="btn btn-primary btn-sm">Информация по дочерним</button>
+
                     <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
                     <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
@@ -278,6 +280,10 @@ export default {
         showDocument: function(ID, Name)
         {
             this.addPanel("Document", Name, {DocumentID: ID});
+        },
+        showCalcParams: function()
+        {
+            this.addPanel("CalcParams", "", {FirmID: this.FirmID, ObjectID: this.ObjectID});
         },
         getUrl: function()
         {
