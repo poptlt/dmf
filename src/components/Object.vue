@@ -1,14 +1,129 @@
 <template>
     <div>
         <div v-if="ObjectType == 'LS'" class="d-flex align-items-center">
-            <button @click="getUrl" class="flex-grow-0 btn btn-primary m-2">Получить url</button>
+            <button @click="getUrl" class="flex-grow-0 border btn btn-light btn-sm m-2">Получить url</button>
             <div>{{ urlMessage }}</div>
             <div hidden ref="link">link</div>
         </div>
 
-        <div role="tablist">
+        <div class="border">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('props')">Реквизиты</div>
+            <div :style="{display: (accordion == 'props') ? 'block' : 'none'}">
+
+                <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
+
+                <table v-else class="table">
+                    <tbody>
+                        <tr v-for="(item, ID) in props" @click="if(item.Editable) showHistory('Props', ID, item.PropName);">
+                            <td>{{ item.PropName }}</td>
+                            <td>{{ item.Value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="border">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('calcParams')">Параметры расчетов</div>
+            <div :style="{display: (accordion == 'calcParams') ? 'block' : 'none'}">
+
+                <center><button @click="showCalcParams" class="border btn btn-light btn-sm m-2">Информация по дочерним</button></center>
+
+                <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
+
+                <table v-else class="table">
+                    <tbody>
+                        <tr v-for="(item, ID) in calcParams" @click="showHistory('CalcParams', ID, item.ParamName)">
+                            <td>{{ item.ParamName }}</td>
+                            <td>{{ item.Value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div v-if="ObjectType == 'Firm'" class="border">
+            <div class=" bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('tariffs')">Тарифы</div>
+            <div :style="{display: (accordion == 'tariffs') ? 'block' : 'none'}">
+
+                <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
+
+            </div>
+        </div>
+
+        <div v-if="ObjectType == 'Firm'" class="border">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('bankAccounts')">Расчётные счета</div>
+            <div :style="{display: (accordion == 'bankAccounts') ? 'block' : 'none'}">
+
+                <center v-if="!bankAccounts" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+                <div v-else-if="bankAccounts.DMF_ERROR" class="alert alert-danger">{{ bankAccounts.message }}</div>
+
+                <div v-for="account in bankAccounts" class="border m-2">
+
+                    <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse2(account.BankAccountID)">{{ account.BankAccountNumber }}</div>
+
+                    <div :style="{display: (accordion2 == account.BankAccountID) ? 'block' : 'none'}">
+
+                        <center class="p-2 font-weight-bold">Неопознанные платежи:</center>
+                        <table class="table">
+                            <tbody>
+                                <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID, '')">
+                                    <td>
+                                        <div class="d-flex flex-wrap">
+                                            <div class="flex-grow-0 p-2">{{ payment.Date }}</div>
+                                            <div class="flex-grow-0 p-2">№ {{ payment.Number }}</div>
+                                            <div class="flex-grow-0 p-2">{{ payment.Summ }} руб.</div>
+                                            <div class="flex-grow-0 p-2">{{ payment.Text }}</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div v-if="ObjectType == 'LS'" class="border">
+            <div class=" bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('turnover')">Баланс</div>
+            <div :style="{display: (accordion == 'turnover') ? 'block' : 'none'}">
+
+                <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
+
+            </div>
+        </div>
+
+        <div class="border">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('calculation')">Начисления</div>
+            <div :style="{display: (accordion == 'calculation') ? 'block' : 'none'}">
+
+                <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
+
+            </div>
+        </div>
+
+        <div class="border">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('receipt')">Квитанция</div>
+            <div :style="{display: (accordion == 'receipt') ? 'block' : 'none'}">
+
+                <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
+
+            </div>
+        </div>
+
+        <!--<div role="tablist">
         <b-card no-body>
-            <b-card-header @click="collapse(propsID)">Реквизиты</b-card-header>
+            <b-card-header @click="collapse(propsID)" class="bg-light">Реквизиты</b-card-header>
             <b-collapse :id="propsID">
                 <b-card-body class="p-0">
 
@@ -34,7 +149,7 @@
             <b-collapse :id="calcParamsID">
                 <b-card-body class="p-0">
 
-                    <button @click="showCalcParams" class="btn btn-primary btn-sm">Информация по дочерним</button>
+                    <center><button @click="showCalcParams" class="border btn btn-light btn-sm m-2">Информация по дочерним</button></center>
 
                     <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
@@ -134,7 +249,7 @@
                 </b-card-body>
             </b-collapse>
         </b-card>
-        </div>
+        </div>-->
         
     </div>
 </template>
@@ -169,7 +284,10 @@ export default {
             calculationID: this.randomID(),
             receiptID: this.randomID(),
 
-            urlMessage: ""
+            urlMessage: "",
+
+            accordion: "props",
+            accordion2: ""
         }
     },
     computed:
@@ -215,7 +333,14 @@ export default {
         },
         bankAccounts: function()
         {
-            if(this.root && this.root.BankAccounts) return this.root.BankAccounts;
+            if(this.root && this.root.BankAccounts)
+            {
+                let res = this.root.BankAccounts;
+
+                if(res.length) this.accordion2 = res[0].BankAccountID;
+
+                return res;
+            }
             else
             {
                 if(!this.root || this.root.BankAccounts === undefined) this.reload();
@@ -263,9 +388,13 @@ export default {
         {
             return "id"+(""+Math.random()).substring(2);
         },
-        collapse: function(ID)
+        collapse: function(panel)
         {
-            this.$root.$emit('bv::toggle::collapse', ID);
+            this.accordion = (this.accordion == panel) ? "" : panel;
+        },
+        collapse2: function(panel)
+        {
+            this.accordion2 = (this.accordion2 == panel) ? "" : panel;
         },
         reload: function()
         {
@@ -283,7 +412,9 @@ export default {
         },
         showCalcParams: function()
         {
-            this.addPanel("CalcParams", "", {FirmID: this.FirmID, ObjectID: this.ObjectID});
+            let label = ((this.root.Name) ? this.root.Name : this.root.ObjectName) + ': Параметры расчета дочерних';
+
+            this.addPanel("CalcParams", label, {FirmID: this.FirmID, ObjectID: this.ObjectID});
         },
         getUrl: function()
         {
@@ -292,7 +423,7 @@ export default {
             let th = this;
 
             function accepted(url)
-            { console.log(url);
+            {
                 th.urlMessage = "URL скопирован в буфер";
 
                 var range = document.createRange(),

@@ -9,7 +9,44 @@
         <div v-else-if="rows.DMF_ERROR" class="alert alert-danger">{{ rows.message }}</div>
 
         <div v-else style="min-width: 600px">
-            <vue-good-table :columns="columns" :rows="rows"/>
+
+            <center v-if="!rows.length" class="m-2">Не найдено записей</center>
+
+            <template v-else>
+
+                <template v-for="col in columns">
+                    <div class="m-2" v-if="col.hidden">
+                        <span class="font-weight-bold">{{ col.label }}: </span>
+                        <template v-if="col.field == 'ObjectName'">
+                            <a href="#"
+                               @click="showObject(rows[0].ObjectID, rows[0].ObjectName, rows[0].ObjectType)">
+                                {{ rows[0].ObjectName }}
+                            </a>
+                        </template>
+                        <template v-else>{{ rows[0][col.field] }}</template>
+                    </div>
+                </template>
+
+                <vue-good-table :columns="columns" :rows="rows">
+
+                    <template slot="table-row" slot-scope="props">
+
+                        <a v-if="props.column.field == 'ObjectName'" href="#"
+                           @click="showObject(props.row.ObjectID, props.row.ObjectName, props.row.ObjectType)">
+                            {{ props.row.ObjectName }}
+                        </a>
+
+                        <span v-else>{{ props.row[props.column.field] }}</span>
+
+                    </template>
+
+                    <center slot="emptystate">
+                        Не найдено записей
+                    </center>
+
+                </vue-good-table>
+
+            </template>
         </div>
 
     </div>
@@ -28,22 +65,7 @@ export default {
     {
         VueGoodTable
     },
-    props: ["FirmID", "ObjectID"],
-    data: function()
-    {
-        return {
-
-            columns:
-            [
-                {label: "Дата", field: "date", sortFn: this.sort},
-                {label: "Параметр", field: "param"},
-                {label: "Значение", field: "value",
-
-                },
-                {label: "Объект", field: "ObjectName", sortFn: this.sort},
-            ],
-        }
-    },
+    props: ["FirmID", "ObjectID", "addPanel"],
     computed:
     {
         ...mapState(["Objects"]),
@@ -81,11 +103,56 @@ export default {
 
                 row.ObjSort = this.objCode(row.ObjectName);
 
+                row.ObjectType = item.ObjectType;
+
                 row.value = item.Value;
 
                 row.param = item.CalcParam;
 
                 res.push(row)
+            });
+
+            return res;
+        },
+        columns: function()
+        {
+            let res = [
+
+                {label: "Дата", field: "date", sortFn: this.sort},
+                {label: "Объект", field: "ObjectName", sortFn: this.sort},
+                {label: "Параметр", field: "param"},
+                {label: "Значение", field: "value"},
+            ];
+
+            res.forEach((col) =>
+            {
+                let set = {}
+
+                this.rows.forEach((row) =>
+                {
+                    set[row[col.field]] = 1;
+                });
+
+                let cnt=0;
+
+
+                col.filterOptions = {
+
+                    enabled: (col.field != "ObjectName") ? true : false,
+                    placeholder: 'все',
+                    filterDropdownItems: [],
+                    filterFn: (data, str) => data == str
+                };
+
+                for(let key in set)
+                {
+                    col.filterOptions.filterDropdownItems.push(key);
+                }
+
+                if(col.filterOptions.filterDropdownItems.length == 1)
+                {
+                    col.hidden = true;
+                }
             });
 
             return res;
@@ -132,6 +199,10 @@ export default {
             }
 
             return res;
+        },
+        showObject(ObjectID, Name, ObjectType)
+        {
+            this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ObjectID, ObjectType: ObjectType});
         }
     }
 }
