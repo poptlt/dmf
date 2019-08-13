@@ -97,7 +97,6 @@ export default {
             searchTimestamp: undefined,
 
             url: (process.env.NODE_ENV == 'production') ? '' : 'http://dev2.dmf.su'
-            
         }
     },
     computed:
