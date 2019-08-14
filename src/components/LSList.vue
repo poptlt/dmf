@@ -4,7 +4,7 @@
 
         <div v-else-if="List.DMF_ERROR" class="alert alert-danger">{{ List.message }}</div>
         
-        <table v-else class="table">
+        <table v-else class="table table-hover">
             <tbody>
                 <tr v-for="LS in List" @click="showObject(LS.ID)">
                     <td>{{ LS.Number }}</td>

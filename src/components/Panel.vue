@@ -2,7 +2,7 @@
 
     <div style="height: 100%" class="d-flex flex-column">
         <div class="flex-grow-0 d-flex align-items-start bg-primary">
-            <div class="p-1 text-light" style="font-size: 20px">{{ label }}</div>
+            <div class="p-1 text-light" style="font-size: 18px">{{ label }}</div>
             <button @click="reload" class="flex-grow-0 m-1 bg-light btn btn-outline-primary btn-sm">
                 <font-awesome-icon icon="sync-alt" fixed-width/>
             </button>

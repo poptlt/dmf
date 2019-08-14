@@ -41,8 +41,6 @@
 
                 <div></div>
 
-
-
                 <button class="flex-grow-0 btn btn-secondary btn-sm" @click="goToPage('/')">
                     <!--<img style="height: 20px" src="home_house_icon_124019.png">-->
                     <font-awesome-icon icon="home"/>
@@ -58,11 +56,18 @@
                 
             </div>
 
-            <div class="flex-fill d-flex" style="overflow: hidden">
+            <!--<div class="flex-fill d-flex" style="overflow: hidden">
                 <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border" v-bind:style="{width: (100 * widths[panel.type])+'%'}" style="max-width: 100vw">
                     <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
                 </div>
+            </div>-->
+
+            <div class="flex-fill row m-0" style="overflow: hidden">
+                <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border p-0" style="height: 100%">
+                    <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
+                </div>
             </div>
+
         </div>
     </div>
 </template>
@@ -129,8 +134,30 @@ export default {
                     res.link[i] = {"d-block": true};
                 }
 
-                for(let j=0; j<3; j++) left[j]-=this.widths[this.panels[i].type];
+                for(let j=0; j<3; j++)
+                {
+                    if(left[j] > 0) left[j]-=this.widths[this.panels[i].type];
+                }
             }
+
+            for(let i=this.panels.length-1; i>=0; i--)
+            {
+                let width = this.widths[this.panels[i].type];
+
+                let sm = 12/(1-left[0])*width;
+
+                res.panel[i]["col-" + sm] = true;
+
+                let md = 12/(2-left[1])*width;
+
+                res.panel[i]["col-md-" + md] = true;
+
+                let lg = 12/(3-left[2])*width;
+
+                res.panel[i]["col-lg-" + lg] = true;
+
+            }
+
             return res;
         }
     },

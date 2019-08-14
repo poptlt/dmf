@@ -21,7 +21,7 @@
                     </div>
                 </div>
 
-                <table class="table">
+                <table class="table table-hover">
                     <tbody>
                         <tr v-for="item in turnover" @click="showDocument(item.DocumentID, item.DocumentName)">
                             <td>{{ item.Date }}</td>

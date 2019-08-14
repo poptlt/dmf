@@ -31,8 +31,6 @@ export default {
         {
             let url = (process.env.NODE_ENV == 'production') ? '' : 'http://dev2.dmf.su';
 
-            alert(process.env.NODE_ENV);
-
             window.open(url + "/receipt/type1?ObjectID=" + this.ObjectID + "&FirmID=" + this.FirmID + "&Date=" + this.dateForServer(this.date, "month"));
         },
         dateFormatter: function(date)

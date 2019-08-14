@@ -6,15 +6,15 @@
             <div hidden ref="link">link</div>
         </div>
 
-        <div class="border">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('props')">Реквизиты</div>
-            <div :style="{display: (accordion == 'props') ? 'block' : 'none'}">
+        <div class="border rounded">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(propsID)">Реквизиты</div>
+            <b-collapse :id="propsID" :accordion="accordionID" visible>
 
                 <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
                 <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
 
-                <table v-else class="table">
+                <table v-else class="table table-hover">
                     <tbody>
                         <tr v-for="(item, ID) in props" @click="if(item.Editable) showHistory('Props', ID, item.PropName);">
                             <td>{{ item.PropName }}</td>
@@ -23,56 +23,58 @@
                     </tbody>
                 </table>
 
-            </div>
+            </b-collapse>
         </div>
 
-        <div class="border">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('calcParams')">Параметры расчетов</div>
-            <div :style="{display: (accordion == 'calcParams') ? 'block' : 'none'}">
-
-                <center><button @click="showCalcParams" class="border btn btn-light btn-sm m-2">Информация по дочерним</button></center>
+        <div class="border rounded">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(calcParamsID)">Параметры расчетов</div>
+            <b-collapse :id="calcParamsID" :accordion="accordionID">
 
                 <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
                 <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
 
-                <table v-else class="table">
-                    <tbody>
-                        <tr v-for="(item, ID) in calcParams" @click="showHistory('CalcParams', ID, item.ParamName)">
-                            <td>{{ item.ParamName }}</td>
-                            <td>{{ item.Value }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <template v-else>
+                    <center><button @click="showCalcParams" class="border btn btn-light btn-sm m-2">Информация по дочерним</button></center>
 
-            </div>
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr v-for="(item, ID) in calcParams" @click="showHistory('CalcParams', ID, item.ParamName)">
+                                <td>{{ item.ParamName }}</td>
+                                <td>{{ item.Value }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+
+            </b-collapse>
         </div>
 
-        <div v-if="ObjectType == 'Firm'" class="border">
-            <div class=" bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('tariffs')">Тарифы</div>
-            <div :style="{display: (accordion == 'tariffs') ? 'block' : 'none'}">
+        <div v-if="ObjectType == 'Firm'" class="border rounded">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(tariffsID)">Тарифы</div>
+            <b-collapse :id="tariffsID" :accordion="accordionID">
 
                 <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
 
-            </div>
+            </b-collapse>
         </div>
 
-        <div v-if="ObjectType == 'Firm'" class="border">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('bankAccounts')">Расчётные счета</div>
-            <div :style="{display: (accordion == 'bankAccounts') ? 'block' : 'none'}">
+        <div v-if="ObjectType == 'Firm'" class="border rounded">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(bankAccountsID)">Расчётные счета</div>
+            <b-collapse :id="bankAccountsID" :accordion="accordionID">
 
                 <center v-if="!bankAccounts" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
                 <div v-else-if="bankAccounts.DMF_ERROR" class="alert alert-danger">{{ bankAccounts.message }}</div>
 
-                <div v-for="account in bankAccounts" class="border m-2">
+                <div v-for="account in bankAccounts" class="border rounded m-2">
 
-                    <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse2(account.BankAccountID)">{{ account.BankAccountNumber }}</div>
+                    <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(bankAccountsID+account.BankAccountID)">{{ account.BankAccountNumber }}</div>
 
-                    <div :style="{display: (accordion2 == account.BankAccountID) ? 'block' : 'none'}">
+                    <b-collapse :id="bankAccountsID+account.BankAccountID" :accordion="bankAccountsID+accordionID">
 
                         <center class="p-2 font-weight-bold">Неопознанные платежи:</center>
-                        <table class="table">
+                        <table class="table table-hover">
                             <tbody>
                                 <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID, '')">
                                     <td>
@@ -87,170 +89,40 @@
                             </tbody>
                         </table>
 
-                    </div>
+                    </b-collapse>
 
                 </div>
 
-            </div>
+            </b-collapse>
         </div>
 
-        <div v-if="ObjectType == 'LS'" class="border">
-            <div class=" bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('turnover')">Баланс</div>
-            <div :style="{display: (accordion == 'turnover') ? 'block' : 'none'}">
+        <div v-if="ObjectType == 'LS'" class="border rounded">
+            <div class=" bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(turnoverID)">Баланс</div>
+            <b-collapse :id="turnoverID" :accordion="accordionID">
 
                 <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
 
-            </div>
+            </b-collapse>
         </div>
 
-        <div class="border">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('calculation')">Начисления</div>
-            <div :style="{display: (accordion == 'calculation') ? 'block' : 'none'}">
+        <div class="border rounded">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(calculationID)">Начисления</div>
+            <b-collapse :id="calculationID" :accordion="accordionID">
 
                 <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
 
-            </div>
+            </b-collapse>
         </div>
 
-        <div class="border">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse('receipt')">Квитанция</div>
-            <div :style="{display: (accordion == 'receipt') ? 'block' : 'none'}">
+        <div class="border rounded">
+            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(receiptID)">Квитанция</div>
+            <b-collapse :id="receiptID" :accordion="accordionID">
 
                 <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
 
-            </div>
+            </b-collapse>
         </div>
 
-        <!--<div role="tablist">
-        <b-card no-body>
-            <b-card-header @click="collapse(propsID)" class="bg-light">Реквизиты</b-card-header>
-            <b-collapse :id="propsID">
-                <b-card-body class="p-0">
-
-                    <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                    <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
-
-                    <table v-else class="table">
-                        <tbody>
-                            <tr v-for="(item, ID) in props" @click="if(item.Editable) showHistory('Props', ID, item.PropName);">
-                                <td>{{ item.PropName }}</td>
-                                <td>{{ item.Value }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </b-card-body>
-            </b-collapse>
-        </b-card>
-
-        <b-card no-body>
-            <b-card-header @click="collapse(calcParamsID)">Параметры расчетов</b-card-header>
-            <b-collapse :id="calcParamsID">
-                <b-card-body class="p-0">
-
-                    <center><button @click="showCalcParams" class="border btn btn-light btn-sm m-2">Информация по дочерним</button></center>
-
-                    <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                    <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
-
-                    <table v-else class="table">
-                        <tbody>
-                            <tr v-for="(item, ID) in calcParams" @click="showHistory('CalcParams', ID, item.ParamName)">
-                                <td>{{ item.ParamName }}</td>
-                                <td>{{ item.Value }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </b-card-body>
-            </b-collapse>
-        </b-card>
-
-        <b-card v-if="ObjectType == 'Firm'" no-body>
-            <b-card-header @click="collapse(tariffsID)">Тарифы</b-card-header>
-            <b-collapse :id="tariffsID">
-                <b-card-body class="p-0">
-                    
-                    <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
-
-                </b-card-body>
-            </b-collapse>
-        </b-card>
-
-        <b-card v-if="ObjectType == 'Firm'" no-body>
-            <b-card-header @click="collapse(bankAccountsID)">Расчётные счета</b-card-header>
-            <b-collapse :id="bankAccountsID">
-                <b-card-body class="p-0">
-
-                    <center v-if="!bankAccounts" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                    <div v-else-if="bankAccounts.DMF_ERROR" class="alert alert-danger">{{ bankAccounts.message }}</div>
-
-                    <div v-else class="p-2">
-                        <b-card v-for="account in bankAccounts" no-body>
-                            <b-card-header @click="collapse(bankAccountsID+account.BankAccountID)">{{ account.BankAccountNumber }}</b-card-header>
-                            <b-collapse :id="bankAccountsID+account.BankAccountID">
-                                <b-card-body class="p-0">
-                                    <div>Неопознанные платежи:</div>
-                                    <table class="table">
-                                        <tbody>
-                                            <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID, '')">
-                                                <td>
-                                                    <div class="d-flex flex-wrap">
-                                                        <div class="flex-grow-0 p-2">{{ payment.Date }}</div>
-                                                        <div class="flex-grow-0 p-2">№ {{ payment.Number }}</div>
-                                                        <div class="flex-grow-0 p-2">{{ payment.Summ }} руб.</div>
-                                                        <div class="flex-grow-0 p-2">{{ payment.Text }}</div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </b-card-body>
-                            </b-collapse>
-                        </b-card>
-                    </div>
-
-                </b-card-body>
-            </b-collapse>
-        </b-card>
-
-        <b-card v-if="ObjectType == 'LS'" no-body>
-            <b-card-header @click="collapse(turnoverID)">Баланс</b-card-header>
-            <b-collapse :id="turnoverID">
-                <b-card-body class="p-0">
-                    
-                    <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
-
-                </b-card-body>
-            </b-collapse>
-        </b-card>
-        
-        <b-card no-body>
-            <b-card-header @click="collapse(calculationID)">Начисления</b-card-header>
-            <b-collapse :id="calculationID">
-                <b-card-body class="p-0">
-                    
-                    <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
-
-                </b-card-body>
-            </b-collapse>
-        </b-card>
-        
-        <b-card no-body>
-            <b-card-header @click="collapse(receiptID)">Квитанция</b-card-header>
-            <b-collapse :id="receiptID">
-                <b-card-body class="p-0">
-                    
-                    <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
-
-                </b-card-body>
-            </b-collapse>
-        </b-card>
-        </div>-->
-        
     </div>
 </template>
 
@@ -285,9 +157,6 @@ export default {
             receiptID: this.randomID(),
 
             urlMessage: "",
-
-            accordion: "props",
-            accordion2: ""
         }
     },
     computed:
@@ -388,13 +257,9 @@ export default {
         {
             return "id"+(""+Math.random()).substring(2);
         },
-        collapse: function(panel)
+        collapse: function(ID)
         {
-            this.accordion = (this.accordion == panel) ? "" : panel;
-        },
-        collapse2: function(panel)
-        {
-            this.accordion2 = (this.accordion2 == panel) ? "" : panel;
+            this.$root.$emit('bv::toggle::collapse', ID);
         },
         reload: function()
         {

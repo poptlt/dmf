@@ -17,7 +17,7 @@
 
             <template v-else>
 
-                <table class="table">
+                <table class="table table-hover">
                     <tbody>
                         <tr v-for="item in History">
                             <td class="p-0">

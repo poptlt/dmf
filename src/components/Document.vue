@@ -7,7 +7,7 @@
         
         <template v-else>
             
-            <table class="table">
+            <table class="table table-hover">
                 <tbody>
                     <template v-for="(val, key) in Document">
                         <tr v-if="typeof(val) != 'object' && key != 'DocumentName'">
@@ -19,12 +19,11 @@
             </table>
 
             <template v-for="(val, key) in Document">
-                <div v-if="typeof(val) == 'object'" class="card">
-                    <div class="card-header">{{ key }}</div>
-                    <div class="card-body p-0">
-                        <div v-for="item in val" class="d-flex flex-wrap border-bottom">
-                            <div v-for="(value, prop) in item" class="p-2 flex-grow-0"><span class="font-weight-bold">{{ prop }}: </span>{{ value }}</div>
-                        </div>
+                <div v-if="typeof(val) == 'object'">
+                    <div class="bg-secondary text-white" style="padding: 12px 20px">{{ key }}</div>
+
+                    <div v-for="item in val" class="d-flex flex-wrap border-bottom">
+                        <div v-for="(value, prop) in item" class="p-2 flex-grow-0"><span class="font-weight-bold">{{ prop }}: </span>{{ value }}</div>
                     </div>
                 </div>
             </template>
