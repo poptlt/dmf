@@ -1,41 +1,54 @@
 <template>
-    <div v-if="created">
-        
+    <div>
         <div class="d-flex">
-            <Datepicker v-if="state != 'loading'" v-model="date" @selected="dateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1"/>
+            <div class="m-2 flex-grow-0">с</div>
+
+            <Datepicker v-model="ldate" @selected="ldateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1"/>
             
-            <button v-if="state == 'loaded'" @click="addCalculation('add')" class="btn btn-primary btn-sm m-1">Начислить</button>
+            <div class="m-2 flex-grow-0">по</div>
             
-            <button v-if="state == 'loaded'"  @click="addCalculation('delete')" class="btn btn-primary btn-sm m-1">Отменить</button>
+            <Datepicker v-model="rdate" @selected="rdateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1"/>
         </div>
         
-        <center v-if="state == 'loading'" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+        <div class="d-flex justify-content-center">
+            <button @click="addCalculation('add')" class="flex-grow-0 btn btn-primary btn-sm m-1">Начислить</button>
+
+            <button @click="addCalculation('delete')" class="flex-grow-0 btn btn-primary btn-sm m-1">Отменить начисления</button>
+        </div>
         
-        <div v-else-if="state == 'loaded'" class="p-3">{{ info }}</div>
+        <center v-if="calculations.length" class="mt-2"><h5>Процессы</h5></center>
         
-        <div v-else class="alert alert-danger">{{ info }}</div>
-        
-        <div v-if="calculations">
-            <center><h5>Процессы</h5></center>
+        <div v-for="item in calculations" class="d-flex align-items-start border-top p-2">
             
-            <div v-for="(process, ID) in calculations" class="d-flex align-items-start border-top p-2">
+            <button v-if="item.delete" @click="removeCalculation(item.delete)" class="flex-grow-0 btn btn-danger btn-sm mr-2">
+                <font-awesome-icon icon="times"/>
+            </button>
+
+            <div>
                 
-                    <button v-if="!process.Active" @click="removeCalculation(ID)" class="flex-grow-0 btn btn-danger btn-sm">
-                        <font-awesome-icon icon="times"/>
-                    </button>
-                
-                    <div class="ml-2">
-                        <div class="d-flex justify-content-between mb-2">
-                            <div>{{ process.Date }}</div>
-                            <div class="text-right">{{ process.Type }}</div>
-                        </div>
-                        <div class="progress bg-secondary">
-                            <div class="progress-bar" :class="{'bg-success': (!process.Active && !process.Error), 'bg-danger': (!process.Active && process.Error)}" :style="{width: (process.Done / process.Total * 100) + '%'}">{{ process.Done }} / {{ process.Total }}</div>
-                        </div>
-                        <div v-if="process.Error" class="alert alert-danger mb-0">{{ process.Error }}</div>
+                <div v-if="item.done" class="my-1">{{ item.done }}</div>
+
+                <div v-if="item.doing" class="my-1">
+
+                    <div>{{ item.doing.text }}</div>
+
+                    <div class="progress bg-secondary">
+                            <div class="progress-bar" :style="{width: (item.doing.done / item.doing.total * 100) + '%'}">{{ item.doing.done }} / {{ item.doing.total }}</div>
                     </div>
-                    
+
+                </div>
+
+                <div v-if="item.todo" class="my-1">{{ item.todo }}</div>
+
+                <div v-if="item.error" class="alert alert-danger mb-0">{{ item.error }}</div>
+
             </div>
+
+            <!--<div v-for="(val, key) in item" class="d-flex">
+                <div class="flex-grow-0">{{ key }}: </div>
+                <div v-if="key != 'ldate' && key != 'rdate' && key != 'date'"> {{ val }}</div>
+                <div v-else> {{ val.getFullYear() }} {{ val.getMonth() }}</div>
+            </div>-->
         </div>
 
     </div>
@@ -60,71 +73,109 @@ export default {
         return {
             
             ru: ru,
-            date: new Date(),
-            state: "loaded",
-            info: undefined,
+            ldate: new Date(),
+            rdate: new Date()
         }
     },
     computed:
     {
         ...mapState(["Background"]),
-        created: function()
-        {
-            this.dateChanged(new Date());
-            
-            return true;
-        },
         calculations: function()
         {            
             let data = this.dataState(this.Background, [this.FirmID, this.ObjectID]);
             
-            if(!data) return null;
+            if(!data) return [];
             
-            let res = {};
+            let res = [];
             
-            for(let processID in data)
-            {
-                if(data[processID]) res[processID] = data[processID];
-            }
+            data.forEach((item) => {
+
+                let cur = {};
+
+                let l1 = item.ldate, r1 = new Date(item.date.getTime());
+
+                r1.setMonth(r1.getMonth() - 1);
+
+                if(item.type == "delete" && !item.active) r1 = item.date;
+
+                let l2 = new Date(item.date.getTime()), r2 = item.rdate;
+
+                l2.setMonth(l2.getMonth() + 1);
+
+                if(item.type == "add" && !item.active) l2 = item.date;
+
+
+                if(item.type == "add" && l1 <= r1)
+                {
+                    cur.done = "Начислено: " + this.dateRange(l1, r1);
+                }
+                if(item.type == "delete" && l2 <= r2)
+                {
+                    cur.done = "Отменено: " + this.dateRange(l2, r2);
+                }
+
+                if(item.active)
+                {
+                    cur.doing = {done: item.done, total: item.total};
+
+                    cur.doing.text = (item.type == "add" ? "Начисляется: " : "Отменяется: ") + this.dateForClient(item.date, "month");
+                }
+
+                if(item.type == "add" && l2 <= r2)
+                {
+                    cur.todo = "Осталось начислить: " + this.dateRange(l2, r2);
+                }
+                if(item.type == "delete" && l1 <= r1)
+                {
+                    cur.todo = "Осталось отменить: " + this.dateRange(l1, r1);
+                }
+
+                if(item.error) cur.error = item.error;
+
+                if(item.error || item.date < item.ldate || item.date > item.rdate) cur.delete = item;
+
+                res.push(cur);
+            });
             
-            if(Object.keys(res).length) return res;
-            else return null;
+            return res;
         }
     },
     methods:
     {
-        ...mapActions(["LOAD_CALCULATION_STATE", "WRITE_CALCULATION", "REMOVE_CALCULATION"]),
+        ...mapActions(["ADD_CALCULATION_PROCESS", "REMOVE_CALCULATION_PROCESS"]),
 
         dateFormatter: function(date)
         {
             return this.dateForClient(date, "month");
         },
-        dateChanged: function(date)
+        ldateChanged: function(date)
         {
-            let th = this;
-            
-            this.state = "loading";
-            date = this.dateForServer(date, "month");
-            
-            function accepted(info)
-            {
-                th.state = "loaded", th.info = info;
-            }
-            
-            function rejected(message)
-            {
-                th.state = "error", th.info = message;
-            }
-                        
-            this.LOAD_CALCULATION_STATE({FirmID: this.FirmID, ObjectID: this.ObjectID, date: date, accepted: accepted, rejected: rejected});
+            if(this.rdate < date) this.rdate = date;
+        },
+        rdateChanged: function(date)
+        {
+            if(this.ldate > date) this.ldate = date;
         },
         addCalculation: function(operation)
         {
-            this.WRITE_CALCULATION({operation: operation, ObjectID: this.ObjectID, FirmID: this.FirmID, dateClient: this.dateForClient(this.date, "month"), dateServer: this.dateForServer(this.date, "month")});
+            let ldate = new Date(this.ldate.getFullYear(), this.ldate.getMonth());
+
+            let rdate = new Date(this.rdate.getFullYear(), this.rdate.getMonth());
+
+            this.ADD_CALCULATION_PROCESS({type: operation, FirmID: this.FirmID, ObjectID: this.ObjectID, ldate: ldate, rdate: rdate});
         },
-        removeCalculation: function(ID)
+        removeCalculation: function(process)
         {
-            this.REMOVE_CALCULATION({FirmID: this.FirmID, ObjectID: this.ObjectID, ProcessID: ID});
+            this.REMOVE_CALCULATION_PROCESS({FirmID: this.FirmID, ObjectID: this.ObjectID, process: process});
+        },
+        dateRange(left, right)
+        {
+            left = this.dateForClient(left, "month");
+
+            right = this.dateForClient(right, "month");
+
+            if(left == right) return left;
+            else return left + " - " + right;
         }
     }
 }

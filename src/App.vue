@@ -39,6 +39,8 @@
                     
                 </b-dropdown>
 
+                <button @click="testing" class="flex-grow-0 btn btn-secondary btn-sm ml-2">TEST</button>
+
                 <div></div>
 
                 <button class="flex-grow-0 btn btn-secondary btn-sm" @click="goToPage('/')">

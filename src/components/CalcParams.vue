@@ -8,7 +8,7 @@
 
         <div v-else-if="rows.DMF_ERROR" class="alert alert-danger">{{ rows.message }}</div>
 
-        <div v-else style="min-width: 600px">
+        <template v-else>
 
             <center v-if="!rows.length" class="m-2">Не найдено записей</center>
 
@@ -27,27 +27,30 @@
                     </div>
                 </template>
 
-                <vue-good-table :columns="columns" :rows="rows">
+                <div :style="{'min-width': tableWidth + 'px'}">
+                    <vue-good-table :columns="columns" :rows="rows">
 
-                    <template slot="table-row" slot-scope="props">
+                        <template slot="table-row" slot-scope="props">
 
-                        <a v-if="props.column.field == 'ObjectName'" href="#"
-                           @click="showObject(props.row.ObjectID, props.row.ObjectName, props.row.ObjectType)">
-                            {{ props.row.ObjectName }}
-                        </a>
+                            <a v-if="props.column.field == 'ObjectName'" href="#"
+                               @click="showObject(props.row.ObjectID, props.row.ObjectName, props.row.ObjectType)">
+                                {{ props.row.ObjectName }}
+                            </a>
 
-                        <span v-else>{{ props.row[props.column.field] }}</span>
+                            <span v-else>{{ props.row[props.column.field] }}</span>
 
-                    </template>
+                        </template>
 
-                    <center slot="emptystate">
-                        Не найдено записей
-                    </center>
+                        <center slot="emptystate">
+                            Не найдено записей
+                        </center>
 
-                </vue-good-table>
+                    </vue-good-table>
+                </div>
 
             </template>
-        </div>
+
+        </template>
 
     </div>
 
@@ -156,6 +159,21 @@ export default {
             });
 
             return res;
+        },
+        tableWidth: function()
+        {
+            let sum = 0;
+
+            this.columns.forEach((col) =>
+            {
+                if(!col.hidden)
+                {
+                    if(col.field == "ObjectName") sum += 250;
+                    else sum += 150;
+                }
+            });
+
+            return sum;
         }
     },
     methods:

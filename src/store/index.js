@@ -450,7 +450,7 @@ export const store = new Vuex.Store({
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
         },
         
-        LOAD_CALCULATION_STATE: ({state, dispatch}, {FirmID, ObjectID, date, accepted, rejected}) => {
+        /*LOAD_CALCULATION_STATE: ({state, dispatch}, {FirmID, ObjectID, date, accepted, rejected}) => {
             
             let resolve = (data) => accepted(data.data["Инфо"]);
             
@@ -459,102 +459,132 @@ export const store = new Vuex.Store({
             let toServer = ['CalculationState', ObjectID, FirmID, date];
             
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },*/
+
+        ADD_CALCULATION_PROCESS: ({state, commit, dispatch}, {type, FirmID, ObjectID, ldate, rdate}) => {
+
+            if(state.Background[FirmID] === undefined || state.Background[FirmID][ObjectID] === undefined)
+            {
+                commit('SET_OBJECTS_VALUE', {root: state.Background, path: { [FirmID]: { [ObjectID]: [] } }, value: undefined});
+            }
+
+            let date = (type == "add") ? new Date(ldate.getTime()) : new Date(rdate.getTime());
+
+            let process = {type: type, ldate: ldate, rdate: rdate, date: date, active: false, error: false, total: 0, done: 0, ID: "", timestamp: ""};
+
+            state.Background[FirmID][ObjectID].push(process);
+
+            dispatch('WRITE_CALCULATION', {process: process, FirmID: FirmID, ObjectID: ObjectID});
         },
         
-        WRITE_CALCULATION: ({state, commit, dispatch}, {operation, ObjectID, FirmID, dateClient, dateServer, accepted, rejected}) => {
+        REMOVE_CALCULATION_PROCESS: ({state}, {FirmID, ObjectID, process}) => {
             
-            let funcName = (operation == "add") ? "Calculation" : "CalculationDelete";
+            let arr = state.Background[FirmID][ObjectID];
             
+            arr.forEach((item, i) =>
+            {
+                if(item == process) arr.splice(i, 1);
+            })
+        },
+
+        WRITE_CALCULATION: ({state, commit, dispatch}, {FirmID, ObjectID, process}) => {
+
+            let funcName = (process.type == "add") ? "Calculation" : "CalculationDelete";
+
+            let year = process.date.getFullYear(), month = process.date.getMonth()+1;
+
+            let dateServer = year + "-" + (month<10 ? "0" : "") + month + "-01T00:00:00";
+
             let toServer = [funcName, ObjectID, FirmID, dateServer];
             
+            let timestamp = new Date();
+
+            process.timestamp = timestamp;
+
             let resolve = (data) => {
                 
-                data = data.data;
-                
-                let ProcessID = data.ProcessID;
-                
-                let obj = {[FirmID]: {[ObjectID]: {[ProcessID]: {}}}};
-                
-                let process = obj[FirmID][ObjectID][ProcessID];
-                
-                process.Total = data.Qnt;
-                
-                process.Done = 0;
-                
-                process.Active = true;
-                
-                process.Type = (operation == "add") ? "начисление" : "удаление начисления";
-                
-                process.Date = dateClient;
-                
-                commit('SET_OBJECTS_VALUE', {root: state.Background, path: obj, value: undefined});
-            }
+                if(process.timestamp == timestamp)
+                {
+                    data = data.data;
+
+                    process.ID = data.ProcessID;
+
+                    process.total = data.Qnt;
+
+                    process.done = 0;
+
+                    process.active = true;
+                }
+            };
             
             let reject = (data) => {
-                                
-                console.log((toDMFerror(data)).message);
-            }
-                        
+
+                if(process.timestamp == timestamp)
+                {
+                    process.error = (toDMFerror(data)).message;
+                }
+            };
+
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
         },
         
-        REMOVE_CALCULATION: ({state, commit}, {FirmID, ObjectID, ProcessID}) => {
+        RELOAD_CALCULATION: ({dispatch}, {FirmID, ObjectID, process}) => {
             
-            commit('DELETE_KEY', {root: state.Background[FirmID][ObjectID], key: ProcessID});
+            let timestamp = new Date();
+
+            process.timestamp = timestamp;
             
-            if(Object.keys(state.Background[FirmID][ObjectID]).length == 0)
-            {
-                commit('DELETE_KEY', {root: state.Background[FirmID], key: ObjectID});
-            }
-            
-            if(Object.keys(state.Background[FirmID]).length == 0)
-            {
-                commit('DELETE_KEY', {root: state.Background, key: FirmID});
-            }
-        },
-        
-        RELOAD_BACKGROUND: ({state, commit, dispatch}) =>
-        {
-            for(let firm in state.Background)
-            {
-                for(let object in state.Background[firm])
+            let resolve = (data) => {
+
+                if(process.timestamp == timestamp)
                 {
-                    for(let processID in state.Background[firm][object])
+                    data = data.data;
+
+                    if(data.Active) process.done = data.Qnt;
+                    else
                     {
-                        let process = state.Background[firm][object][processID];
-                        
-                        if(process && process.Active)
+                        if(data.Error) process.error = data.Error;
+                        else
                         {
-                            function accepted(data)
-                            {
-                                data = data.data;
-                                
-                                let obj = {};
-                                
-                                if(data.Active) obj.Done = data.Qnt;
-                                else
-                                {
-                                    obj.Active = false;
-                                    
-                                    if(data.Error) obj.Error = data.Error;
-                                    else
-                                    {
-                                        obj.Done = data.Qnt;
-                                        obj.Total = data.Qnt;
-                                    }
-                                }
-                                
-                                commit('SET_OBJECTS_VALUE', {root: process, path: obj, value: undefined});
-                            }
+                            process.active = false;
+
+                            let add = (process.type == "add") ? 1 : -1;
                             
-                            function rejected(data)
+                            process.date.setMonth(process.date.getMonth() + add);
+
+                            if(process.date >= process.ldate && process.date <= process.rdate)
                             {
-                                console.log((toDMFerror(data)).message);
+                                dispatch('WRITE_CALCULATION', {FirmID: FirmID, ObjectID: ObjectID, process: process});
                             }
-                            
-                            dispatch('SERVER_REQUEST', {toServer: ['ProcessState', processID], resolve: accepted, reject: rejected});
                         }
                     }
+                }
+            };
+
+            let reject = (data) => {
+
+                if(process.timestamp == timestamp)
+                {
+                    console.log((toDMFerror(data)).message);
+                }
+            };
+
+            dispatch('SERVER_REQUEST', {toServer: ['ProcessState', process.ID], resolve: resolve, reject: reject});
+        },
+
+        RELOAD_BACKGROUND: ({state, commit, dispatch}) =>
+        {
+            for(let FirmID in state.Background)
+            {
+                for(let ObjectID in state.Background[FirmID])
+                {
+                    state.Background[FirmID][ObjectID].forEach((process) => {
+
+                        if(process.active && !process.error)
+                        {
+                            dispatch('RELOAD_CALCULATION', {FirmID: FirmID, ObjectID: ObjectID, process: process});
+                        }
+                    });
                 }
             }
         },
