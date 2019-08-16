@@ -1,13 +1,16 @@
 <template>
     <div>
-        <div class="d-flex">
-            <div class="m-2 flex-grow-0">с</div>
+        <div class="d-flex flex-wrap">
+            <div class="d-flex">
+                <div class="m-1 flex-grow-0" style="width: 20px">с</div>
 
-            <Datepicker v-model="ldate" @selected="ldateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1"/>
-            
-            <div class="m-2 flex-grow-0">по</div>
-            
-            <Datepicker v-model="rdate" @selected="rdateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1"/>
+                <Datepicker v-model="ldate" @selected="ldateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1" style="min-width: 300px"/>
+            </div>
+            <div class="d-flex">
+                <div class="m-1 flex-grow-0" style="width: 20px">по</div>
+
+                <Datepicker v-model="rdate" @selected="rdateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1" style="min-width: 300px"/>
+            </div>
         </div>
         
         <div class="d-flex justify-content-center">
