@@ -9,9 +9,9 @@
     
     <div v-else>
         
-        <template v-if="History !== undefined">
+        <template v-if="History !== undefined && type !== undefined">
                 
-            <center v-if="History === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+            <center v-if="History === null || type === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
             <div v-else-if="History.DMF_ERROR" class="alert alert-danger">{{ History.message }}</div>
 
@@ -26,33 +26,42 @@
                                 </button>
                             </td>
                             <td>{{ item.Date }}</td>
-                            <td>{{ item.Value }} <a href="#" v-if="item.NodeName" @click="showObject(item.NodeID, item.NodeName, item.NodeType)"> ( {{ item.NodeName }} )</a></td>
+                            <td>{{ item.Value }} <a href="#" v-if="item.NodeID" @click="showObject(item.NodeID)"> ( {{ item.NodeName }} )</a></td>
                         </tr>
                     </tbody>
                 </table>
                 
-                <div v-if="type" class="d-flex">
-                    
-                    <div class="flex-grow-0 p-1">
-                        <button v-if="newValue !== undefined" @click="add" class="btn btn-success btn-sm">
-                            <font-awesome-icon icon="plus"/>
-                        </button>
+                <div v-if="type.DMF_ERROR" class="alert alert-danger">{{ type.message }}</div>
+
+                <template v-else>
+                    <div class="d-flex">
+
+                        <div class="flex-grow-0 p-1">
+                            <button v-if="newValue !== undefined" @click="add" class="btn btn-success btn-sm">
+                                <font-awesome-icon icon="plus"/>
+                            </button>
+                        </div>
+
+                        <Datepicker ref="datepicker" v-model="newDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates" :bootstrap-styling="true" style="width: 140px" class="flex-shrink-0"/>
+
+                        <component :is="type.Type" v-bind="type" v-on:change="changeValue" class="mx-1"/>
+
                     </div>
-                    
-                    <Datepicker ref="datepicker" v-model="newDate" :monday-first="true" :language="ru" :format="dateFormatter" :minimum-view="calendarView" :disabled-dates="disabledDates" :bootstrap-styling="true" style="width: 140px" class="flex-shrink-0"/>
-
-                    <component :is="type.Type" v-bind="type" v-on:change="changeValue" class="mx-1"/>
-
-                </div>
-                <div v-if="newValue === undefined" class="alert alert-warning m-1">Значение не соответствует типу</div>
-                
-
+                    <div v-if="newValue === undefined" class="alert alert-warning m-1">Значение не соответствует типу</div>
+                </template>
 
             </template>
 
         </template>
 
     </div>
+
+    <!--<div>
+        <div>history:</div>
+        <div>{{ History }}</div>
+        <div>type:</div>
+        <div>{{ type }}</div>
+    </div>-->
 
 </template>
 
@@ -98,21 +107,28 @@ export default {
     },
     computed:
     {
-        ...mapState(["Objects", "Types"]),
+        queries: function()
+        {
+            let res = {history: {FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: this.AttrID}};
+            
+            if(this.AttrType == "Props") res.history.func = 'ObjectPropDetails';
+            
+            if(this.AttrType == "CalcParams") res.history.func = 'CalcParamDetails';
+
+            if(this.AttrType == "Tariffs") res.history.func = 'TariffValueDetails';
+
+            if(this.AttrType != "Tariffs")
+            {
+                res.types = {func: "DataTypes", FirmID: this.FirmID};
+            }
+
+            return res;
+        },
         History: function()
         {
-            let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, this.AttrType, this.AttrID, 'History']);
-            
-            if(data === undefined) this.reload();
-            
-            data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, this.AttrType, this.AttrID, 'History']);
-                        
-            if(!data || data.DMF_ERROR)
-            {
-                this.newDate = new Date();
-                
-                return data;
-            }
+            let data = this.vuexLoad(this.queries).history;
+
+            if(!data || data.DMF_ERROR) return data;
                         
             let res = [];
             
@@ -133,7 +149,6 @@ export default {
                 {
                     if(data[i].NodeID == this.ObjectID)
                     {
-                        
                         if(this.disabledDates.to < date)
                         {
                             this.disabledDates.to = date;
@@ -143,8 +158,7 @@ export default {
                     else
                     {
                         res[i].NodeID = data[i].NodeID;
-                        res[i].NodeName = data[i].NodeName;
-                        res[i].NodeType = data[i].NodeType;
+                        res[i].NodeName = this.vuexGet("Objects", this.FirmID, data[i].NodeID, "info", "name");
                     }
                 }
                 else
@@ -168,8 +182,12 @@ export default {
             {
                 return {Type: "Number", NoNegative: true, Digits: 6, DigitsAfterPoint: 2};
             }
+
+            let types = this.vuexLoad(this.queries).types;
+
+            if(!types || types.DMF_ERROR) return types;
             
-            return this.dataState(this.Types, [this.AttrID, 'Type']);
+            return types[this.AttrID].Type;
         }
     },
     methods:
@@ -182,7 +200,9 @@ export default {
         },
         reload: function()
         {
-            this.LOAD_HISTORY({FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID});
+            this.vuexClear({history: this.queries.history});
+
+            this.newDate = new Date();
         },
         changeValue: function(val)
         {            
@@ -211,7 +231,7 @@ export default {
                         
             this.state = "changing", this.message = "Добавление записи...";
             
-            this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, value: this.newValue, accepted: accepted, rejected: rejected});
+            this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, value: this.newValue, query: this.queries.history, accepted: accepted, rejected: rejected});
         },
         Delete: function(date)
         {
@@ -235,11 +255,13 @@ export default {
             
             this.state = "changing", this.message = "Удаление записи...";
             
-            this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, accepted: accepted, rejected: rejected})
+            this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, query: this.queries.history, accepted: accepted, rejected: rejected})
         },
-        showObject: function(ObjectID, Name, ObjectType)
+        showObject: function(ObjectID)
         {
-            this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ObjectID, ObjectType: ObjectType});
+            let name = this.vuexGet("Objects", this.FirmID, ObjectID, "info", "name");
+
+            this.addPanel("Object", name, {FirmID: this.FirmID, ObjectID: ObjectID});
         }
     }
 }

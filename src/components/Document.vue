@@ -34,17 +34,27 @@
 
 <script>
     
-import { mapActions, mapState } from 'vuex';
+//import { mapActions, mapState } from 'vuex';
     
 export default {
-    props: ["DocumentID"],
+    props: ["FirmID", "DocumentID"],
+    data: function()
+    {
+        return {
+
+            queries:
+            {
+                data: {func: "GetDoc", FirmID: this.FirmID, DocumentID: this.DocumentID}
+            }
+        }
+    },
     computed:
     {
-        ...mapState(["Documents"]),
+        //...mapState(["Documents"]),
         
         Document: function()
         {
-            let data = this.dataState(this.Documents, [this.DocumentID]);
+            /*let data = this.dataState(this.Documents, [this.DocumentID]);
             
             if(data === undefined) this.reload();
             
@@ -52,15 +62,22 @@ export default {
             
             if(data && data.DocumentName) this.$emit("setLabel", data.DocumentName);
             
+            return data;*/
+
+            let data = this.vuexLoad(this.queries).data;
+
+            if(data && data.DocumentName) this.$emit("setLabel", data.DocumentName);
+
             return data;
         }
     },
     methods:
     {
-        ...mapActions(["LOAD_DOCUMENT"]),
+        //...mapActions(["LOAD_DOCUMENT"]),
         reload: function()
         {
-            this.LOAD_DOCUMENT({DocumentID: this.DocumentID});
+            this.vuexClear(this.queries);
+            //this.LOAD_DOCUMENT({DocumentID: this.DocumentID});
         }
     }
 }

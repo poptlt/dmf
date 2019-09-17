@@ -12,23 +12,23 @@
                 <Datepicker v-model="rdate" @selected="rdateChanged" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true" class="m-1" style="min-width: 300px"/>
             </div>
         </div>
-        
+
         <div class="d-flex justify-content-center">
             <button @click="addCalculation('add')" class="flex-grow-0 btn btn-primary btn-sm m-1">Начислить</button>
 
             <button @click="addCalculation('delete')" class="flex-grow-0 btn btn-primary btn-sm m-1">Отменить начисления</button>
         </div>
-        
+
         <center v-if="calculations.length" class="mt-2"><h5>Процессы</h5></center>
-        
+
         <div v-for="item in calculations" class="d-flex align-items-start border-top p-2">
-            
+
             <button v-if="item.delete" @click="removeCalculation(item.delete)" class="flex-grow-0 btn btn-danger btn-sm mr-2">
                 <font-awesome-icon icon="times"/>
             </button>
 
             <div>
-                
+
                 <div v-if="item.done" class="my-1">{{ item.done }}</div>
 
                 <div v-if="item.doing" class="my-1">
@@ -36,7 +36,7 @@
                     <div>{{ item.doing.text }}</div>
 
                     <div class="progress bg-secondary">
-                            <div class="progress-bar" :style="{width: (item.doing.done / item.doing.total * 100) + '%'}">{{ item.doing.done }} / {{ item.doing.total }}</div>
+                        <div class="progress-bar" :class="{'bg-primary': !item.error, 'bg-danger': item.error}" :style="{width: (item.doing.done / item.doing.total * 100) + '%'}">{{ item.doing.done }} / {{ item.doing.total }}</div>
                     </div>
 
                 </div>
@@ -58,13 +58,13 @@
 </template>
 
 <script>
-    
+
 import { mapActions, mapState } from 'vuex';
 
 import Datepicker from 'vuejs-datepicker';
-    
+
 import {ru} from 'vuejs-datepicker/dist/locale';
-    
+
 export default {
     props: ["FirmID", "ObjectID"],
     components:
@@ -74,7 +74,7 @@ export default {
     data: function()
     {
         return {
-            
+
             ru: ru,
             ldate: new Date(),
             rdate: new Date()
@@ -84,13 +84,13 @@ export default {
     {
         ...mapState(["Background"]),
         calculations: function()
-        {            
+        {
             let data = this.dataState(this.Background, [this.FirmID, this.ObjectID]);
-            
+
             if(!data) return [];
-            
+
             let res = [];
-            
+
             data.forEach((item) => {
 
                 let cur = {};
@@ -139,7 +139,7 @@ export default {
 
                 res.push(cur);
             });
-            
+
             return res;
         }
     },
@@ -185,5 +185,5 @@ export default {
 </script>
 
 <style>
-    
+
 </style>

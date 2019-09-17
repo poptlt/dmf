@@ -37,7 +37,11 @@ Vue.config.productionTip = false
 // если путь где-либо прерывается, то возвращается undefined
 // иначе возвращаются собственно данные
 
+//import { mapActions, mapState, mapMutations } from 'vuex';
+
 let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
+import { getData, getPath } from './store/functions.js'
 
 Vue.mixin({
     
@@ -82,8 +86,48 @@ Vue.mixin({
             {
                 return (day<10 ? "0" : "") + day + "." + (month+1<10 ? "0" : "") + (month + 1) + "." + year;
             }
+        },
+
+        //vuexGet: (...path) => getData(path),
+
+        vuexGet: (...path) => getData(path, store.state),
+
+        vuexClear: (queries) => {
+
+            for(let key in queries)
+            {
+                store.commit('INSERT', {path: getPath(queries[key]), data: undefined});
+            }
+        },
+
+        vuexLoad: (queries) => {
+
+            let toServer = [];
+
+            for(let key in queries)
+            {
+                if(getData( getPath(queries[key]), store.state ) === undefined)
+                {
+                    toServer.push(queries[key]);
+                }
+            }
+
+            if(toServer.length) store.dispatch('LOAD_DATA', toServer);
+
+            let res = {};
+
+            for(let key in queries)
+            {
+                res[key] = getData( getPath(queries[key]), store.state );
+            }
+
+            return res;
         }
-    }
+    },
+    /*computed: {
+
+        store: () => store.state
+    }*/
 })
 
 

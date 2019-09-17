@@ -1,15 +1,12 @@
 <template>
-    <div>
+    <div v-if="roots !== undefined">
         <center v-if="!roots" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
         <div v-else-if="roots.DMF_ERROR" class="alert alert-danger">{{ roots.message }}</div>
+
         <div v-else style="padding: 10px">
 
-            <template v-if="!FirmID">
-                <TreeVertex v-for="(val, FirmID) in roots" :addPanel="addPanel" :FirmID="FirmID" :ObjectID="FirmID" :Name="roots[FirmID][FirmID].Name"/>
-            </template>
-            <template v-else>
-                <TreeVertex :addPanel="addPanel" :FirmID="FirmID" :ObjectID="ObjectID" :Name="roots[FirmID][ObjectID].Name"/>
-            </template>
+            <TreeVertex v-for="node in roots" :addPanel="addPanel" :FirmID="node.FirmID" :ObjectID="node.ObjectID" :Name="node.name"/>
 
         </div>
     </div>
@@ -19,26 +16,34 @@
 
 import TreeVertex from './TreeVertex.vue';
 
-import { mapState } from 'vuex';
+import { mapMutations } from 'vuex';
 
 export default {
-    components: {TreeVertex},
+    components:
+    {
+        TreeVertex
+    },
     props: ["addPanel", "FirmID", "ObjectID"],
     computed:
     {
-        ...mapState(["Objects"]),
+        queries: function()
+        {
+            return {
+
+                roots: {func: "TreeLevel", FirmID: "", ObjectID: ""}
+            };
+        },
         roots: function()
         {
-            if(this.Objects === undefined) this.reload();
-
-            return this.Objects;
+            return this.vuexLoad(this.queries).roots;
         }
     },
     methods:
     {
+        ...mapMutations(['DESTROY_TREE']),
         reload: function()
         {            
-            this.$store.dispatch('INIT');
+            this.DESTROY_TREE();
         }
     }
 }

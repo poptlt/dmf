@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <!--<div>
         <div v-if="ObjectType == 'LS'" class="d-flex align-items-center">
             <button @click="getUrl" class="flex-grow-0 border btn btn-light btn-sm m-2">Получить url</button>
             <div>{{ urlMessage }}</div>
@@ -123,38 +123,131 @@
             </b-collapse>
         </div>
 
+    </div>-->
+
+    <div>
+        <div v-if="ObjectType == 'LS'" class="d-flex align-items-center">
+            <button @click="getUrl" class="flex-grow-0 border btn btn-light btn-sm m-2">Получить url</button>
+            <div>{{ urlMessage }}</div>
+            <div hidden ref="link">link</div>
+        </div>
+
+        <Tab :accordionID="accordionID" :visible="true" label="Реквизиты">
+
+            <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+            <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
+
+            <table v-else class="table table-hover">
+                <tbody>
+                    <tr v-for="item in props" @click="if(item.Editable) showHistory('Props', item.PropID, item.PropName);">
+                        <td>{{ item.PropName }}</td>
+                        <td>{{ item.Value }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </Tab>
+
+        <Tab :accordionID="accordionID" label="Параметры расчетов">
+
+            <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+
+            <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
+
+            <template v-else>
+                <center><button @click="showCalcParams" class="border btn btn-light btn-sm m-2">Информация по дочерним</button></center>
+
+                <table class="table table-hover">
+                    <tbody>
+                        <tr v-for="item in calcParams" @click="showHistory('CalcParams', item.ParamID, item.ParamName)">
+                            <td>{{ item.ParamName }}</td>
+                            <td>{{ item.Value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+
+        </Tab>
+
+        <Tab :accordionID="accordionID" label="Тарифы ТО">
+
+            <TariffTOHistory :FirmID="FirmID"
+                             :ObjectID="ObjectID"
+                             :history="dataPack.tariffTOHistory"
+                             :tariffs="dataPack.tariffsTO"/>
+        </Tab>
+
+        <Tab v-if="ObjectType == 'Firm'" :accordionID="accordionID" label="Список тарифов">
+
+            <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
+
+        </Tab>
+
+        <Tab v-if="ObjectType == 'Firm'" :accordionID="accordionID" label="Список тарифов ТО">
+
+            <TariffsTO :data="tariffsTO" :types="hardTypes" :FirmID="FirmID" :addPanel="addPanel"/>
+
+        </Tab>
+
+        <Tab v-if="ObjectType == 'Firm'" :accordionID="accordionID" label="Расчётные счета">
+
+            <BankAccounts :data="bankAccounts" :FirmID="FirmID" :addPanel="addPanel"/>
+
+        </Tab>
+
+        <Tab v-if="ObjectType == 'LS'" :accordionID="accordionID" label="Баланс">
+
+            <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
+
+        </Tab>
+
+        <Tab :accordionID="accordionID" label="Начисления">
+
+            <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
+
+        </Tab>
+
+        <Tab :accordionID="accordionID" label="Квитанция">
+
+            <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
+
+        </Tab>
     </div>
 </template>
 
 <script>
 
 import { mapActions, mapState } from 'vuex';
+
+import Data from './Data.vue';
     
-import Tariffs from './Tariffs.vue';
+import Tab from './ObjectContent/Tab.vue';
     
-import Turnover from './Turnover.vue';
+import TariffTOHistory from './ObjectContent/TariffTOHistory.vue';
     
-import Calculation from './Calculation.vue';
+import Tariffs from './ObjectContent/Tariffs.vue';
     
-import Receipt from './Receipt.vue';
+import TariffsTO from './ObjectContent/TariffsTO.vue';
+
+import BankAccounts from './ObjectContent/BankAccounts.vue';
+
+import Turnover from './ObjectContent/Turnover.vue';
+
+import Calculation from './ObjectContent/Calculation.vue';
+
+import Receipt from './ObjectContent/Receipt.vue';
 
 export default {
-    props: ["FirmID", "ObjectID", "ObjectType", "addPanel"],
+    props: ["FirmID", "ObjectID", "addPanel"],
     components:
     {
-        Tariffs, Turnover, Calculation, Receipt
+        Data, Tab, TariffTOHistory, Tariffs, TariffsTO, BankAccounts, Turnover, Calculation, Receipt
     },
     data: function()
     {
         return {
-            accordionID: this.randomID(),
-            propsID: this.randomID(),
-            calcParamsID: this.randomID(),
-            tariffsID: this.randomID(),
-            bankAccountsID: this.randomID(),
-            turnoverID: this.randomID(),
-            calculationID: this.randomID(),
-            receiptID: this.randomID(),
+            accordionID: "id"+(""+Math.random()).substring(2),
 
             urlMessage: "",
         }
@@ -162,47 +255,68 @@ export default {
     computed:
     {
         ...mapState(["Objects"]),
-        root: function()
+        /*root: function()
         {
             if(this.Objects && this.Objects[this.FirmID] && this.Objects[this.FirmID][this.ObjectID])
             {
                 return this.Objects[this.FirmID][this.ObjectID];
             }
             else return null;
+        },*/
+        queries: function()
+        {
+            let res = {
+                props: {func: "GetObjectProps", FirmID: this.FirmID, ObjectID: this.ObjectID},
+
+                calcParams: {func: "GetObjectCalcParams", FirmID: this.FirmID, ObjectID: this.ObjectID},
+
+                tariffTOHistory: {func: "ObjectTariffTODetails", FirmID: this.FirmID, ObjectID: this.ObjectID},
+
+                tariffsTO: {func: "GetTariffsTO", FirmID: this.FirmID}
+            };
+
+            if(this.ObjectType == "Firm")
+            {
+                res.tariffs = {func: "GetTariffs", FirmID: this.FirmID};
+
+                res.bankAccounts = {func: "GetBankAccounts", FirmID: this.FirmID};
+
+                res.hardTypes = {func: "GetHardTypes"};
+            }
+
+            return res;
+        },
+        ObjectType: function()
+        {
+            return this.vuexGet("Objects", this.FirmID, this.ObjectID, "info", "Type");
+        },
+        dataPack: function()
+        {
+            return this.vuexLoad(this.queries);
         },
         props: function()
         {
-            if(this.root && this.root.Props) return this.root.Props;
-            else
-            {
-                if(!this.root || this.root.Props === undefined) this.reload();
-
-                return null;
-            }
+            return this.vuexLoad(this.queries).props;
         },
         calcParams: function()
         {
-            if(this.root && this.root.CalcParams) return this.root.CalcParams;
-            else
-            {
-                if(!this.root || this.root.CalcParams === undefined) this.reload();
-
-                return null;
-            }
+            return this.vuexLoad(this.queries).calcParams;
         },
         tariffs: function()
         {
-            if(this.root && this.root.Tariffs) return this.root.Tariffs;
-            else
-            {
-                if(!this.root || this.root.Tariffs === undefined) this.reload();
-
-                return null;
-            }
+            return this.vuexLoad(this.queries).tariffs;
+        },
+        tariffsTO: function()
+        {
+            return this.vuexLoad(this.queries).tariffsTO;
+        },
+        hardTypes: function()
+        {
+            return this.vuexLoad(this.queries).hardTypes;
         },
         bankAccounts: function()
         {
-            if(this.root && this.root.BankAccounts)
+            /*if(this.root && this.root.BankAccounts)
             {
                 let res = this.root.BankAccounts;
 
@@ -215,11 +329,33 @@ export default {
                 if(!this.root || this.root.BankAccounts === undefined) this.reload();
 
                 return null;
-            }
+            }*/
+
+            return this.vuexLoad(this.queries).bankAccounts;
         },
         turnover: function()
         {
-            if(this.root && this.root.Turnover)
+            /*let turnover = this.vuexLoad(this.queries).data.turnover;
+
+            if(!turnover) return turnover;
+
+            let res = [];
+
+            turnover.forEach((item) => {
+
+                let t = {};
+                for(let key in item) t[key] = item[key];
+
+                t.Date = this.dateForClient(new Date(Date.parse(t.Date)), "day");
+
+                res.push(t);
+            });
+
+            return res;*/
+
+            return null;
+
+            /*if(this.root && this.root.Turnover)
             {
                 if(this.root.Turnover.DMF_ERROR) return this.root.Turnover;
                 
@@ -242,42 +378,37 @@ export default {
                 if(!this.root || this.root.Turnover === undefined) this.reload();
 
                 return null;
-            }
+            }*/
         },
         balance: function()
         {            
-            if(this.root) return this.root.Balance;
-            else return undefined;
+            /*if(this.root) return this.root.Balance;
+            else return undefined;*/
+
+            /*let data = this.vuexLoad(this.queries).data.balance;
+
+            if(!data) return data;
+            else return data.balance;*/
+
+            return null;
         }
     },
     methods:
     {
-        ...mapActions(['LOAD_OBJECT', 'GET_URL']),
-        randomID: function()
-        {
-            return "id"+(""+Math.random()).substring(2);
-        },
-        collapse: function(ID)
-        {
-            this.$root.$emit('bv::toggle::collapse', ID);
-        },
+        ...mapActions(["GET_URL"]),
         reload: function()
         {
-            this.LOAD_OBJECT({FirmID: this.FirmID, ObjectID: this.ObjectID, ObjectType: this.ObjectType, refresh: true});
+            this.vuexClear(this.queries);
         },
         showHistory: function(AttrType, AttrID, Name)
         {
-            let label = ((this.root.Name) ? this.root.Name : this.root.ObjectName) + ' ' + Name;
+            let label = this.vuexGet("Objects", this.FirmID, this.ObjectID, "info", "name") + " " + Name;
 
             this.addPanel("History", label, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
         },
-        showDocument: function(ID, Name)
-        {
-            this.addPanel("Document", Name, {DocumentID: ID});
-        },
         showCalcParams: function()
         {
-            let label = ((this.root.Name) ? this.root.Name : this.root.ObjectName) + ': Параметры расчета дочерних';
+            let label = this.vuexGet("Objects", this.FirmID, this.ObjectID, "info", "name"); + ': Параметры расчета дочерних';
 
             this.addPanel("CalcParams", label, {FirmID: this.FirmID, ObjectID: this.ObjectID});
         },

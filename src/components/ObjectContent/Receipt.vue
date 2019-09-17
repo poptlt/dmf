@@ -1,17 +1,17 @@
 <template>
     <div class="d-flex p-2">
         <Datepicker v-model="date" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true"/>
-        
+
         <button @click="make" class="btn btn-primary ml-2">Сформировать квитанции</button>
     </div>
 </template>
 
 <script>
-    
+
 import Datepicker from 'vuejs-datepicker';
-    
+
 import {ru} from 'vuejs-datepicker/dist/locale';
-    
+
 export default {
     props: ["FirmID", "ObjectID"],
     components:
@@ -42,5 +42,5 @@ export default {
 </script>
 
 <style>
-    
+
 </style>

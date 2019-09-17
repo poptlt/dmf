@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isNotEmpty">
+    <div v-if="List !== undefined">
         <center v-if="List === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
         <div v-else-if="List.DMF_ERROR" class="alert alert-danger">{{ List.message }}</div>
@@ -13,82 +13,53 @@
                 </tr>
             </tbody>
         </table>
-        
     </div>
 </template>
 
 <script>
 
-import { mapActions, mapState } from 'vuex';
-
 export default {
     props: ["FirmID", "ObjectID", "addPanel"],
     computed:
     {
-        ...mapState(["Objects"]),
-        
-        isNotEmpty: function() {
-             let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'LS']);
-            
-            if (data === undefined) {
-                this.reload(); 
-                let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'LS']);
-                if (data === undefined) {return false}
-                else {return true}
+        queries: function()
+        {
+            return {
+
+                list: {func: "LSList", FirmID: this.FirmID, ObjectID: this.ObjectID}
             }
-            else {return true}            
         },
-        
-        List: function() { 
+        List: function()
+        {
+            let list = this.vuexLoad(this.queries).list;
             
-            let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'LS']);
- 
-            if (data === undefined) {
-                
-                console.log("undef");
-                
-                return undefined;
-            }
-            
-            if (data === null) {return null}
-            
-            if (data.DMF_ERROR) {return data}
+            if(!list || list.DMF_ERROR) return list;
 
             let res = [];
 
-            for(let i=0; i<data.length; i++) {
-                res[i] = {};
-                res[i].ID = data[i].ObjectID;
-                res[i].Balance = data[i].Balance;
-                res[i].Number = this.Objects[this.FirmID][res[i].ID].Number;
-                res[i].AdressAdd = this.Objects[this.FirmID][res[i].ID].AdressAdd;
-            }
-            return res;             
+            list.forEach((LS) => {
+                
+                let Number = this.vuexGet("Objects", this.FirmID, LS.ObjectID, "info", "Number");
+                
+                let AdressAdd = this.vuexGet("Objects", this.FirmID, LS.ObjectID, "info", "AdressAdd");
+
+                res.push({ID: LS.ObjectID, Balance: LS.Balance, Number: Number, AdressAdd: AdressAdd});
+            });
+            
+            return res;
         }
     },
-    
     methods:
     {
-        ...mapActions(['LOAD_LS_LIST']),
-        showObject: function(ID)
-        {
-            let Name = this.Objects[this.FirmID][ID].Name, ObjectType = this.Objects[this.FirmID][ID].Type;
-
-            this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ID, ObjectType: ObjectType});
-        },
         reload: function()
         {
-            this.LOAD_LS_LIST({FirmID: this.FirmID, ObjectID: this.ObjectID, refresh: true});
+            this.vuexClear(this.queries);
         },
-        root: function()
+        showObject: function(ID)
         {
-            //console.log("computing root");
-            
-            if(this.Objects && this.Objects[this.FirmID] && this.Objects[this.FirmID][this.ObjectID])
-            {
-                return this.Objects[this.FirmID][this.ObjectID];
-            }
-            else return undefined;
+            let name = this.vuexGet("Objects", this.FirmID, ID, "info", "name");
+
+            this.addPanel("Object", name, {FirmID: this.FirmID, ObjectID: ID});
         }
     }
 }

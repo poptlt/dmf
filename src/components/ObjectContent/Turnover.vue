@@ -1,16 +1,16 @@
 <template>
 
     <center v-if="state == 'changing'">Установка начальной задолжности...</center>
-    
+
     <div v-else>
         <template v-if="turnover !== undefined">
 
             <center v-if="!turnover" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
 
             <div v-else-if="turnover.DMF_ERROR" class="alert alert-danger">{{ turnover.message }}</div>
-                    
+
             <template v-else>
-                        
+
                 <div v-if="balance !== undefined && balance !== null" class="p-2">Текущая задолжность: {{ balance }}</div>
 
                 <div class="d-flex align-items-center">
@@ -30,7 +30,7 @@
                         </tr>
                     </tbody>
                 </table>
-                
+
             </template>
 
         </template>
@@ -41,9 +41,9 @@
 <script>
 
 import { mapActions, mapState } from 'vuex';
-    
-import Number from './Inputs/Number.vue';
-    
+
+import Number from '../Inputs/Number.vue';
+
 export default {
     props: ["turnover", "balance", "FirmID", "ObjectID", "addPanel"],
     components:
@@ -53,7 +53,7 @@ export default {
     data: function()
     {
         return {
-            
+
             startBalance: undefined,
             state: "show"
         }
@@ -68,16 +68,16 @@ export default {
         writeStartBalance: function()
         {
             let th = this;
-            
+
             function done(message)
             {
                 th.state = "done";
-                
+
                 if(message) console.log(message);
             }
-            
+
             this.state = "changing";
-            
+
             this.WRITE_START_BALANCE({FirmID: this.FirmID, ObjectID: this.ObjectID, value: this.startBalance, accepted: done, rejected: done});
         },
         showDocument: function(ID, Name)

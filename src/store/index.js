@@ -3,6 +3,8 @@ import Vuex from 'vuex'
 Vue.use(Vuex);
 import Axios from 'axios'
 
+import { getPath, getQuery } from './functions.js'
+
 function urlFunc() {
     if (process.env.NODE_ENV == 'production') {return '/func'}
     else {return 'http://dev2.dmf.su/func'}
@@ -21,6 +23,8 @@ function toDMFerror(error) {
         err.code = 0;
     }
     else if (error.response != undefined && error.response.status != undefined && error.response.status == 500) {
+
+        console.log("here");
         err.message = error.response.data.Message;
         err.code = 500;
     }
@@ -89,6 +93,7 @@ function setObjectsValue(root, object, value) {
 
     // корень данных не может быть не объектом
     if (root === null || typeof root != 'object') {
+        //вот тут надо бы выкинуть ошибку, создавать ни к чему не привязанный объект нет смысла
         root = {}
     }
 
@@ -104,12 +109,12 @@ function setObjectsValue(root, object, value) {
         if(root[key] === null) root[key] = {};
 
         // если на следующем уровне вставляемых данных объект (массив не считаем за объект), то продолжаем растить дерево
-        if (object[key] != null && typeof object[key] == 'object' && Object.keys(object[key]).length > 0 && !Array.isArray(object[key])) {
+        if (object[key] !== null && typeof object[key] == 'object' && Object.keys(object[key]).length > 0 && !Array.isArray(object[key])) {
             setObjectsValue(root[key], object[key], value);
         }
         // иначе вставляем в данные значение
         else {
-            if (value != undefined) {
+            if (value !== undefined) {
                 root[key] = value;
             }
             else {
@@ -122,7 +127,8 @@ function setObjectsValue(root, object, value) {
 export const store = new Vuex.Store({
   state: {
       AuthState: true,
-      Objects: undefined,
+      Objects: {},
+      HardTypes: undefined,
       Types: undefined,
       Documents: undefined,
       Background: {}
@@ -140,6 +146,40 @@ export const store = new Vuex.Store({
         },
         DELETE_KEY: (state, {root, key}) => {
             Vue.delete(root, key);
+        },
+        INSERT: (state, {path, data}) => {
+
+            let root = state;
+
+            path.forEach((key, i) => {
+
+                if(i > 0) root = root[path[i-1]];
+
+                if(root[key] === undefined) Vue.set(root, key, {});
+            })
+
+            root[path[path.length - 1]] = data;
+        },
+        DESTROY_TREE: (state) => {
+
+            state["Objects"]["TreeLevel"] = undefined;
+
+            for(let FirmID in state["Objects"])
+            {
+                if(FirmID != "TreeLevel")
+                {
+                    for(let ObjectID in state["Objects"][FirmID])
+                    {
+                        if(ObjectID != "DataTypes")
+                        {
+                            if(state["Objects"][FirmID][ObjectID]["TreeLevel"] !== undefined)
+                            {
+                                state["Objects"][FirmID][ObjectID]["TreeLevel"] = undefined;
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
 
@@ -160,12 +200,77 @@ export const store = new Vuex.Store({
                 });
         },
 
-        INIT: ({state, dispatch}) => {
+        CHECK: ({state}) => {
             
+            console.log("check");
+
+            return 12;
+        },
         
+        LOAD_DATA ({state, commit, dispatch}, queries)  {
             
-            let transform = (data) => {
+            let toServer = ['ExecFunctions', []];
+
+            queries.forEach((query) => {
+
+                toServer[1].push( getQuery(query) );
+
+                commit('INSERT', {path: getPath(query), data: null});
+            });
+
+            function accepted(data)
+            {
+                data = data.data;
                                 
+                queries.forEach((query, i) => {
+
+                    if(data[i].DMF_ERROR)
+                    {
+                        if(data[i].DMF_ERROR.Log !== undefined) console.log(data[i].DMF_ERROR.Log);
+
+                        commit('INSERT', {path: getPath(query), data: {DMF_ERROR: true, message: data[i].DMF_ERROR.Message}});
+                    }
+                    else
+                    {
+                        let func = undefined;
+
+                        if(query.func == "TreeLevel") func = 'LOAD_TREE_LEVEL';
+
+                        if(query.func == "LSList") func = 'LOAD_LS_LIST';
+
+                        if(query.func == "GetChildrenHistoryCalcParams") func = 'LOAD_CHILDREN_HISTORY_CALC_PARAMS';
+
+                        if(query.func == "ObjectPropDetails") func = 'LOAD_PROPS_HISTORY';
+
+                        if(query.func == "CalcParamDetails") func = 'LOAD_CALC_PARAMS_HISTORY';
+
+
+                        if(func !== undefined ) dispatch(func, {query: query, data: data[i]});
+                        else commit('INSERT', {path: getPath(query), data: data[i]});
+                    }
+                });
+            }
+
+            function rejected(data)
+            {
+                console.log(data);
+
+                let res = [];
+
+                for(let i=0; i<queries.length; i++) res.push(toDMFerror(data));
+
+                accepted({data: res});
+            }
+
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: accepted, reject: rejected});
+        },
+
+        INIT: ({state, dispatch}) => {
+
+            let transform = (data) => {
+
+                console.log(data);
+
                 return {Objects: data.Firms, Types: data.Types, Documents: {}}
             }
 
@@ -174,9 +279,7 @@ export const store = new Vuex.Store({
 
         LOAD_OBJECTS: ({state, commit, dispatch}, {root, object, toServer, refresh = true, transform = (data) => {return data}}) => {
 
-            
-            
-            
+
             // если у нас идет обновление данных, то запрос однозначно нужно исполнить
             let request = refresh;
             // если необходимость запроса пока отсутствует, то уточняем его по данным
@@ -207,48 +310,61 @@ export const store = new Vuex.Store({
             }
         },
 
-        LOAD_TREE_LEVEL: ({state, dispatch}, {FirmID, ObjectID = FirmID, hiddenEmpty = true}) => {
+        LOAD_TREE_LEVEL: ({commit}, {query, data}) => {
 
-            let root = state.Objects[FirmID];
-            let object = {[ObjectID]: {Children: null}};
-            let toServer = ['TreeNodes', FirmID, ObjectID, hiddenEmpty];
+            let nodes = [];
 
-            let transform = (data) => {
-                let res = {[ObjectID]: {Children: []}};
-                for (let i = 0; i < data.length; i++) {
-                    res[ObjectID].Children.push({ObjectID: data[i].NodeID, Name:  data[i].NodeName});
-                    res[ data[i].NodeID] = {Type: data[i].Type, Name: data[i].NodeFullName, ChildrenQnt: data[i].NodesQnt, LSQnt: data[i].LSQnt};
-                }
-                return res;
+            if(data.DMF_ERROR) nodes = data;
+            else
+            {
+                data.forEach((node) => {
+
+                    nodes.push({FirmID: node.FirmID, ObjectID: node.NodeID, name: node.NodeName});
+
+                    let info = {
+
+                        LSQnt: node.LSQnt,
+                        name: node.NodeFullName,
+                        NodesQnt: node.NodesQnt,
+                        Roles: node.Roles,
+                        Type: node.Type
+                    }
+
+                    for(let key in info)
+                    {
+                        commit('INSERT', {path: ["Objects", node.FirmID, node.NodeID, "info", key], data: info[key]});
+                    }
+                });
             }
 
-            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+            commit('INSERT', {path: getPath(query), data: nodes});
         },
 
-        LOAD_LS_LIST: ({state, dispatch}, {FirmID, ObjectID = FirmID}) => {
-                        
-            let root = state.Objects;
+        LOAD_LS_LIST: ({commit}, {query, data}) => {
 
-            let object = { [FirmID]: {[ObjectID]: {LS: null}} };
+            let list = [];
 
-            let toServer = ['LSList', ObjectID, FirmID];
+            if(data.DMF_ERROR) list = data;
+            else
+            {
+                data.forEach((LS) => {
 
-            let transform = (data) => {
-                
-                
-                object[FirmID][ObjectID].LS = [];
+                    list.push({ObjectID: LS.LSID, Balance: LS.Balance});
 
-                for (let i = 0; i < data.length; i++) {
-                    object[FirmID][ObjectID].LS.push({ObjectID: data[i].LSID, Balance: data[i].Balance});
-                    object[FirmID][ data[i].LSID] = {Type: 'LS', Name: data[i].LSName, Number: data[i].Number, AdressAdd: data[i].AdressAdd};
-                }
-                return object;
+                    commit('INSERT', {path: ["Objects", query.FirmID, LS.LSID, "info", "Type"], data: "LS"});
+
+                    commit('INSERT', {path: ["Objects", query.FirmID, LS.LSID, "info", "name"], data: LS.LSName});
+
+                    commit('INSERT', {path: ["Objects", query.FirmID, LS.LSID, "info", "Number"], data: LS.Number});
+
+                    commit('INSERT', {path: ["Objects", query.FirmID, LS.LSID, "info", "AdressAdd"], data: LS.AdressAdd});
+                });
             }
 
-            dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+            commit('INSERT', {path: getPath(query), data: list});
         },
 
-        LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID, ObjectType}) => {
+        /*LOAD_OBJECT: ({state, dispatch}, {ObjectID, FirmID, ObjectType}) => {
 
             let root = state.Objects;
 
@@ -267,6 +383,8 @@ export const store = new Vuex.Store({
             let transform = (data) => {
                 
                 data = data.Data; //ключи ObjectName и ObjectType уже не нужны
+
+                console.log(data);
                                 
                 let props = data.Props, idCnt=1;
                 
@@ -307,9 +425,25 @@ export const store = new Vuex.Store({
             }
 
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },*/
+
+        LOAD_CHILDREN_HISTORY_CALC_PARAMS: ({commit}, {query, data}) => {
+
+            let list = [];
+
+            data.forEach((item) => {
+
+                list.push({Date: item.Date, ObjectID: item.ObjectID, Value: item.Value, CalcParam: item.CalcParam});
+
+                commit('INSERT', {path: ["Objects", query.FirmID, item.ObjectID, "info", "name"], data: item.ObjectName});
+
+                commit('INSERT', {path: ["Objects", query.FirmID, item.ObjectID, "info", "Type"], data: item.ObjectType});
+            });
+
+            commit('INSERT', {path: getPath(query), data: list});
         },
         
-        LOAD_CHILDREN_HISTORY_CALC_PARAMS: ({state, dispatch}, {FirmID, ObjectID}) => {
+        /*LOAD_CHILDREN_HISTORY_CALC_PARAMS: ({state, dispatch}, {FirmID, ObjectID}) => {
 
             let root = state.Objects;
 
@@ -351,19 +485,53 @@ export const store = new Vuex.Store({
             }
             
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
+        },*/
+
+        LOAD_PROPS_HISTORY: ({commit}, {query, data}) => {
+
+            commit('INSERT', {path: getPath(query), data: data.Data});
+        },
+
+        LOAD_CALC_PARAMS_HISTORY: ({commit}, {query, data}) => {
+
+            data = data.Data;
+
+            let history = [];
+
+            data.forEach((item) => {
+
+                let cur = {Date: item.Date, Value: item.Value};
+
+                if(item.NodeID)
+                {
+                    cur.NodeID = item.NodeID;
+
+                    commit('INSERT', {path: ["Objects", query.FirmID, item.NodeID, "info", "name"], data: item.NodeName});
+
+                    commit('INSERT', {path: ["Objects", query.FirmID, item.NodeID, "info", "Type"], data: item.NodeType});
+                }
+
+                history.push(cur);
+            });
+
+            commit('INSERT', {path: getPath(query), data: history});
         },
         
-        WRITE_HISTORY: ({state, dispatch}, {operation, ObjectID, FirmID, AttrType, AttrID, date, value, accepted, rejected}) => {
+        WRITE_HISTORY: ({dispatch, commit}, {operation, ObjectID, FirmID, AttrType, AttrID, date, value, query, accepted, rejected}) => {
             
             let resolve = () => {
                 
-                dispatch('LOAD_HISTORY', {ObjectID: ObjectID, FirmID: FirmID, AttrType: AttrType, AttrID: AttrID});
+                /*dispatch('LOAD_HISTORY', {ObjectID: ObjectID, FirmID: FirmID, AttrType: AttrType, AttrID: AttrID});*/
+
+                commit('INSERT', {path: getPath(query), data: undefined});
                 
                 accepted();
             }
             
             let reject = (data) => {
                 
+                console.log(data);
+
                 rejected( (toDMFerror(data)).message);
             }
             
@@ -376,6 +544,10 @@ export const store = new Vuex.Store({
                 if(AttrType == "CalcParams") toServer = ['CalcParamWrite', ObjectID, FirmID, AttrID, date, value];
                 
                 if(AttrType == "Tariffs") toServer = ['TariffValueWrite', FirmID, AttrID, date, value];
+
+                if(AttrType == "TariffsTO") toServer = ['TariffTOValueWrite', FirmID, AttrID, date, value];
+
+                if(AttrType == "ObjectTariffTO") toServer = ['ObjectTariffTOWrite', FirmID, ObjectID, date, value];
             }
             
             if(operation == "delete")
@@ -385,6 +557,10 @@ export const store = new Vuex.Store({
                 if(AttrType == "CalcParams") toServer = ['CalcParamDelete', ObjectID, FirmID, AttrID, date];
                 
                 if(AttrType == "Tariffs") toServer = ['TariffValueDelete', FirmID, AttrID, date];
+
+                if(AttrType == "TariffsTO") toServer = ['TariffTOValueDelete', FirmID, AttrID, date];
+
+                if(AttrType == "ObjectTariffTO") toServer = ['ObjectTariffTODelete', FirmID, ObjectID, date, value];
             }
             
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
@@ -408,11 +584,13 @@ export const store = new Vuex.Store({
             dispatch('LOAD_OBJECTS', {root: root,  object: object, toServer: toServer, transform: transform});
         },
         
-        WRITE_TARIFF: ({state, dispatch}, {operation, FirmID, TariffID, TariffName, accepted, rejected}) => {
+        WRITE_TARIFF: ({state, dispatch, commit}, {operation, FirmID, TariffID, TariffName, accepted, rejected}) => {
             
             let resolve = () => {
                 
-                dispatch('LOAD_OBJECT', {ObjectID: FirmID, FirmID: FirmID, ObjectType: "Firm"});
+                //dispatch('LOAD_OBJECT', {ObjectID: FirmID, FirmID: FirmID, ObjectType: "Firm"});
+
+                commit('INSERT', {path: ["Objects", FirmID, FirmID, "GetTariffs"], data: undefined});
                 
                 accepted();
             };
@@ -431,6 +609,29 @@ export const store = new Vuex.Store({
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
         },
         
+        WRITE_TARIFF_TO: ({dispatch, commit}, {operation, FirmID, TariffID, TariffName, accepted, rejected}) => {
+
+            let resolve = () => {
+
+                commit('INSERT', {path: ["Objects", FirmID, FirmID, "GetTariffsTO"], data: undefined});
+
+                accepted();
+            };
+
+            let reject = (data) => {
+
+                rejected((toDMFerror(data)).message);
+            };
+
+            let toServer;
+
+            if(operation == "change") toServer = ['TariffTOWrite', FirmID, TariffID, TariffName];
+
+            if(operation == "delete") toServer = ['TariffTODelete', FirmID, TariffID];
+
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },
+
         WRITE_START_BALANCE: ({state, dispatch}, {FirmID, ObjectID, value, accepted, rejected}) => {
             
             let resolve = () => {

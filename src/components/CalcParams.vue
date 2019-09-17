@@ -19,7 +19,7 @@
                         <span class="font-weight-bold">{{ col.label }}: </span>
                         <template v-if="col.field == 'ObjectName'">
                             <a href="#"
-                               @click="showObject(rows[0].ObjectID, rows[0].ObjectName, rows[0].ObjectType)">
+                               @click="showObject(rows[0].ObjectID)">
                                 {{ rows[0].ObjectName }}
                             </a>
                         </template>
@@ -33,7 +33,7 @@
                         <template slot="table-row" slot-scope="props">
 
                             <a v-if="props.column.field == 'ObjectName'" href="#"
-                               @click="showObject(props.row.ObjectID, props.row.ObjectName, props.row.ObjectType)">
+                               @click="showObject(props.row.ObjectID)">
                                 {{ props.row.ObjectName }}
                             </a>
 
@@ -58,7 +58,7 @@
 
 <script>
 
-import { mapActions, mapState } from 'vuex';
+//import { mapActions, mapState } from 'vuex';
 
 import 'vue-good-table/dist/vue-good-table.css'
 import { VueGoodTable } from 'vue-good-table';
@@ -69,10 +69,20 @@ export default {
         VueGoodTable
     },
     props: ["FirmID", "ObjectID", "addPanel"],
+    data: function()
+    {
+        return {
+
+            queries:
+            {
+                data: {func: "GetChildrenHistoryCalcParams", FirmID: this.FirmID, ObjectID: this.ObjectID}
+            }
+        }
+    },
     computed:
     {
-        ...mapState(["Objects"]),
-        info: function()
+        //...mapState(["Objects"]),
+        /*info: function()
         {
             let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'CalcParamsInfo']);
 
@@ -113,6 +123,39 @@ export default {
                 row.param = item.CalcParam;
 
                 res.push(row)
+            });
+
+            return res;
+        },*/
+        rows: function()
+        {
+            let data = this.vuexLoad(this.queries).data;
+
+            if(!data || data.DMF_ERROR) return data;
+
+            let res = [];
+
+            data.forEach((item) =>
+            {
+                let row = {};
+
+                row.dateSort = new Date(Date.parse(item.Date));
+
+                row.date = this.dateForClient(row.dateSort, "month");
+
+                row.ObjectID = item.ObjectID;
+
+                row.ObjectName = this.vuexGet("Objects", this.FirmID, item.ObjectID, "info", "name");
+
+                row.ObjSort = this.objCode(row.ObjectName);
+
+                //row.ObjectType = this.vuexGet("Objects", this.FirmID, item.ObjectID, "info", "Type");
+
+                row.value = item.Value;
+
+                row.param = item.CalcParam;
+
+                res.push(row);
             });
 
             return res;
@@ -178,10 +221,11 @@ export default {
     },
     methods:
     {
-        ...mapActions(["LOAD_CHILDREN_HISTORY_CALC_PARAMS"]),
+        //...mapActions(["LOAD_CHILDREN_HISTORY_CALC_PARAMS"]),
         reload: function()
         {
-            this.LOAD_CHILDREN_HISTORY_CALC_PARAMS({FirmID: this.FirmID, ObjectID: this.ObjectID});
+            //this.LOAD_CHILDREN_HISTORY_CALC_PARAMS({FirmID: this.FirmID, ObjectID: this.ObjectID});
+            this.vuexClear(this.queries);
         },
         sort(x, y, col, rowX, rowY)
         {
@@ -218,9 +262,11 @@ export default {
 
             return res;
         },
-        showObject(ObjectID, Name, ObjectType)
+        showObject(ID)
         {
-            this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ObjectID, ObjectType: ObjectType});
+            let name = this.vuexGet("Objects", this.FirmID, ID, "info", "name");
+
+            this.addPanel("Object", name, {FirmID: this.FirmID, ObjectID: ID});
         }
     }
 }
