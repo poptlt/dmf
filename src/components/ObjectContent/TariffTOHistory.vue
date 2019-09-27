@@ -50,7 +50,13 @@ export default {
 
             ru: ru,
             newDate: new Date(),
-            newValue: this.tariffs[0].TariffID;
+        }
+    },
+    computed:
+    {
+        newValue: function()
+        {
+            return this.tariffs[0].TariffID;
         }
     },
     methods:

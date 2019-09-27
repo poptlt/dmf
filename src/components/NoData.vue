@@ -1,17 +1,12 @@
 <template>
-    <div v-if="show !== undefined">
+    <center v-if="show === null" class="text-primary p-2">
+        <font-awesome-icon icon="spinner" size="3x" pulse/>
+    </center>
 
-        <center v-if="show === null" class="text-primary p-2">
-            <font-awesome-icon icon="spinner" size="3x" pulse/>
-        </center>
-
-        <div v-else-if="typeof(show) == 'object' && show.DMF_ERROR" class="alert alert-danger">
-            {{ show.message }}
-        </div>
-
-        <div v-else-if="1==0"><slot/></div>
-
+    <div v-else-if="typeof(show) == 'object' && show.DMF_ERROR" class="alert alert-danger">
+        {{ show.message }}
     </div>
+
 </template>
 
 <script>
@@ -21,10 +16,10 @@ export default {
     {
         show: function()
         {
-            console.log(this.data);
             function check(data)
             {
-                if(data === undefined || data === null || (typeof(data) == 'object' && data.DMF_ERROR)) return false;
+                if(data === undefined || data === null ||
+                   (typeof(data) == 'object' && data.DMF_ERROR)) return false;
                 else return true;
             }
 
@@ -42,8 +37,12 @@ export default {
                     if(!check(this.data[key])) return this.data[key];
                 }
             }
-            return true;
+            return undefined;
         }
     }
 }
 </script>
+
+<style>
+
+</style>

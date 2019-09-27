@@ -34,12 +34,16 @@ import Document from './Document.vue'
 
 import CalcParams from './CalcParams.vue'
 
+import ObjectTariffTOHistory from './ObjectTariffTOHistory.vue'
+
+import EquipmentHistory from './EquipmentHistory.vue'
+
 import { mapState } from 'vuex';
 
 export default {
     components:
     {
-        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams
+        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, ObjectTariffTOHistory, EquipmentHistory
     },
     props:
     {

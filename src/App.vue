@@ -96,7 +96,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1, Object: 1, History: 1, TariffsTOHistory: 1, Document: 1, CalcParams: 2
+                Tree: 1, LSList: 1, Object: 1, History: 1, TariffsTOHistory: 1, Document: 1, CalcParams: 2, ObjectTariffTOHistory: 1, EquipmentHistory: 1
             },
             searchStr: "",
             searchList: [],

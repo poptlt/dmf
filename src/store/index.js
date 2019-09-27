@@ -199,13 +199,6 @@ export const store = new Vuex.Store({
                     console.log(error);
                 });
         },
-
-        CHECK: ({state}) => {
-            
-            console.log("check");
-
-            return 12;
-        },
         
         LOAD_DATA ({state, commit, dispatch}, queries)  {
             
@@ -566,6 +559,54 @@ export const store = new Vuex.Store({
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
         },
         
+        WRITE_EQUIPMENT_HISTORY: ({dispatch, commit}, {type, operation, FirmID, ObjectID, date, kitID, equipmentID, state, accepted, rejected}) => {
+
+            let resolve = () => {
+
+                commit('INSERT', {path: ["Objects", FirmID, ObjectID, "ObjectHardState"], data: undefined});
+
+                commit('INSERT', {path: ["Objects", FirmID, ObjectID, "ObjectHardDetails"], data: undefined});
+
+                accepted();
+            };
+
+            let reject = (data) => {
+
+                console.log(data);
+
+                rejected( (toDMFerror(data)).message);
+            };
+
+            let toServer;
+
+            if(type == "equipment")
+            {
+                if(operation == "add")
+                {
+                    toServer = ["ObjectHardWrite", FirmID, ObjectID, date, equipmentID];
+                }
+                else
+                {
+                    toServer = ["ObjectHardDelete", FirmID, ObjectID, date, kitID];
+                }
+            }
+            if(type == "state")
+            {
+                if(operation == "add")
+                {
+                    toServer = ["ObjectHardWorkWrite", FirmID, ObjectID, date, kitID, state];
+                }
+                else
+                {
+                    toServer = ["ObjectHardWorkDelete", FirmID, ObjectID, date, kitID];
+                }
+            }
+
+            console.log(toServer);
+
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        },
+
         LOAD_DOCUMENT: ({state, dispatch}, {DocumentID}) => {
         
             let root = state.Documents;

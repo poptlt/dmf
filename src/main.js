@@ -122,6 +122,32 @@ Vue.mixin({
             }
 
             return res;
+        },
+
+        isData: (data) => {
+
+            function check(data)
+            {
+                if(data === undefined || data === null ||
+                   (typeof(data) == 'object' && data.DMF_ERROR)) return false;
+                else return true;
+            }
+
+            if(Array.isArray(data))
+            {
+                for(let i=0; i<data.length; i++)
+                {
+                    if(!check(data[i])) return false;
+                }
+            }
+            else
+            {
+                for(let key in data)
+                {
+                    if(!check(data[key])) return false;
+                }
+            }
+            return true;
         }
     },
     /*computed: {

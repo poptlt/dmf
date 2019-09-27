@@ -98,8 +98,6 @@ export default {
 
             let res = [];
 
-            console.log(this.data);
-
             this.data.forEach((tariff) => {
 
                 let cur = {ID: tariff.TariffID, name: tariff.TariffName, value: {}};
@@ -114,8 +112,6 @@ export default {
                 }
                 res.push(cur);
             });
-
-            console.log(res);
 
             return res;
         }

@@ -1,129 +1,4 @@
 <template>
-    <!--<div>
-        <div v-if="ObjectType == 'LS'" class="d-flex align-items-center">
-            <button @click="getUrl" class="flex-grow-0 border btn btn-light btn-sm m-2">Получить url</button>
-            <div>{{ urlMessage }}</div>
-            <div hidden ref="link">link</div>
-        </div>
-
-        <div class="border rounded">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(propsID)">Реквизиты</div>
-            <b-collapse :id="propsID" :accordion="accordionID" visible>
-
-                <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
-
-                <table v-else class="table table-hover">
-                    <tbody>
-                        <tr v-for="(item, ID) in props" @click="if(item.Editable) showHistory('Props', ID, item.PropName);">
-                            <td>{{ item.PropName }}</td>
-                            <td>{{ item.Value }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-            </b-collapse>
-        </div>
-
-        <div class="border rounded">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(calcParamsID)">Параметры расчетов</div>
-            <b-collapse :id="calcParamsID" :accordion="accordionID">
-
-                <center v-if="!calcParams" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                <div v-else-if="calcParams.DMF_ERROR" class="alert alert-danger">{{ calcParams.message }}</div>
-
-                <template v-else>
-                    <center><button @click="showCalcParams" class="border btn btn-light btn-sm m-2">Информация по дочерним</button></center>
-
-                    <table class="table table-hover">
-                        <tbody>
-                            <tr v-for="(item, ID) in calcParams" @click="showHistory('CalcParams', ID, item.ParamName)">
-                                <td>{{ item.ParamName }}</td>
-                                <td>{{ item.Value }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </template>
-
-            </b-collapse>
-        </div>
-
-        <div v-if="ObjectType == 'Firm'" class="border rounded">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(tariffsID)">Тарифы</div>
-            <b-collapse :id="tariffsID" :accordion="accordionID">
-
-                <Tariffs :tariffs="tariffs" :FirmID="FirmID" :addPanel="addPanel"/>
-
-            </b-collapse>
-        </div>
-
-        <div v-if="ObjectType == 'Firm'" class="border rounded">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(bankAccountsID)">Расчётные счета</div>
-            <b-collapse :id="bankAccountsID" :accordion="accordionID">
-
-                <center v-if="!bankAccounts" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-                <div v-else-if="bankAccounts.DMF_ERROR" class="alert alert-danger">{{ bankAccounts.message }}</div>
-
-                <div v-for="account in bankAccounts" class="border rounded m-2">
-
-                    <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(bankAccountsID+account.BankAccountID)">{{ account.BankAccountNumber }}</div>
-
-                    <b-collapse :id="bankAccountsID+account.BankAccountID" :accordion="bankAccountsID+accordionID">
-
-                        <center class="p-2 font-weight-bold">Неопознанные платежи:</center>
-                        <table class="table table-hover">
-                            <tbody>
-                                <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID, '')">
-                                    <td>
-                                        <div class="d-flex flex-wrap">
-                                            <div class="flex-grow-0 p-2">{{ payment.Date }}</div>
-                                            <div class="flex-grow-0 p-2">№ {{ payment.Number }}</div>
-                                            <div class="flex-grow-0 p-2">{{ payment.Summ }} руб.</div>
-                                            <div class="flex-grow-0 p-2">{{ payment.Text }}</div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </b-collapse>
-
-                </div>
-
-            </b-collapse>
-        </div>
-
-        <div v-if="ObjectType == 'LS'" class="border rounded">
-            <div class=" bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(turnoverID)">Баланс</div>
-            <b-collapse :id="turnoverID" :accordion="accordionID">
-
-                <Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>
-
-            </b-collapse>
-        </div>
-
-        <div class="border rounded">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(calculationID)">Начисления</div>
-            <b-collapse :id="calculationID" :accordion="accordionID">
-
-                <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
-
-            </b-collapse>
-        </div>
-
-        <div class="border rounded">
-            <div class="bg-secondary text-white rounded-top" style="padding: 12px 20px" @click="collapse(receiptID)">Квитанция</div>
-            <b-collapse :id="receiptID" :accordion="accordionID">
-
-                <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
-
-            </b-collapse>
-        </div>
-
-    </div>-->
 
     <div>
         <div v-if="ObjectType == 'LS'" class="d-flex align-items-center">
@@ -134,18 +9,43 @@
 
         <Tab :accordionID="accordionID" :visible="true" label="Реквизиты">
 
-            <center v-if="!props" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+            <template v-if="isData([dataPack.props, dataPack.tariffTOState, dataPack.equipmentState])">
 
-            <div v-else-if="props.DMF_ERROR" class="alert alert-danger">{{ props.message }}</div>
+                <table class="table table-hover">
+                    <tbody>
+                        <tr v-for="item in props" @click="(item.Editable) ? showHistory('Props', item.PropID, item.PropName) : false">
+                            <td>{{ item.PropName }}</td>
+                            <td>{{ item.Value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <table v-else class="table table-hover">
-                <tbody>
-                    <tr v-for="item in props" @click="if(item.Editable) showHistory('Props', item.PropID, item.PropName);">
-                        <td>{{ item.PropName }}</td>
-                        <td>{{ item.Value }}</td>
-                    </tr>
-                </tbody>
-            </table>
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div class="text-center font-weight-bold">Тарифы</div>
+                    <button @click="showTariffTOHistory"
+                            class="border btn btn-light btn-sm m-1 flex-grow-0">
+                        История
+                    </button>
+
+                </div>
+                <TariffTOState :data="dataPack.tariffTOState"/>
+
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div class="text-center font-weight-bold">Оборудование</div>
+                    <button @click="showEquipmentHistory"
+                            class="border btn btn-light btn-sm m-1 flex-grow-0">
+                        История
+                    </button>
+
+                </div>
+                <EquipmentState :data="dataPack.equipmentState"/>
+
+            </template>
+            <NoData v-else :data="[dataPack.props, dataPack.tariffTOState, dataPack.equipmentState]"/>
 
         </Tab>
 
@@ -170,13 +70,13 @@
 
         </Tab>
 
-        <Tab :accordionID="accordionID" label="Тарифы ТО">
+        <!--<Tab :accordionID="accordionID" label="Тарифы ТО">
 
             <TariffTOHistory :FirmID="FirmID"
                              :ObjectID="ObjectID"
                              :history="dataPack.tariffTOHistory"
                              :tariffs="dataPack.tariffsTO"/>
-        </Tab>
+        </Tab>-->
 
         <Tab v-if="ObjectType == 'Firm'" :accordionID="accordionID" label="Список тарифов">
 
@@ -220,11 +120,15 @@
 
 import { mapActions, mapState } from 'vuex';
 
-import Data from './Data.vue';
+import NoData from './NoData.vue';
     
 import Tab from './ObjectContent/Tab.vue';
     
-import TariffTOHistory from './ObjectContent/TariffTOHistory.vue';
+import TariffTOState from './ObjectContent/TariffTOState.vue';
+
+import EquipmentState from './ObjectContent/EquipmentState.vue';
+
+//import TariffTOHistory from './ObjectContent/TariffTOHistory.vue';
     
 import Tariffs from './ObjectContent/Tariffs.vue';
     
@@ -242,7 +146,7 @@ export default {
     props: ["FirmID", "ObjectID", "addPanel"],
     components:
     {
-        Data, Tab, TariffTOHistory, Tariffs, TariffsTO, BankAccounts, Turnover, Calculation, Receipt
+        NoData, Tab, TariffTOState, EquipmentState, Tariffs, TariffsTO, BankAccounts, Turnover, Calculation, Receipt
     },
     data: function()
     {
@@ -270,9 +174,11 @@ export default {
 
                 calcParams: {func: "GetObjectCalcParams", FirmID: this.FirmID, ObjectID: this.ObjectID},
 
-                tariffTOHistory: {func: "ObjectTariffTODetails", FirmID: this.FirmID, ObjectID: this.ObjectID},
+                tariffsTO: {func: "GetTariffsTO", FirmID: this.FirmID},
 
-                tariffsTO: {func: "GetTariffsTO", FirmID: this.FirmID}
+                tariffTOState: {func: "ObjectTariffTOState", FirmID: this.FirmID, ObjectID: this.ObjectID},
+
+                equipmentState: {func: "ObjectHardState", FirmID: this.FirmID, ObjectID: this.ObjectID}
             };
 
             if(this.ObjectType == "Firm")
@@ -406,6 +312,18 @@ export default {
 
             this.addPanel("History", label, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
         },
+        showTariffTOHistory: function()
+        {
+            let label = this.vuexGet("Objects", this.FirmID, this.ObjectID, "info", "name") + " Тарифы ТО";
+
+            this.addPanel("ObjectTariffTOHistory", label, {FirmID: this.FirmID, ObjectID: this.ObjectID});
+        },
+        showEquipmentHistory: function()
+        {
+            let label = this.vuexGet("Objects", this.FirmID, this.ObjectID, "info", "name") + " Оборудование";
+
+            this.addPanel("EquipmentHistory", label, {FirmID: this.FirmID, ObjectID: this.ObjectID});
+        },
         showCalcParams: function()
         {
             let label = this.vuexGet("Objects", this.FirmID, this.ObjectID, "info", "name"); + ': Параметры расчета дочерних';
@@ -454,6 +372,17 @@ export default {
     }
 }
 </script>
+
+/*
+роли:
+
+тестовый админ - разраб,
+
+админ - владелец
+
+помощник админа - назначается админом,
+
+владелец лс - назначается системой
 
 <style>
 

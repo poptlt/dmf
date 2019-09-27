@@ -40,6 +40,14 @@ export function getPath(data)//куда класть данные во vuex
     {
         return ["Objects", data.FirmID, data.FirmID, "GetBankAccounts"];
     }
+    if(data.func == "ObjectTariffTOState")
+    {
+        return ["Objects", data.FirmID, data.ObjectID, "ObjectTariffTOState"];
+    }
+    if(data.func == "ObjectHardState")
+    {
+        return ["Objects", data.FirmID, data.ObjectID, "ObjectHardState"];
+    }
 
     //изменения в параметрах дочерних
     if(data.func == "GetChildrenHistoryCalcParams")
@@ -67,6 +75,10 @@ export function getPath(data)//куда класть данные во vuex
     if(data.func == "ObjectTariffTODetails")
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectTariffTODetails"];
+    }
+    if(data.func == "ObjectHardDetails")
+    {
+        return ["Objects", data.FirmID, data.ObjectID, "ObjectHardDetails"];
     }
 
     //типы
@@ -121,6 +133,14 @@ export function getQuery(data)//что спрашивать у сервера
     {
         return ["GetBankAccounts", data.FirmID];
     }
+    if(data.func == "ObjectTariffTOState")
+    {
+        return ["ObjectTariffTOState", data.FirmID, data.ObjectID];
+    }
+    if(data.func == "ObjectHardState")
+    {
+        return ["ObjectHardState", data.FirmID, data.ObjectID];
+    }
 
     //изменения в параметрах дочерних
     if(data.func == "GetChildrenHistoryCalcParams")
@@ -148,6 +168,10 @@ export function getQuery(data)//что спрашивать у сервера
     if(data.func == "ObjectTariffTODetails")
     {
         return ["ObjectTariffTODetails", data.FirmID, data.ObjectID];
+    }
+    if(data.func == "ObjectHardDetails")
+    {
+        return ["ObjectHardDetails", data.FirmID, data.ObjectID];
     }
 
     //типы
