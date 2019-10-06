@@ -1,34 +1,29 @@
 <template>
-    <div v-if="data !== undefined">
-        <center v-if="!data" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+<div>
+    <div v-for="(account, i) in data" class="border rounded m-2">
 
-        <div v-else-if="data.DMF_ERROR" class="alert alert-danger">{{ data.message }}</div>
+        <Tab :accordionID="accordionID" :label="account.BankAccountNumber" :visible="i==0">
 
-        <div v-for="(account, i) in data" class="border rounded m-2">
+            <center class="p-2 font-weight-bold">Неопознанные платежи:</center>
+            <table class="table table-hover">
+                <tbody>
+                    <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID)">
+                        <td>
+                            <div class="d-flex flex-wrap">
+                                <div class="flex-grow-0 p-2">{{ payment.Date }}</div>
+                                <div class="flex-grow-0 p-2">№ {{ payment.Number }}</div>
+                                <div class="flex-grow-0 p-2">{{ payment.Summ }} руб.</div>
+                                <div class="flex-grow-0 p-2">{{ payment.Text }}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-            <Tab :accordionID="accordionID" :label="account.BankAccountNumber" :visible="i==0">
+        </Tab>
 
-                <center class="p-2 font-weight-bold">Неопознанные платежи:</center>
-                <table class="table table-hover">
-                    <tbody>
-                        <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID)">
-                            <td>
-                                <div class="d-flex flex-wrap">
-                                    <div class="flex-grow-0 p-2">{{ payment.Date }}</div>
-                                    <div class="flex-grow-0 p-2">№ {{ payment.Number }}</div>
-                                    <div class="flex-grow-0 p-2">{{ payment.Summ }} руб.</div>
-                                    <div class="flex-grow-0 p-2">{{ payment.Text }}</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-            </Tab>
-
-        </div>
     </div>
-
+</div>
 </template>
 
 <script>

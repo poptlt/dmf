@@ -1,64 +1,49 @@
 <template>
+<div>
+    <center v-if="!rows.length" class="m-2">Не найдено записей</center>
 
-    <!--<div>{{info}}</div>-->
+    <template v-else>
 
-    <div v-if="rows !== undefined">
-
-        <center v-if="rows === null" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
-
-        <div v-else-if="rows.DMF_ERROR" class="alert alert-danger">{{ rows.message }}</div>
-
-        <template v-else>
-
-            <center v-if="!rows.length" class="m-2">Не найдено записей</center>
-
-            <template v-else>
-
-                <template v-for="col in columns">
-                    <div class="m-2" v-if="col.hidden">
-                        <span class="font-weight-bold">{{ col.label }}: </span>
-                        <template v-if="col.field == 'ObjectName'">
-                            <a href="#"
-                               @click="showObject(rows[0].ObjectID)">
-                                {{ rows[0].ObjectName }}
-                            </a>
-                        </template>
-                        <template v-else>{{ rows[0][col.field] }}</template>
-                    </div>
+        <template v-for="col in columns">
+            <div class="m-2" v-if="col.hidden">
+                <span class="font-weight-bold">{{ col.label }}: </span>
+                <template v-if="col.field == 'ObjectName'">
+                    <a href="#"
+                       @click="showObject(rows[0].ObjectID)">
+                        {{ rows[0].ObjectName }}
+                    </a>
                 </template>
-
-                <div :style="{'min-width': tableWidth + 'px'}">
-                    <vue-good-table :columns="columns" :rows="rows">
-
-                        <template slot="table-row" slot-scope="props">
-
-                            <a v-if="props.column.field == 'ObjectName'" href="#"
-                               @click="showObject(props.row.ObjectID)">
-                                {{ props.row.ObjectName }}
-                            </a>
-
-                            <span v-else>{{ props.row[props.column.field] }}</span>
-
-                        </template>
-
-                        <center slot="emptystate">
-                            Не найдено записей
-                        </center>
-
-                    </vue-good-table>
-                </div>
-
-            </template>
-
+                <template v-else>{{ rows[0][col.field] }}</template>
+            </div>
         </template>
 
-    </div>
+        <div :style="{'min-width': tableWidth + 'px'}">
+            <vue-good-table :columns="columns" :rows="rows">
 
+                <template slot="table-row" slot-scope="props">
+
+                    <a v-if="props.column.field == 'ObjectName'"
+                       href="#"
+                       @click="showObject(props.row.ObjectID, props.row.ObjectName, props.row.ObjectType)">
+                        {{ props.row.ObjectName }}
+                    </a>
+
+                    <span v-else>{{ props.row[props.column.field] }}</span>
+
+                </template>
+
+                <center slot="emptystate">
+                    Не найдено записей
+                </center>
+
+            </vue-good-table>
+        </div>
+
+    </template>
+</div>
 </template>
 
 <script>
-
-//import { mapActions, mapState } from 'vuex';
 
 import 'vue-good-table/dist/vue-good-table.css'
 import { VueGoodTable } from 'vue-good-table';
@@ -68,41 +53,14 @@ export default {
     {
         VueGoodTable
     },
-    props: ["FirmID", "ObjectID", "addPanel"],
-    data: function()
-    {
-        return {
-
-            queries:
-            {
-                data: {func: "GetChildrenHistoryCalcParams", FirmID: this.FirmID, ObjectID: this.ObjectID}
-            }
-        }
-    },
+    props: ["FirmID", "ObjectID", "data", "addPanel"],
     computed:
     {
-        //...mapState(["Objects"]),
-        /*info: function()
-        {
-            let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'CalcParamsInfo']);
-
-            if(data === undefined) this.reload();
-
-            return this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'CalcParamsInfo']);
-        },
         rows: function()
         {
-            let data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'CalcParamsInfo']);
-
-            if(data === undefined) this.reload();
-
-            data = this.dataState(this.Objects, [this.FirmID, this.ObjectID, 'CalcParamsInfo']);
-
-            if(!data || data.DMF_ERROR) return data;
-
             let res = [];
 
-            data.forEach((item) =>
+            this.data.forEach((item) =>
             {
                 let row = {};
 
@@ -117,39 +75,6 @@ export default {
                 row.ObjSort = this.objCode(row.ObjectName);
 
                 row.ObjectType = item.ObjectType;
-
-                row.value = item.Value;
-
-                row.param = item.CalcParam;
-
-                res.push(row)
-            });
-
-            return res;
-        },*/
-        rows: function()
-        {
-            let data = this.vuexLoad(this.queries).data;
-
-            if(!data || data.DMF_ERROR) return data;
-
-            let res = [];
-
-            data.forEach((item) =>
-            {
-                let row = {};
-
-                row.dateSort = new Date(Date.parse(item.Date));
-
-                row.date = this.dateForClient(row.dateSort, "month");
-
-                row.ObjectID = item.ObjectID;
-
-                row.ObjectName = this.vuexGet("Objects", this.FirmID, item.ObjectID, "info", "name");
-
-                row.ObjSort = this.objCode(row.ObjectName);
-
-                //row.ObjectType = this.vuexGet("Objects", this.FirmID, item.ObjectID, "info", "Type");
 
                 row.value = item.Value;
 
@@ -178,9 +103,6 @@ export default {
                 {
                     set[row[col.field]] = 1;
                 });
-
-                let cnt=0;
-
 
                 col.filterOptions = {
 
@@ -221,12 +143,6 @@ export default {
     },
     methods:
     {
-        //...mapActions(["LOAD_CHILDREN_HISTORY_CALC_PARAMS"]),
-        reload: function()
-        {
-            //this.LOAD_CHILDREN_HISTORY_CALC_PARAMS({FirmID: this.FirmID, ObjectID: this.ObjectID});
-            this.vuexClear(this.queries);
-        },
         sort(x, y, col, rowX, rowY)
         {
             if(col.field == "date")
@@ -262,11 +178,9 @@ export default {
 
             return res;
         },
-        showObject(ID)
+        showObject(ID, Name, Type)
         {
-            let name = this.vuexGet("Objects", this.FirmID, ID, "info", "name");
-
-            this.addPanel("Object", name, {FirmID: this.FirmID, ObjectID: ID});
+            this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ID, Name: Name, Type: Type});
         }
     }
 }

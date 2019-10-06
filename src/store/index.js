@@ -24,7 +24,6 @@ function toDMFerror(error) {
     }
     else if (error.response != undefined && error.response.status != undefined && error.response.status == 500) {
 
-        console.log("here");
         err.message = error.response.data.Message;
         err.code = 500;
     }
@@ -160,6 +159,10 @@ export const store = new Vuex.Store({
 
             root[path[path.length - 1]] = data;
         },
+        CLEAR: (state, path) => {
+            
+            store.commit('INSERT', {path: path, data: undefined});
+        },
         DESTROY_TREE: (state) => {
 
             state["Objects"]["TreeLevel"] = undefined;
@@ -227,16 +230,18 @@ export const store = new Vuex.Store({
                     {
                         let func = undefined;
 
-                        if(query.func == "TreeLevel") func = 'LOAD_TREE_LEVEL';
+                        //if(query.func == "TreeLevel") func = 'LOAD_TREE_LEVEL';
 
-                        if(query.func == "LSList") func = 'LOAD_LS_LIST';
+                        //if(query.func == "LSList") func = 'LOAD_LS_LIST';
 
-                        if(query.func == "GetChildrenHistoryCalcParams") func = 'LOAD_CHILDREN_HISTORY_CALC_PARAMS';
+                        //if(query.func == "GetChildrenHistoryCalcParams") func = 'LOAD_CHILDREN_HISTORY_CALC_PARAMS';
 
-                        if(query.func == "ObjectPropDetails") func = 'LOAD_PROPS_HISTORY';
+                        //if(query.func == "ObjectPropDetails") func = 'LOAD_PROPS_HISTORY';
 
-                        if(query.func == "CalcParamDetails") func = 'LOAD_CALC_PARAMS_HISTORY';
-
+                        //if(query.func == "CalcParamDetails") func = 'LOAD_CALC_PARAMS_HISTORY';
+                        
+                        if(query.func == "ObjectPropDetails" ||
+                           query.func == "CalcParamDetails") data[i] = data[i].Data;
 
                         if(func !== undefined ) dispatch(func, {query: query, data: data[i]});
                         else commit('INSERT', {path: getPath(query), data: data[i]});
@@ -256,6 +261,99 @@ export const store = new Vuex.Store({
             }
 
             dispatch('SERVER_REQUEST', {toServer: toServer, resolve: accepted, reject: rejected});
+        },
+        
+        SEND_DATA: ({commit, dispatch}, {query, accepted, rejected}) => {
+            
+            let resolve = () => {
+                
+                switch(query.func)
+                {
+                    case "TariffWrite":
+                    case "TariffDelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "GetTariffs"]);
+                        
+                        break;
+                    
+                    case "TariffTOWrite":
+                    case "TariffTODelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "GetTariffsTO"]);
+                        
+                        break;
+                    
+                    case "TariffValueWrite":
+                    case "TariffValueDelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "Tariffs", query.AttrID, "TariffValueDetails"]);
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "GetTariffs"])
+                        
+                        break;
+                        
+                    case "TariffTOValueWrite":
+                    case "TariffTOValueDelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "TariffsTO", query.TariffID, "TariffTOValueDetails"]);
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "GetTariffsTO"]);
+                        
+                        break;
+                    
+                    case "ObjectPropWrite":
+                    case "ObjectPropDelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "Props", query.AttrID, "ObjectPropDetails"]);
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "GetObjectProps"]);
+                        
+                        break;
+                        
+                    case "CalcParamWrite":
+                    case "CalcParamDelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "CalcParams", query.AttrID, "CalcParamDetails"]);
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "GetObjectCalcParams"]);
+                        
+                        break;
+                        
+                    case "ObjectTariffTOWrite":
+                    case "ObjectTariffTODelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectTariffTOState"]);
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectTariffTODetails"]);
+                        
+                        break;
+                        
+                    case "ObjectHardWrite":
+                    case "ObjectHardDelete":
+                    case "ObjectHardWorkWrite":
+                    case "ObjectHardWorkDelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardState"]);
+
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardDetails"]);
+                        
+                        break;
+                        
+                }
+                
+                accepted();
+            };
+            
+            let reject = (data) => {
+                
+                console.log(data);
+                
+                rejected( (toDMFerror(data)).message);
+            }
+            
+            console.log(getQuery(query));
+            
+            dispatch('SERVER_REQUEST', {toServer: getQuery(query), resolve: resolve, reject: reject});
         },
 
         INIT: ({state, dispatch}) => {
@@ -423,7 +521,9 @@ export const store = new Vuex.Store({
         LOAD_CHILDREN_HISTORY_CALC_PARAMS: ({commit}, {query, data}) => {
 
             let list = [];
-
+            
+            console.log("here");
+            
             data.forEach((item) => {
 
                 list.push({Date: item.Date, ObjectID: item.ObjectID, Value: item.Value, CalcParam: item.CalcParam});
@@ -516,7 +616,7 @@ export const store = new Vuex.Store({
                 
                 /*dispatch('LOAD_HISTORY', {ObjectID: ObjectID, FirmID: FirmID, AttrType: AttrType, AttrID: AttrID});*/
 
-                commit('INSERT', {path: getPath(query), data: undefined});
+                if(query) commit('INSERT', {path: getPath(query), data: undefined});
                 
                 accepted();
             }

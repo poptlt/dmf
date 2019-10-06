@@ -1,5 +1,8 @@
 <template>
     <div id="app" style="height: 100%; font-size: 16px">
+        
+        
+        
         <auth-dmf/>
 
         <div v-if="AuthState" class="d-flex flex-column" style="height: 100%">
@@ -57,12 +60,6 @@
                 </button>
                 
             </div>
-
-            <!--<div class="flex-fill d-flex" style="overflow: hidden">
-                <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border" v-bind:style="{width: (100 * widths[panel.type])+'%'}" style="max-width: 100vw">
-                    <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
-                </div>
-            </div>-->
 
             <div class="flex-fill row m-0" style="overflow: hidden">
                 <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border p-0" style="height: 100%">

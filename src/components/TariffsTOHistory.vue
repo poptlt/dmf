@@ -1,70 +1,55 @@
 <template>
-    <center v-if="state == 'changing'">{{ message }}</center>
+<div>
+    <div v-for="item in history">
 
-    <div v-else-if="state == 'done'" :class="{alert: true, 'alert-success': !error, 'alert-danger': error}" class="d-flex">
-        <div>{{ message }}</div>
-        <button @click="state = 'show'" class="flex-grow-0"><font-awesome-icon icon="times"/></button>
+        <div class="d-flex align-items-center p-2">
+
+            <button @click="Delete(item.date)" class="btn btn-danger btn-sm flex-grow-0">
+                    <font-awesome-icon icon="times"/>
+            </button>
+
+            <div class="ml-2">{{ dateForClient(item.date, "month") }}</div>
+        </div>
+
+        <table class="table table-bordered">
+            <template v-for="(kit, kitName) in item.value">
+                <tr v-for="(equipment, i) in kit">
+                    <td v-if="i==0" :rowspan="kit.length">{{ kitName }}</td>
+
+                    <td>{{ equipment.name }}</td>
+
+                    <td>{{ equipment.value }}</td>
+                </tr>
+            </template>
+        </table>
     </div>
 
-    <div v-else-if="history !== undefined">
+    <div class="d-flex align-items-center p-2">
 
-        <center v-if="!history" class="text-primary p-2"><font-awesome-icon icon="spinner" size="3x" pulse/></center>
+        <button v-if="newValue" @click="add" class="flex-grow-0 btn btn-success btn-sm mr-2">
+            <font-awesome-icon icon="plus"/>
+        </button>
 
-        <div v-else-if="history.DMF_ERROR" class="alert alert-danger">{{ history.message }}</div>
+        <Datepicker v-model="newDate" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true"/>
 
-        <template v-else>
+    </div>
 
-            <div v-for="item in history">
+    <table class="table table-bordered">
+        <template v-for="(kit, kitID) in input">
+            <tr v-for="(equipment, i) in kit.List">
+                <td v-if="i==0" :rowspan="kit.List.length">{{ kit.Name }}</td>
 
-                <div class="d-flex align-items-center p-2">
+                <td>{{ equipment.Name }}</td>
 
-                    <button @click="Delete(item.date)" class="btn btn-danger btn-sm flex-grow-0">
-                            <font-awesome-icon icon="times"/>
-                    </button>
-
-                    <div class="ml-2">{{ dateForClient(item.date, "month") }}</div>
-                </div>
-
-                <table class="table table-bordered">
-                    <template v-for="(kit, kitName) in item.value">
-                        <tr v-for="(equipment, i) in kit">
-                            <td v-if="i==0" :rowspan="kit.length">{{ kitName }}</td>
-
-                            <td>{{ equipment.name }}</td>
-
-                            <td>{{ equipment.value }}</td>
-                        </tr>
-                    </template>
-                </table>
-            </div>
-
-            <div class="d-flex align-items-center p-2">
-
-                <button v-if="newValue" @click="add" class="flex-grow-0 btn btn-success btn-sm mr-2">
-                    <font-awesome-icon icon="plus"/>
-                </button>
-
-                <Datepicker v-model="newDate" :monday-first="true" :language="ru" :format="dateFormatter" minimum-view="month" :bootstrap-styling="true"/>
-
-            </div>
-
-            <table class="table table-bordered">
-                <template v-for="(kit, kitID) in input">
-                    <tr v-for="(equipment, i) in kit.List">
-                        <td v-if="i==0" :rowspan="kit.List.length">{{ kit.Name }}</td>
-
-                        <td>{{ equipment.Name }}</td>
-
-                        <td class="p-1" align="center"><Number @change="equipment.onChange" :NoNegative="true" :Digits="5" :DigitsAfterPoint="2" :CanBeEmpty="true" style="width: 75px"/></td>
-                    </tr>
-                </template>
-            </table>
-
-            <div v-if="newValue === undefined" class="alert alert-warning m-1">Значение не соответствует типу</div>
-
+                <td class="p-1" align="center"><Number @change="equipment.onChange" :NoNegative="true" :Digits="5" :DigitsAfterPoint="2" :CanBeEmpty="true" style="width: 75px"/></td>
+            </tr>
         </template>
+    </table>
 
+    <div v-if="newValue === undefined" class="alert alert-warning m-1">
+        Значение не соответствует типу
     </div>
+</div>
 </template>
 
 <script>
@@ -80,7 +65,7 @@ import {ru} from 'vuejs-datepicker/dist/locale';
 import Number from './Inputs/Number.vue';
 
 export default {
-    props: ["FirmID", "TariffID"],
+    props: ["FirmID", "TariffID", "data", "type"],
     components:
     {
         Datepicker, Number
@@ -94,7 +79,7 @@ export default {
             newDate: new Date(),
             inputValue: {},
 
-            state: "show",
+            /*state: "show",
             message: "",
             error: false,
 
@@ -102,24 +87,18 @@ export default {
             {
                 history: {func: "TariffTOValueDetails", FirmID: this.FirmID, TariffID: this.TariffID},
                 type: {func: "GetHardTypes"}
-            }
+            }*/
         }
     },
     computed:
     {
         history: function()
         {
-            let history = this.vuexLoad(this.queries).history;
-
-            if(!history || history.DMF_ERROR) return history;
-
-            if(!this.type || this.type.DMF_ERROR) return this.type;
-
             let res = [];
 
-            this.newDate = new Date();
+            //this.newDate = new Date();
 
-            history.forEach((item) => {
+            this.data.forEach((item) => {
 
                 let cur = {date: new Date(Date.parse(item.Date)), value: {} };
 
@@ -142,10 +121,10 @@ export default {
 
             return res;
         },
-        type: function()
+        /*type: function()
         {
             return this.vuexLoad(this.queries).type;
-        },
+        },*/
         input: function()
         {
             let res = {};
@@ -196,42 +175,42 @@ export default {
     },
     methods:
     {
-        ...mapActions(['WRITE_HISTORY']),
-        reload: function()
-        {
-            let res = {history: this.queries.history};
-
-            if(this.type && this.type.DMF_ERROR) res.type = this.queries.type;
-
-            this.vuexClear(res);
-        },
+        ...mapActions(['SEND_DATA']),
         dateFormatter: function(date)
         {
             return this.dateForClient(date, "month");
         },
         add: function()
         {
-            //console.log(JSON.stringify(this.newValue));
-
-            let th = this;
+            let change = this.$parent.change;
 
             function accepted()
             {
-                th.state = "done", th.error = false;
-                th.message = "Запись добавлена";
+                change("done", "Запись добавлена");
             }
 
             function rejected(message)
             {
-                th.state = "done", th.error = true;
-                th.message = "Произошла ошибка при добавлении записи: " + message;
+                change("error", "Произошла ошибка при добавлении записи: " + message);
             }
 
             let date = this.dateForServer(this.newDate, "month");
 
-            this.state = "changing", this.message = "Добавление записи...";
-
-            this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, AttrType: "TariffsTO", AttrID: this.TariffID, date: date, value: this.newValue, query: this.queries.history, accepted: accepted, rejected: rejected});
+            change("changing", "Добавление записи");
+            
+            this.SEND_DATA({
+                query: {
+                    func: "TariffTOValueWrite",
+                    FirmID: this.FirmID,
+                    TariffID: this.TariffID,
+                    date: this.dateForServer(this.newDate, "month"),
+                    value: this.newValue
+                },
+                accepted: accepted,
+                rejected: rejected
+            });
+            
+            /*this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, AttrType: "TariffsTO", AttrID: this.TariffID, date: date, value: this.newValue, query: this.queries.history, accepted: accepted, rejected: rejected});*/
         },
         Delete: function(date)
         {
@@ -239,25 +218,34 @@ export default {
 
             if(!ok) return;
 
-            let th = this;
+            let change = this.$parent.change;
 
             function accepted()
             {
-                th.state = "done", th.error = false;
-                th.message = "Запись удалена";
+                change("done", "Запись удалена");
             }
 
             function rejected(message)
             {
-                th.state = "done", th.error = true;
-                th.message = "Произошла ошибка при удалении записи: " + message;
+                change("error", "Произошла ошибка при удалении записи: " + message);
             }
+            
+            change("changing", "Удаление записи");
+            
+            this.SEND_DATA({
+                query: {
+                    func: "TariffTOValueDelete",
+                    FirmID: this.FirmID,
+                    TariffID: this.TariffID,
+                    date: this.dateForServer(date, "month"),
+                },
+                accepted: accepted,
+                rejected: rejected
+            });
+            
+            /*date = this.dateForServer(date, "month");
 
-            this.state = "changing", this.message = "Удаление записи...";
-
-            date = this.dateForServer(date, "month");
-
-            this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, AttrType: "TariffsTO", AttrID: this.TariffID, date: date, query: this.queries.history, accepted: accepted, rejected: rejected});
+            this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, AttrType: "TariffsTO", AttrID: this.TariffID, date: date, query: this.queries.history, accepted: accepted, rejected: rejected});*/
         }
     }
 }

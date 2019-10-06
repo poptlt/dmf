@@ -1,4 +1,5 @@
 <template>
+<div>
     <div v-if="state == 'changing'"
          class="d-flex justify-content-center align-items-center p-2">
         <div class="flex-grow-0 mr-2">{{ message }}</div>
@@ -19,7 +20,10 @@
         </button>
     </div>
 
-    <div v-else><slot/></div>
+    <div v-show="state == 'show'">
+        <slot/>
+    </div>
+</div>
 </template>
 
 <script>

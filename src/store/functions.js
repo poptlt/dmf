@@ -108,7 +108,7 @@ export function getQuery(data)//что спрашивать у сервера
 
     //лицевые счета
     if(data.func == "LSList")
-    {
+    {        
         return ["LSList", data.ObjectID, data.FirmID];
     }
 
@@ -188,6 +188,88 @@ export function getQuery(data)//что спрашивать у сервера
     if(data.func == "GetDoc")
     {
         return ['GetDoc', data.DocumentID];
+    }
+    
+    //изменение истории
+    switch(data.func)
+    {
+        //изменение имени тарифа/добавление нового
+        case "TariffWrite":
+            
+            return ["TariffWrite", data.FirmID, data.TariffID, data.TariffName];
+            
+        case "TariffDelete":
+            
+            return ["TariffDelete", data.FirmID, data.TariffID];
+            
+        case "TariffTOWrite":
+            
+            return ["TariffTOWrite", data.FirmID, data.TariffID, data.TariffName];
+            
+        case "TariffTODelete":
+            
+            return ["TariffTODelete", data.FirmID, data.TariffID];
+        
+        //изменение значения тарифа(добавление/удаление записи в историю значений)
+        case "TariffValueWrite":
+            
+            return ["TariffValueWrite", data.FirmID, data.AttrID, data.date, data.value];
+            
+        case "TariffValueDelete":
+            
+            return ["TariffValueDelete", data.FirmID, data.AttrID, data.date];
+            
+        case "TariffTOValueWrite":
+            
+            return ["TariffTOValueWrite", data.FirmID, data.TariffID, data.date, data.value];
+            
+        case "TariffTOValueDelete":
+            
+            return ["TariffTOValueDelete", data.FirmID, data.TariffID, data.date];
+        
+        //изменение значения реквизита(добавление/удаление записи в историю значений)
+        case "ObjectPropWrite":
+            
+            return ["ObjectPropWrite", data.ObjectID, data.FirmID, data.AttrID, data.date, data.value];
+            
+        case "ObjectPropDelete":
+            
+            return ["ObjectPropDelete", data.ObjectID, data.FirmID, data.AttrID, data.date];
+        
+        //изменение значения параметра расчета(добавление/удаление записи в историю значений)
+        case "CalcParamWrite":
+            
+            return ["CalcParamWrite", data.ObjectID, data.FirmID, data.AttrID, data.date, data.value];
+            
+        case "CalcParamDelete":
+            
+            return ["CalcParamDelete", data.ObjectID, data.FirmID, data.AttrID, data.date];
+            
+            
+            
+        case "ObjectTariffTOWrite":
+            
+            return ["ObjectTariffTOWrite", data.FirmID, data.ObjectID, data.date, data.value];
+        
+        case "ObjectTariffTODelete":
+            
+            return ["ObjectTariffTODelete", data.FirmID, data.ObjectID, data.date, data.value];
+            
+        case "ObjectHardWrite":
+            
+            return ["ObjectHardWrite", data.FirmID, data.ObjectID, data.date, data.kitID, data.equipmentID];
+            
+        case "ObjectHardDelete":
+            
+            return ["ObjectHardDelete", data.FirmID, data.ObjectID, data.date, data.kitID];
+            
+        case "ObjectHardWorkWrite":
+            
+            return ["ObjectHardWorkWrite", data.FirmID, data.ObjectID, data.date, data.kitID, data.state];
+            
+        case "ObjectHardWorkDelete":
+            
+            return ["ObjectHardWorkDelete", data.FirmID, data.ObjectID, data.date, data.kitID];
     }
 }
 

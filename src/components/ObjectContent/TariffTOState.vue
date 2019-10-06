@@ -24,7 +24,6 @@
             </tr>
         </template>
     </table>
-    <!--<div>{{data}}</div>-->
 </div>
 </template>
 

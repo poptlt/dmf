@@ -1,56 +1,55 @@
 <template>
-<State ref="state">
-    <template v-if="isData(vuexLoad(queries))">
+<div>
+    <div v-for="(kit, i) in history" class="mb-4">
 
-        <div v-for="(kit, i) in history" class="mb-4">
+        <div class="text-center font-weight-bold p-2">
+            {{ kit.ComplectName }}
+        </div>
 
-            <div class="text-center font-weight-bold p-2">
-                {{ kit.ComplectName }}
-            </div>
+        <table class="table">
+            <tr v-for="(item, j) in kit.List">
 
-            <table class="table">
-                <tr v-for="(item, j) in kit.List">
+                <td class="px-1">
+                    <button v-if="j == kit.List.length-1"
+                            @click="edit((item.TypeID) ? 'equipment' : 'state', 'delete', item.Date, kit.ComplectID)"
+                            class="btn btn-danger btn-sm">
+                        <font-awesome-icon icon="times"/>
+                    </button>
+                </td>
 
-                    <td class="px-1">
-                        <button v-if="j == kit.List.length-1"
-                                @click="edit((item.TypeID) ? 'equipment' : 'state', 'delete', item.Date, kit.ComplectID)"
-                                class="btn btn-danger btn-sm">
-                            <font-awesome-icon icon="times"/>
-                        </button>
-                    </td>
+                <td>{{ dateForClient(new Date(Date.parse(item.Date)), 'day') }}</td>
+                <td v-if="item.TypeID">Установлено: {{ item.TypeName }}</td>
+                <td v-else>{{ (item.State) ? 'Включено' : 'Выключено' }}</td>
+            </tr>
+        </table>
 
-                    <td>{{ dateForClient(new Date(Date.parse(item.Date)), 'day') }}</td>
-                    <td v-if="item.TypeID">Установлено: {{ item.TypeName }}</td>
-                    <td v-else>{{ (item.State) ? 'Включено' : 'Выключено' }}</td>
-                </tr>
-            </table>
+        <div class="mx-2">Установить оборудование:</div>
+        <div class="d-flex align-items-center p-1">
 
-            <div class="mx-2">Установить оборудование:</div>
-            <div class="d-flex align-items-center p-1">
+            <Datepicker v-model="newDate[i].equipment"
+                        :disabled-dates="disabledDates[i]"
+                        :monday-first="true"
+                        :language="ru"
+                        :format="dateFormatter"
+                        minimum-view="day"
+                        :bootstrap-styling="true"
+                        style="width: 110px"
+                        class="flex-shrink-0"/>
 
-                <Datepicker v-model="newDate[i].equipment"
-                            :disabled-dates="disabledDates[i]"
-                            :monday-first="true"
-                            :language="ru"
-                            :format="dateFormatter"
-                            minimum-view="day"
-                            :bootstrap-styling="true"
-                            style="width: 110px"
-                            class="flex-shrink-0"/>
+            <select v-model="newEquipment[i]" class="form-control ml-1">
+                <option v-for="equipment in equipmentList[i]" :value="equipment.ID">
+                    {{ equipment.Name }}
+                </option>
+            </select>
 
-                <select v-model="newEquipment[i]" class="form-control ml-1">
-                    <option v-for="equipment in equipmentList[i]" :value="equipment.ID">
-                        {{ equipment.Name }}
-                    </option>
-                </select>
+            <button @click="edit('equipment', 'add', newDate[i].equipment, {kitID: kit.ComplectID, equipmentID: newEquipment[i]})"
+                    class="btn btn-success btn-sm ml-1 flex-grow-0">
+                <font-awesome-icon icon="plus"/>
+            </button>
 
-                <button @click="edit('equipment', 'add', newDate[i].equipment, newEquipment[i])"
-                        class="btn btn-success btn-sm ml-1 flex-grow-0">
-                    <font-awesome-icon icon="plus"/>
-                </button>
+        </div>
 
-            </div>
-
+        <template v-if="newState[i] !== null">
             <div class="mx-2">Изменить состояние:</div>
             <div class="d-flex align-items-center p-1">
 
@@ -70,140 +69,96 @@
                 </button>
 
             </div>
+        </template>
 
-        </div>
-
-    </template>
-    <NoData v-else :data="vuexLoad(queries)"/>
-</State>
+    </div>
+</div>
 </template>
 
 <script>
 
 import { mapActions } from 'vuex';
-
-import State from './State.vue';
-
-import NoData from './NoData.vue';
-
+    
 import Datepicker from 'vuejs-datepicker';
 
 import {ru} from 'vuejs-datepicker/dist/locale';
-
+    
 export default {
-    props: ["FirmID", "ObjectID"],
+    props: ["FirmID", "ObjectID", "history", "kits"],
     components:
     {
-        State, NoData, Datepicker
+        Datepicker
     },
     data: function()
-    {
-        return {
+    {        
+        let res = {ru: ru};
+        
+        res.equipmentList = [];
 
-            ru: ru,
-            queries:
-            {
-                history: {func: "ObjectHardDetails", FirmID: this.FirmID, ObjectID: this.ObjectID},
+        res.newEquipment = [];
 
-                kits: {func: "GetHardTypes"}
-            },
+        res.newState = [];
 
-            equipmentList: undefined,
-            newEquipment: undefined,
-            newState: undefined,
-            newDate: undefined,
-            disabledDates: undefined,
+        res.newDate = [];
 
-            prevHistory: undefined,
-            prevKits: undefined
-        }
-    },
-    computed:
-    {
-        history: function()
-        {
-            let history = this.vuexLoad(this.queries).history;
+        res.disabledDates = [];
 
-            let kits = this.vuexLoad(this.queries).kits;
+        this.history.forEach((kit) => {
 
-            if(history !== this.prevHistory || kits !== this.prevKits)
-            {
+            let kitID = kit.ComplectID;
 
-            this.equipmentList = [];
+            let lastID = "-";
 
-            this.newEquipment = [];
+            let lastState = undefined;
 
-            this.newState = [];
+            let lastDate = new Date(1980, 0);
 
-            this.newDate = [];
+            kit.List.forEach((item) => {
 
-            this.disabledDates = [];
-
-            history.forEach((kit) => {
-
-                let kitID = kit.ComplectID;
-
-                let lastID = "-";
-
-                let lastState = undefined;
-
-                let lastDate = new Date(1980, 0);
-
-                kit.List.forEach((item) => {
-
-                    lastDate = new Date(Date.parse(item.Date));
-
-                    lastDate.setDate(lastDate.getDate() + 1);
-
-                    if(item.TypeID) lastID = item.TypeID, lastState = true;
-                    else lastState = item.State;
-                });
-
-                let equipment = [];
-                for(let ID in kits[kitID].List)
-                {
-                    if(ID != lastID) equipment.push({ID: ID, Name: kits[kitID].List[ID]});
-                }
-                if(lastID != "-") equipment.push({ID: "-", Name: "Нет оборудования"});
-
-                this.equipmentList.push(equipment);
-
-                this.newEquipment.push(equipment[0].ID);
-
-                this.newState.push(lastState ? false : true);
-
-                this.disabledDates.push({to: lastDate});
-
-                let curDate = new Date();
-                if(curDate < lastDate) curDate = lastDate;
-                this.newDate.push({equipment: curDate, state: curDate});
-
+                let date = new Date(Date.parse(item.Date));
+                
+                lastDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
+                                
+                if(item.TypeID) lastID = item.TypeID, lastState = true;
+                else lastState = item.State;
             });
+
+            let equipment = [];
+            for(let ID in this.kits[kitID].List)
+            {
+                if(ID != lastID) equipment.push({ID: ID, Name: this.kits[kitID].List[ID]});
             }
+            if(lastID != "-") equipment.push({ID: "-", Name: "Нет оборудования"});
 
-            this.prevHistory = history;
-            this.prevKits = kits;
+            res.equipmentList.push(equipment);
 
-            return history;
-        }
+            res.newEquipment.push(equipment[0].ID);
+
+            res.newState.push(lastState ? false : true);
+
+            res.disabledDates.push({to: lastDate});
+
+            let curDate = new Date();
+            if(curDate < lastDate) curDate = lastDate;
+            res.newDate.push({equipment: curDate, state: curDate});
+
+        });
+        
+        return res;
     },
     methods:
     {
-        ...mapActions(["WRITE_EQUIPMENT_HISTORY"]),
+        ...mapActions(["SEND_DATA"]),
         dateFormatter: function(date)
         {
             return this.dateForClient(date, "day");
-        },
-        reload: function()
-        {
-            this.vuexClear(this.queries);
         },
         edit: function(type, operation, date, value)
         {
             if(operation == "add") date = this.dateForServer(date, "day");
 
-            let state = this.$refs.state;
-
+            let change = this.$parent.change;
+            
             function accepted()
             {
                 let message;
@@ -215,7 +170,7 @@ export default {
                 }
                 else message = "Запись удалена";
 
-                state.change("done", message);
+                change("done", message);
             }
 
             function rejected(error)
@@ -231,7 +186,7 @@ export default {
 
                 message += ": " + error;
 
-                state.change("error", message);
+                change("error", message);
             }
 
             let message;
@@ -243,36 +198,50 @@ export default {
             }
             else message = "Удаление записи";
 
-            state.change("changing", message);
+            change("changing", message);
 
-            let toVuex = {
+            let query = {
 
-                type: type,
-                operation: operation,
                 FirmID: this.FirmID,
                 ObjectID: this.ObjectID,
                 date: date,
-                accepted: accepted,
-                rejected: rejected
             };
 
             if(type == "equipment")
             {
-                if(operation == "add") toVuex.equipmentID = value;
-                else toVuex.kitID = value;
+                if(operation == "add")
+                {
+                    query.func = "ObjectHardWrite";
+                    query.kitID = value.kitID;
+                    query.equipmentID = value.equipmentID;
+                }
+                else
+                {
+                    query.func = "ObjectHardDelete";
+                    query.kitID = value;
+                }
             }
             if(type == "state")
             {
-                if(operation == "add") toVuex.kitID = value.kitID, toVuex.state = value.state;
-                else toVuex.kitID = value;
+                if(operation == "add")
+                {
+                    query.func = "ObjectHardWorkWrite";
+                    query.kitID = value.kitID;
+                    query.state = value.state;
+                }
+                else
+                {
+                    query.func = "ObjectHardWorkDelete";
+                    query.kitID = value;
+                }
             }
 
-            this.WRITE_EQUIPMENT_HISTORY(toVuex);
+            this.SEND_DATA({query: query, accepted: accepted, rejected: rejected});
         }
     }
 }
 </script>
 
 <style>
-
+    
 </style>
