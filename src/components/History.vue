@@ -70,9 +70,7 @@ export default {
         Datepicker, String, Number, List, Complex
     },
     data: function()
-    {
-        console.log(this.AttrType);
-        
+    {        
         let res = {
             ru: ru,
             calendarView: (this.AttrType == "Props") ? "day" : "month",
@@ -125,82 +123,12 @@ export default {
             }
             
             if(res.newDate < res.disabledDates.to) res.newDate = res.disabledDates.to;
-            
         }
         
         return res;
     },
     computed:
     {
-        /*queries: function()
-        {
-            let res = {history: {FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: this.AttrID}};
-            
-            if(this.AttrType == "Props") res.history.func = 'ObjectPropDetails';
-            
-            if(this.AttrType == "CalcParams") res.history.func = 'CalcParamDetails';
-
-            if(this.AttrType == "Tariffs") res.history.func = 'TariffValueDetails';
-
-            if(this.AttrType != "Tariffs")
-            {
-                res.types = {func: "DataTypes", FirmID: this.FirmID};
-            }
-
-            return res;
-        },
-        History: function()
-        {
-            let data = this.vuexLoad(this.queries).history;
-
-            if(!data || data.DMF_ERROR) return data;
-                        
-            let res = [];
-            
-            this.disabledDates.to = new Date(1980, 0);
-            
-            for(let i=data.length-1; i>=0; i--)
-            {
-                res[i] = {Value: data[i].Value};
-        
-                let date = new Date(Date.parse(data[i].Date));
-                                
-                res[i].Date = this.dateFormatter(date);
-                
-                if(this.AttrType == "Props") date.setDate(date.getDate() + 1);
-                else date.setMonth(date.getMonth() + 1);
-                
-                if(this.AttrType == "CalcParams")
-                {
-                    if(data[i].NodeID == this.ObjectID)
-                    {
-                        if(this.disabledDates.to < date)
-                        {
-                            this.disabledDates.to = date;
-                            res[i].delete = data[i].Date;
-                        }
-                    }
-                    else
-                    {
-                        res[i].NodeID = data[i].NodeID;
-                        res[i].NodeName = this.vuexGet("Objects", this.FirmID, data[i].NodeID, "info", "name");
-                    }
-                }
-                else
-                {
-                    if(this.disabledDates.to < date)
-                    {
-                        this.disabledDates.to = date;
-                        res[i].delete = data[i].Date;
-                    }
-                }
-                
-            }
-            
-            if(this.newDate < this.disabledDates.to) this.newDate = this.disabledDates.to;
-                        
-            return res;
-        },*/
         type: function()
         {
             if(this.AttrType == "Tariffs")
@@ -262,8 +190,6 @@ export default {
                 accepted: accepted,
                 rejected: rejected
             });
-            
-            /*this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, value: this.newValue, query: this.queries.history, accepted: accepted, rejected: rejected});*/
         },
         Delete: function(date)
         {
@@ -302,8 +228,6 @@ export default {
                 accepted: accepted,
                 rejected: rejected
             });
-            
-            /*this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, ObjectID: this.ObjectID, AttrType: this.AttrType, AttrID: this.AttrID, date: date, query: this.queries.history, accepted: accepted, rejected: rejected})*/
         },
         showObject: function(ID, Name, Type)
         {

@@ -171,41 +171,11 @@ export default {
             urlMessage: "",
         }
     },
-    /*computed:
-    {
-        queries: function()
-        {
-            let res = {
-                props: {func: "GetObjectProps", FirmID: this.FirmID, ObjectID: this.ObjectID},
-
-                calcParams: {func: "GetObjectCalcParams", FirmID: this.FirmID, ObjectID: this.ObjectID},
-
-                tariffsTO: {func: "GetTariffsTO", FirmID: this.FirmID},
-
-                tariffTOState: {func: "ObjectTariffTOState", FirmID: this.FirmID, ObjectID: this.ObjectID},
-
-                equipmentState: {func: "ObjectHardState", FirmID: this.FirmID, ObjectID: this.ObjectID}
-            };
-
-            if(this.ObjectType == "Firm")
-            {
-                res.tariffs = {func: "GetTariffs", FirmID: this.FirmID};
-
-                res.bankAccounts = {func: "GetBankAccounts", FirmID: this.FirmID};
-
-                res.hardTypes = {func: "GetHardTypes"};
-            }
-
-            return res;
-        }
-    },*/
     methods:
     {
         ...mapActions(["GET_URL"]),
         showHistory: function(AttrType, AttrID, Name)
         {
-            //let label = this.vuexGet("Objects", this.FirmID, this.ObjectID, "info", "name") + " " + Name;
-
             this.addPanel("History", this.Name + " " + Name, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
         },
         showTariffTOHistory: function()

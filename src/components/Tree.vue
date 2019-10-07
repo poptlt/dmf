@@ -10,22 +10,12 @@
 
 import TreeVertex from './TreeVertex.vue';
 
-import { mapMutations } from 'vuex';
-
 export default {
     components:
     {
         TreeVertex
     },
     props: ["addPanel", "roots"],
-    methods:
-    {
-        ...mapMutations(['DESTROY_TREE']),
-        reload: function()
-        {            
-            this.DESTROY_TREE();
-        }
-    }
 }
 </script>
 

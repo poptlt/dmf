@@ -47,7 +47,7 @@
 
 <script>
 
-import { mapActions, mapState } from 'vuex';
+import { mapActions } from 'vuex';
 
 export default {
     props: ["tariffs", "FirmID", "FirmName", "addPanel"],
@@ -64,9 +64,7 @@ export default {
         ...mapActions(["SEND_DATA"]),
         showHistory: function(ID, Name)
         {
-            //let label = this.vuexGet("Objects", this.FirmID, this.FirmID, "info", "name") + " " + Name;
-
-            this.addPanel("History", this.ObjectName + " " + Name, {AttrType: "Tariffs", FirmID: this.FirmID, ObjectID: this.FirmID, AttrID: ID});
+            this.addPanel("History", this.FirmName + " " + Name, {AttrType: "Tariffs", FirmID: this.FirmID, ObjectID: this.FirmID, AttrID: ID});
         },
         Delete: function(ID)
         {

@@ -96,8 +96,6 @@ export default {
         ...mapActions(["SEND_DATA"]),
         showHistory: function(ID, name)
         {
-            //let label = this.vuexGet("Objects", this.FirmID, this.FirmID, "info", "name") + " " + name;
-
             this.addPanel("TariffsTOHistory", this.FirmName + " " + name, {FirmID: this.FirmID, TariffID: ID});
         },
         Delete: function(ID)

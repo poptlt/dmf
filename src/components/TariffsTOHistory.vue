@@ -73,21 +73,10 @@ export default {
     data: function()
     {
         return {
-
             ru: ru,
 
             newDate: new Date(),
             inputValue: {},
-
-            /*state: "show",
-            message: "",
-            error: false,
-
-            queries:
-            {
-                history: {func: "TariffTOValueDetails", FirmID: this.FirmID, TariffID: this.TariffID},
-                type: {func: "GetHardTypes"}
-            }*/
         }
     },
     computed:
@@ -95,8 +84,6 @@ export default {
         history: function()
         {
             let res = [];
-
-            //this.newDate = new Date();
 
             this.data.forEach((item) => {
 
@@ -121,10 +108,6 @@ export default {
 
             return res;
         },
-        /*type: function()
-        {
-            return this.vuexLoad(this.queries).type;
-        },*/
         input: function()
         {
             let res = {};
@@ -209,8 +192,6 @@ export default {
                 accepted: accepted,
                 rejected: rejected
             });
-            
-            /*this.WRITE_HISTORY({operation: "add", FirmID: this.FirmID, AttrType: "TariffsTO", AttrID: this.TariffID, date: date, value: this.newValue, query: this.queries.history, accepted: accepted, rejected: rejected});*/
         },
         Delete: function(date)
         {
@@ -242,10 +223,6 @@ export default {
                 accepted: accepted,
                 rejected: rejected
             });
-            
-            /*date = this.dateForServer(date, "month");
-
-            this.WRITE_HISTORY({operation: "delete", FirmID: this.FirmID, AttrType: "TariffsTO", AttrID: this.TariffID, date: date, query: this.queries.history, accepted: accepted, rejected: rejected});*/
         }
     }
 }
