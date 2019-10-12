@@ -1,9 +1,9 @@
 <template>
 <table class="table table-hover">
     <tbody>
-        <tr v-for="LS in list" @click="showLS(LS.LSID, LS.LSName)">
+        <tr v-for="LS in list" @click="showObject(LS.Object)">
             <td>{{ LS.Number }}</td>
-            <td>{{ LS.AdressAdd }}</td>
+            <td>{{ LS.Name }}</td>
             <td class="text-right">{{ LS.Balance }}</td>
         </tr>
     </tbody>
@@ -13,13 +13,6 @@
 <script>
 
 export default {
-    props: ["FirmID", "ObjectID", "addPanel", "list"],
-    methods:
-    {
-        showLS: function(ID, name)
-        {
-            this.addPanel("Object", name, {FirmID: this.FirmID, ObjectID: ID, Name: name, Type: "LS"});
-        }
-    }
+    props: ["FirmID", "ObjectID", "addPanel", "showObject", "list"],
 }
 </script>

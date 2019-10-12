@@ -18,7 +18,8 @@
                     </div>
                 </template>
             </div>
-            <div @click="showObject" style="padding-bottom: 10px" class="flex-grow-0">{{NodeName}}</div>
+            
+            <div @click="showObject(object)" style="padding-bottom: 10px; cursor: pointer" class="flex-grow-0">{{Name}}</div>
             <div v-if="LSQnt" class="flex-grow-0 pl-2">
                 <button @click="showLS" class="btn btn-sm btn-primary p-0" style="font-size: inherit">ЛС({{ LSQnt }})</button>
             </div>
@@ -37,7 +38,7 @@
                     <div v-if="i+1<children.length" class="border-left border-primary"/>
                 </div>
                 
-                <TreeVertex v-bind="child" :addPanel="addPanel"/>
+                <TreeVertex :object="child.Object" v-bind="child" :addPanel="addPanel" :showObject="showObject"/>
             </div>
 
         </div>
@@ -53,7 +54,7 @@ import { mapActions } from 'vuex';
 
 export default {
     name: "TreeVertex",
-    props: ["addPanel", "FirmID", "NodeID", "NodeName", "LSQnt", "NodeFullName", "NodesQnt", "Roles", "Type"],
+    props: ["addPanel", "showObject", "Name", "LSQnt", "NodesQnt", "object"],
     data: function()
     {
         return {
@@ -64,7 +65,7 @@ export default {
     {
         children: function()
         {
-            return this.vuexGet("Objects", this.FirmID, this.NodeID, "TreeLevel");
+            return this.vuexGet("Objects", this.object.FirmID, this.object.ObjectID, "TreeLevel");
         },
     },
     methods:
@@ -78,24 +79,20 @@ export default {
                 {
                     if(this.children.DMF_ERROR)
                     {
-                        this.LOAD_DATA([{func: "TreeLevel", FirmID: this.FirmID, ObjectID: this.NodeID}]);
+                        this.LOAD_DATA([{func: "TreeLevel", FirmID: this.object.FirmID, ObjectID: this.object.ObjectID}]);
                     }
                     else this.opened=false;
                 }
                 else
                 {
-                    if(!this.children) this.LOAD_DATA([{func: "TreeLevel", FirmID: this.FirmID, ObjectID: this.NodeID}]);
+                    if(!this.children) this.LOAD_DATA([{func: "TreeLevel", FirmID: this.object.FirmID, ObjectID: this.object.ObjectID}]);
                     this.opened=true;
                 }
             }
         },
         showLS: function()
         {
-            this.addPanel("LSList", this.NodeFullName, {FirmID: this.FirmID, ObjectID: this.NodeID});
-        },
-        showObject: function()
-        {
-            this.addPanel("Object", this.NodeFullName, {FirmID: this.FirmID, ObjectID: this.NodeID, Name: this.NodeFullName, Type: this.Type});
+            this.addPanel("LSList", this.object.Name, {FirmID: this.object.FirmID, ObjectID: this.object.ObjectID});
         }
     }
 }

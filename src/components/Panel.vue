@@ -11,36 +11,26 @@
             </button>
         </div>
         <div style="overflow: auto" class="pb-3">
-            <!--<h5 v-if="!main" class="text-xs-center">{{ Objects[info.FirmID][info.FirmID].Name }}</h5>-->
-            <template v-if="type == 'EquipmentHistory' ||
-                            type == 'ObjectTariffTOHistory' ||
-                            type == 'Tree' ||
-                            type == 'LSList' ||
-                            type == 'Document' ||
-                            type == 'CalcParams' ||
-                            type == 'TariffsTOHistory' ||
-                            type == 'History'">
-
-                <State ref="state">
-                    
-                    <component :is="type"
-                               ref="content"
-                               v-if="isData(vuexLoad(queries))"
-                               v-bind="combine(info, vuexLoad(queries))"
-                               :addPanel="addPanel"
-                               :setHeader="setHeader"/>
-                    
-                    <NoData v-else :data="vuexLoad(queries)"/>
-                    
-                </State>
             
-            </template>
-
-            <Object v-else-if="type == 'Object'"
+            <Object v-if="type == 'Object'"
                     v-bind="combine(info, vuexLoad(queries))"
-                    :addPanel="addPanel"/>
+                    :addPanel="addPanel"
+                    :showObject="showObject"/>
             
-            <component v-else :is="type" ref="content" v-bind="info" :addPanel="addPanel" />
+            <State v-else ref="state">
+                
+                <component :is="type"
+                           ref="content"
+                           v-if="isData(vuexLoad(queries))"
+                           v-bind="combine(info, vuexLoad(queries))"
+                           :addPanel="addPanel"
+                           :showObject="showObject"
+                           :setHeader="setHeader"/>
+                    
+                <NoData v-else :data="vuexLoad(queries)"/>
+                    
+            </State>
+            
         </div>
     </div>
 
@@ -98,7 +88,8 @@ export default {
             default: ""
         },
         info: {},
-        addPanel: {}
+        addPanel: {},
+        showObject: {}
 
     },
     data: function()
@@ -216,22 +207,8 @@ export default {
         },
         reload: function()
         {
-            if(this.type == "EquipmentHistory" ||
-               this.type == "ObjectTariffTOHistory" ||
-               this.type == "LSList" ||
-               this.type == "Object" ||
-               this.type == "Document" ||
-               this.type == "CalcParams" ||
-               this.type == "TariffsTOHistory" ||
-               this.type == "History")
-            {
-                this.vuexClear(this.queries);
-            }
-            else if(this.type == "Tree")
-            {
-                this.DESTROY_TREE();
-            }
-            else this.$refs.content.reload();
+            if(this.type == "Tree") this.DESTROY_TREE();
+            else this.vuexClear(this.queries);
         },
         setHeader: function(header)
         {

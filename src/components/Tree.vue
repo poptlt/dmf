@@ -1,7 +1,11 @@
 <template>
 
 <div style="padding: 10px">
-    <TreeVertex v-for="node in roots" v-bind="node" :addPanel="addPanel"/>
+    <TreeVertex v-for="node in roots"
+                :object="node.Object"
+                v-bind="node"
+                :addPanel="addPanel"
+                :showObject="showObject"/>
 </div>
 
 </template>
@@ -15,7 +19,7 @@ export default {
     {
         TreeVertex
     },
-    props: ["addPanel", "roots"],
+    props: ["addPanel", "showObject", "roots"],
 }
 </script>
 

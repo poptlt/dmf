@@ -63,7 +63,13 @@
 
             <div class="flex-fill row m-0" style="overflow: hidden">
                 <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border p-0" style="height: 100%">
-                    <Panel :label="panel.label" :main="i==0" :type="panel.type" :info="panel.info" v-on:delete="deletePanel(i)" :addPanel="addPanel"/>
+                    <Panel :label="panel.label"
+                           :main="i==0"
+                           :type="panel.type"
+                           :info="panel.info"
+                           v-on:delete="deletePanel(i)"
+                           :addPanel="addPanel"
+                           :showObject="showObject"/>
                 </div>
             </div>
 
@@ -172,6 +178,10 @@ export default {
         addPanel: function(type, label, info)
         {            
             this.panels.push({type: type, label: label, info: info});
+        },
+        showObject: function({FirmID, ObjectID, Name, Type, Roles})
+        {
+            this.addPanel("Object", Name, {FirmID: FirmID, ObjectID: ObjectID, Name: Name, Type: Type, Roles: Roles});
         },
         deletePanel: function(i)
         {

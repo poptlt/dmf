@@ -338,7 +338,7 @@ export const store = new Vuex.Store({
                 rejected( (toDMFerror(data)).message);
             }
             
-            //console.log(getQuery(query));
+            console.log(getQuery(query));
             
             dispatch('SERVER_REQUEST', {toServer: getQuery(query), resolve: resolve, reject: reject});
         },

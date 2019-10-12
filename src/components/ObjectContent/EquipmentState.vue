@@ -2,7 +2,7 @@
 <div>
     <table class="table">
         <template v-for="(item, i) in data">
-            <tr :style="{'background-color': (item.State) ? 'PaleGreen' : 'LightCoral'}">
+            <tr :style="{'background-color': (item.State) ? '#ccffcc' : '#ffcccc'}">
                 <td>{{ item.ComplectName }}</td>
                 <td>{{ item.TypeName }}</td>
                 <td class="px-0">
@@ -17,17 +17,24 @@
                     <div>
                         Дата установки: {{ dateForClient(new Date(Date.parse(item.DateInstall)), 'day') }}
                     </div>
-                    <div>
-                        Установлено на <a href="#">{{ item.ObjectInstallName }}</a>
+                    <div v-if="ObjectID != item.ObjectInstallID">
+                        Установлено на 
+                        <a href="#"
+                           @click="showObject(item.ObjectInstallID, item.ObjectInstallName)">
+                            {{ item.ObjectInstallName }}
+                        </a>
                     </div>
                     <template v-if="item.DateState !== null">
                         <div>
                             Дата {{ (item.State) ? 'включения' : 'выключения' }}:
                             {{ dateForClient(new Date(Date.parse(item.DateState)), 'day') }}
                         </div>
-                        <div>
+                        <div v-if="ObjectID != item.ObjectInstallID">
                             {{ (item.State) ? 'Включено' : 'Выключено' }} на
-                            <a href="#">{{ item.ObjectStateName }}</a>
+                            <a href="#"
+                               @click="showObject(item.ObjectStateID, item.ObjectStateName)">
+                                {{ item.ObjectStateName }}
+                            </a>
                         </div>
                     </template>
                 </td>
@@ -42,11 +49,10 @@
 import Vue from 'vue';
 
 export default {
-    props: ["data"],
+    props: ["data", "FirmID", "ObjectID"],
     data: function()
     {
         return {
-
             opened: []
         }
     },
@@ -56,6 +62,10 @@ export default {
         {
             Vue.set(this.opened, i, (this.opened[i]) ? false : true);
         },
+        showObject: function(ID, Name, Type)
+        {
+            //this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ID, Name: Name, Type: Type});
+        }
     }
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
 <div>    
-    <TariffTOState :data="history" :remove="remove"/>
+    <TariffTOState :data="history" :FirmID="FirmID" :ObjectID="ObjectID" :remove="remove"/>
     
     <div v-if="tariffs.length" class="d-flex align-items-center p-1">
 

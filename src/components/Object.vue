@@ -29,7 +29,9 @@
                 </button>
 
             </div>
-            <TariffTOState :data="tariffTOState"/>
+            <TariffTOState :data="tariffTOState"
+                           :FirmID="FirmID"
+                           :ObjectID="ObjectID"/>
 
 
             <div class="d-flex justify-content-between align-items-center">
@@ -41,7 +43,9 @@
                 </button>
 
             </div>
-            <EquipmentState :data="equipmentState"/>
+            <EquipmentState :data="equipmentState"
+                            :FirmID="FirmID"
+                            :ObjectID="ObjectID"/>
 
         </template>
         <NoData v-else :data="[props, tariffTOState, equipmentState]"/>
@@ -155,7 +159,7 @@ import Calculation from './ObjectContent/Calculation.vue';
 import Receipt from './ObjectContent/Receipt.vue';
 
 export default {
-    props: ["FirmID", "ObjectID", "Name", "Type",
+    props: ["FirmID", "ObjectID", "Name", "Type", "Roles",
             "props", "calcParams", "tariffTOState", "equipmentState", "tariffs", "tariffsTO", "bankAccounts",
             "addPanel"],
     components:
