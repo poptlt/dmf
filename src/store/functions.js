@@ -48,6 +48,10 @@ export function getPath(data)//куда класть данные во vuex
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectHardState"];
     }
+    if(data.func == "GetLSTurnover")
+    {
+        return ["Objects", data.FirmID, data.LSID, "GetLSTurnover", data.year];
+    }
 
     //изменения в параметрах дочерних
     if(data.func == "GetChildrenHistoryCalcParams")
@@ -140,6 +144,10 @@ export function getQuery(data)//что спрашивать у сервера
     if(data.func == "ObjectHardState")
     {
         return ["ObjectHardState", data.FirmID, data.ObjectID];
+    }
+    if(data.func == "GetLSTurnover")
+    {
+        return ["GetLSTurnover", data.LSID, data.year];
     }
 
     //изменения в параметрах дочерних

@@ -183,7 +183,11 @@ export const store = new Vuex.Store({
                     }
                 }
             }
-        }
+        },
+        CLEAR_TURNOVER: (state, {FirmID, LSID}) => {
+            
+            store.commit('INSERT', {path: ["Objects", FirmID, LSID, "GetLSTurnover"], data: undefined});
+        },
     },
 
     actions : {

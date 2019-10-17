@@ -200,7 +200,7 @@ export default {
     },
     methods:
     {
-        ...mapMutations(['DESTROY_TREE']),
+        ...mapMutations(['DESTROY_TREE', 'CLEAR_TURNOVER']),
         remove: function()
         {
             this.$emit('delete');
@@ -209,6 +209,11 @@ export default {
         {
             if(this.type == "Tree") this.DESTROY_TREE();
             else this.vuexClear(this.queries);
+            
+            if(this.type == "Object")
+            {
+                this.CLEAR_TURNOVER({FirmID: this.info.FirmID, LSID: this.info.ObjectID});
+            }
         },
         setHeader: function(header)
         {

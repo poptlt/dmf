@@ -25,13 +25,15 @@
                 <div class="text-center font-weight-bold">Тарифы</div>
                 <button @click="showTariffTOHistory"
                         class="border btn btn-light btn-sm m-1 flex-grow-0">
-                    История
+                    <font-awesome-icon icon="edit"/>
                 </button>
 
             </div>
             <TariffTOState :data="tariffTOState"
                            :FirmID="FirmID"
-                           :ObjectID="ObjectID"/>
+                           :ObjectID="ObjectID"
+                           :addPanel="addPanel"
+                           :showObject="showObject"/>
 
 
             <div class="d-flex justify-content-between align-items-center">
@@ -39,7 +41,7 @@
                 <div class="text-center font-weight-bold">Оборудование</div>
                 <button @click="showEquipmentHistory"
                         class="border btn btn-light btn-sm m-1 flex-grow-0">
-                    История
+                    <font-awesome-icon icon="edit"/>
                 </button>
 
             </div>
@@ -111,9 +113,7 @@
 
     <Tab v-if="Type == 'LS'" :accordionID="accordionID" label="Баланс">
 
-        пока не готов
-
-        <!--<Turnover :turnover="turnover" :balance="balance" :FirmID="FirmID" :ObjectID="ObjectID" :addPanel="addPanel"/>-->
+        <Turnover :FirmID="FirmID" :LSID="ObjectID"/>
 
     </Tab>
 
@@ -152,7 +152,7 @@ import TariffsTO from './ObjectContent/TariffsTO.vue';
 
 import BankAccounts from './ObjectContent/BankAccounts.vue';
 
-//import Turnover from './ObjectContent/Turnover.vue';
+import Turnover from './ObjectContent/Turnover.vue';
 
 import Calculation from './ObjectContent/Calculation.vue';
 
@@ -161,11 +161,11 @@ import Receipt from './ObjectContent/Receipt.vue';
 export default {
     props: ["FirmID", "ObjectID", "Name", "Type", "Roles",
             "props", "calcParams", "tariffTOState", "equipmentState", "tariffs", "tariffsTO", "bankAccounts",
-            "addPanel"],
+            "addPanel", "showObject"],
     components:
     {
         NoData, State, Tab,
-        TariffTOState, EquipmentState, Tariffs, TariffsTO, BankAccounts, Calculation, Receipt
+        TariffTOState, EquipmentState, Tariffs, TariffsTO, BankAccounts, Turnover, Calculation, Receipt
     },
     data: function()
     {

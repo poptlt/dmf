@@ -1,6 +1,6 @@
 <template>
 
-    <center v-if="state == 'changing'">Установка начальной задолжности...</center>
+    <!--<center v-if="state == 'changing'">Установка начальной задолжности...</center>
 
     <div v-else>
         <template v-if="turnover !== undefined">
@@ -34,6 +34,42 @@
             </template>
 
         </template>
+    </div>-->
+
+    <div>
+        <div class="d-flex align-items-center justify-content-around">
+        
+            <button @click="year-=1"
+                    class="btn btn-link">
+                <font-awesome-icon icon="caret-left"/>
+            </button>
+            
+            <div class="flex-grow-0">{{ year }}</div>
+            
+            <button @click="year+=1"
+                    class="btn btn-link">
+                <font-awesome-icon icon="caret-right"/>
+            </button>
+            
+        </div>
+        <template v-if="isData([data])">
+            
+
+            <div class="m-2">Начальное сальдо: {{ data.BeginSaldo }}</div>
+
+            <table class="table table-hover">
+                <tr v-for="item in data.Moving"
+                    :style="{'background-color': item.Type ? '#ffcccc' : '#ccffcc'}">
+                    <td>{{ dateForClient(new Date(Date.parse(item.Date)), 'day') }}</td>
+                    <td>{{ item.Summ }}</td>
+                    <td>{{ item.Text }}</td>
+                </tr>
+            </table>
+
+            <div class="m-2">Конечное сальдо: {{ data.EndSaldo }}</div>
+
+        </template>
+        <NoData v-else :data="[data]"/>
     </div>
 
 </template>
@@ -42,10 +78,33 @@
 
 import { mapActions, mapState } from 'vuex';
 
-import Number from '../Inputs/Number.vue';
+import NoData from '../NoData.vue';
+    
+//import Number from '../Inputs/Number.vue';
 
 export default {
-    props: ["turnover", "balance", "FirmID", "ObjectID", "addPanel"],
+    props: ["FirmID", "LSID"],
+    components:
+    {
+        NoData
+    },
+    data: function()
+    {
+        return {
+            year: (new Date()).getFullYear()
+        }
+    },
+    computed:
+    {
+        data: function()
+        {
+            return this.vuexLoad({
+                data: {func: "GetLSTurnover", FirmID: this.FirmID, LSID: this.LSID, year: this.year}
+            }).data;
+        }
+    }
+    
+    /*props: ["turnover", "balance", "FirmID", "ObjectID", "addPanel"],
     components:
     {
         Number
@@ -84,6 +143,6 @@ export default {
         {
             this.addPanel("Document", Name, {DocumentID: ID});
         }
-    }
+    }*/
 }
 </script>
