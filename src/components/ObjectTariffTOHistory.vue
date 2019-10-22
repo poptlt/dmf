@@ -1,6 +1,11 @@
 <template>
 <div>    
-    <TariffTOState :data="history" :FirmID="FirmID" :ObjectID="ObjectID" :remove="remove"/>
+    <TariffTOState :data="history"
+                   :FirmID="FirmID"
+                   :ObjectID="ObjectID"
+                   :addPanel="addPanel"
+                   :showObject="showObject"
+                   :remove="remove"/>
     
     <div v-if="tariffs.length" class="d-flex align-items-center p-1">
 
@@ -32,7 +37,7 @@ import Datepicker from 'vuejs-datepicker';
 import {ru} from 'vuejs-datepicker/dist/locale';
 
 export default {
-    props: ["FirmID", "ObjectID", "history", "tariffs"],
+    props: ["FirmID", "ObjectID", "history", "tariffs", "addPanel", "showObject"],
     components:
     {
         TariffTOState, Datepicker

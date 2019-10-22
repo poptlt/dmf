@@ -59,6 +59,7 @@
 
             <table class="table table-hover">
                 <tr v-for="item in data.Moving"
+                    @click="(item.Doc) ? showDoc(item.Doc) : null"
                     :style="{'background-color': item.Type ? '#ffcccc' : '#ccffcc'}">
                     <td>{{ dateForClient(new Date(Date.parse(item.Date)), 'day') }}</td>
                     <td>{{ item.Summ }}</td>
@@ -83,7 +84,7 @@ import NoData from '../NoData.vue';
 //import Number from '../Inputs/Number.vue';
 
 export default {
-    props: ["FirmID", "LSID"],
+    props: ["FirmID", "LSID", "addPanel"],
     components:
     {
         NoData
@@ -101,6 +102,13 @@ export default {
             return this.vuexLoad({
                 data: {func: "GetLSTurnover", FirmID: this.FirmID, LSID: this.LSID, year: this.year}
             }).data;
+        }
+    },
+    methods:
+    {
+        showDoc: function({DocID = undefined, Name})
+        {
+            if(DocID) this.addPanel("Document", Name, {DocumentID: DocID});
         }
     }
     

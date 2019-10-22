@@ -113,7 +113,7 @@
 
     <Tab v-if="Type == 'LS'" :accordionID="accordionID" label="Баланс">
 
-        <Turnover :FirmID="FirmID" :LSID="ObjectID"/>
+        <Turnover :FirmID="FirmID" :LSID="ObjectID" :addPanel="addPanel"/>
 
     </Tab>
 

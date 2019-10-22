@@ -70,7 +70,8 @@ export default {
         Datepicker, String, Number, List, Complex
     },
     data: function()
-    {        
+    {
+        console.log(this.data);
         let res = {
             ru: ru,
             calendarView: (this.AttrType == "Props") ? "day" : "month",

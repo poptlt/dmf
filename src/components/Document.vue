@@ -3,8 +3,8 @@
             
     <table class="table table-hover">
         <tbody>
-            <template v-for="(val, key) in document">
-                <tr v-if="typeof(val) != 'object' && key != 'DocumentName'">
+            <template v-for="(val, key) in document.Value">
+                <tr v-if="typeof(val) != 'object'">
                     <td>{{ key }}</td>
                     <td>{{ val }}</td>
                 </tr>
@@ -12,7 +12,7 @@
         </tbody>
     </table>
 
-    <template v-for="(val, key) in document">
+    <template v-for="(val, key) in document.Value">
         <div v-if="typeof(val) == 'object'">
             <div class="bg-secondary text-white" style="padding: 12px 20px">{{ key }}</div>
 
@@ -33,7 +33,7 @@ export default {
     {
         created: function()
         {
-            this.setHeader(this.document.DocumentName);
+            this.setHeader(this.document.Name);
             
             return true;
         }

@@ -31,7 +31,7 @@
                         
                         <a v-if="item.ObjectID != ObjectID"
                            href="#"
-                           @click="showObject(item.ObjectID, item.ObjectName)">
+                           @click="showObject(item.Object)">
                             ( {{ item.ObjectName }} )
                         </a>
                     </td>
@@ -50,78 +50,28 @@
                         minimum-view="day"
                         :bootstrap-styling="true"
                         style="width: 110px"
-                        class="flex-grow-0 mx-2"/>
+                        class="flex-grow-0 flex-shrink-0 mx-2"/>
             
             <div class="d-flex flex-column px-2">
                 
                 <button v-if="newState[i] !== null"
                         @click="edit('state', 'add', newDate[i], {kitID: kit.ComplectID, state: newState[i]})"
-                        class="btn m-1"
+                        class="btn btn-sm m-1"
                         :class="{'btn-success': newState[i], 'btn-danger': (!newState[i])}">
                     {{ newState[i] ? 'Включить' : 'Выключить' }}
                 </button>
                 
                 <button v-for="equipment in equipmentList[i]"
                         @click="edit('equipment', 'add', newDate[i], {kitID: kit.ComplectID, equipmentID: equipment.ID})"
-                        class="btn m-1"
+                        class="btn btn-sm m-1"
                         :class="{'btn-primary': equipment.ID != '-', 'btn-secondary': equipment.ID == '-'}">
                     <span v-if="equipment.ID != '-'">Установить: {{ equipment.Name }}</span>
                     <span v-else>Демонтаж</span>
                 </button>
                 
-                
-                
             </div>
             
         </div>
-
-        <!--<div class="mx-2">Установить оборудование:</div>
-        <div class="d-flex align-items-center p-1">
-
-            <Datepicker v-model="newDate[i].equipment"
-                        :disabled-dates="disabledDates[i]"
-                        :monday-first="true"
-                        :language="ru"
-                        :format="dateFormatter"
-                        minimum-view="day"
-                        :bootstrap-styling="true"
-                        style="width: 110px"
-                        class="flex-shrink-0"/>
-
-            <select v-model="newEquipment[i]" class="form-control ml-1">
-                <option v-for="equipment in equipmentList[i]" :value="equipment.ID">
-                    {{ equipment.Name }}
-                </option>
-            </select>
-
-            <button @click="edit('equipment', 'add', newDate[i].equipment, {kitID: kit.ComplectID, equipmentID: newEquipment[i]})"
-                    class="btn btn-success btn-sm ml-1 flex-grow-0">
-                <font-awesome-icon icon="plus"/>
-            </button>
-
-        </div>
-
-        <template v-if="newState[i] !== null">
-            <div class="mx-2">Изменить состояние:</div>
-            <div class="d-flex align-items-center p-1">
-
-                <Datepicker v-model="newDate[i].state"
-                            :disabled-dates="disabledDates[i]"
-                            :monday-first="true" :language="ru"
-                            :format="dateFormatter"
-                            minimum-view="day"
-                            :bootstrap-styling="true"
-                            style="width: 110px"
-                            class="flex-grow-0"/>
-
-                <button @click="edit('state', 'add', newDate[i].state, {kitID: kit.ComplectID, state: newState[i]})"
-                        class="btn btn-sm ml-1 flex-grow-0"
-                        :class="{'btn-success': newState[i], 'btn-danger': (!newState[i])}">
-                    {{ newState[i] ? 'Включить' : 'Выключить' }}
-                </button>
-
-            </div>
-        </template>-->
 
     </div>
 </div>
@@ -136,7 +86,7 @@ import Datepicker from 'vuejs-datepicker';
 import {ru} from 'vuejs-datepicker/dist/locale';
     
 export default {
-    props: ["FirmID", "ObjectID", "history", "kits"],
+    props: ["FirmID", "ObjectID", "history", "kits", "showObject"],
     components:
     {
         Datepicker
@@ -301,10 +251,6 @@ export default {
             }
 
             this.SEND_DATA({query: query, accepted: accepted, rejected: rejected});
-        },
-        showObject: function(ID, Name, Type)
-        {
-            //this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ID, Name: Name, Type: Type});
         }
     }
 }

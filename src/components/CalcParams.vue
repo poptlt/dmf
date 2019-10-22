@@ -58,6 +58,7 @@ export default {
     {
         rows: function()
         {
+            console.log(this.data);
             let res = [];
 
             this.data.forEach((item) =>

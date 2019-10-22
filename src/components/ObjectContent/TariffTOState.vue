@@ -43,7 +43,7 @@
                         <font-awesome-icon :icon="(opened[i]) ? 'chevron-up' : 'chevron-down'"/>
                     </button>
                     <button v-if="remove"
-                            @click="remove(tariff.Date, tariff.TariffID)"
+                            @click="remove(tariff.Date, tariff.Tariff.TariffID)"
                             class="btn btn-danger btn-sm">
                         <font-awesome-icon icon="times"/>
                     </button>
@@ -53,8 +53,8 @@
                 <td colspan="3">
                     {{ dateForClient(new Date(Date.parse(tariff.Date)), 'month') }}, 
                     
-                    <a href="#" @click="showTariff(tariff.TariffID, tariff.TariffName)">
-                        {{ tariff.TariffName }}
+                    <a href="#" @click="showTariff(tariff.Tariff.TariffID, tariff.Tariff.TariffName, tariff.Tariff.Object.Name)">
+                        {{ tariff.Tariff.TariffName }}
                     </a> 
                     
                     <a v-if="tariff.Object.ObjectID != ObjectID"
@@ -79,7 +79,7 @@ export default {
     props: ["data", "remove", "FirmID", "ObjectID", "addPanel", "showObject"],
     data: function()
     {
-        console.log(this.data);
+        //console.log(this.data);
         return {
             opened: []
         }
@@ -90,13 +90,9 @@ export default {
         {
             Vue.set(this.opened, i, (this.opened[i]) ? false : true);
         },
-        /*showObject: function(ID, Name, Type)
+        showTariff: function(ID, tariffName, firmName)
         {
-            //this.addPanel("Object", Name, {FirmID: this.FirmID, ObjectID: ID, Name: Name, Type: Type});
-        },*/
-        showTariff: function(ID, name)
-        {
-            this.addPanel("TariffsTOHistory", name, {FirmID: this.FirmID, TariffID: ID});
+            this.addPanel("TariffsTOHistory", firmName + " " + tariffName, {FirmID: this.FirmID, TariffID: ID});
         }
     }
 }

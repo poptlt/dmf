@@ -226,6 +226,8 @@ export const store = new Vuex.Store({
 
                     if(data[i].DMF_ERROR)
                     {
+                        console.log(query);
+                        
                         if(data[i].DMF_ERROR.Log !== undefined) console.log(data[i].DMF_ERROR.Log);
 
                         commit('INSERT', {path: getPath(query), data: {DMF_ERROR: true, message: data[i].DMF_ERROR.Message}});
