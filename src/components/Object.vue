@@ -20,6 +20,9 @@
             </table>
 
 
+            <button class="btn btn-sm btn-primary"
+                    @click="showEquipmentHistory2">Новая история по оборудованию и тарифам</button>
+            
             <div class="d-flex justify-content-between align-items-center">
 
                 <div class="text-center font-weight-bold">Тарифы</div>
@@ -189,6 +192,10 @@ export default {
         showEquipmentHistory: function()
         {
             this.addPanel("EquipmentHistory", this.Name + " Оборудование", {FirmID: this.FirmID, ObjectID: this.ObjectID});
+        },
+        showEquipmentHistory2: function()
+        {
+            this.addPanel("EquipmentHistory2", this.Name + ", оборудование и тарифы", {FirmID: this.FirmID, ObjectID: this.ObjectID});
         },
         showCalcParams: function()
         {

@@ -92,7 +92,8 @@ export default {
         Datepicker
     },
     data: function()
-    {        
+    {
+        //console.log(this.history);
         let res = {ru: ru};
         
         res.equipmentList = [];

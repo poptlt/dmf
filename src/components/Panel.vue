@@ -60,6 +60,8 @@ import CalcParams from './CalcParams.vue'
 import ObjectTariffTOHistory from './ObjectTariffTOHistory.vue'
 
 import EquipmentHistory from './EquipmentHistory.vue'
+    
+import EquipmentHistory2 from './EquipmentHistory2.vue'
 
 import { mapState, mapMutations } from 'vuex';
 
@@ -68,7 +70,7 @@ export default {
     {
         State, NoData,
         
-        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, ObjectTariffTOHistory, EquipmentHistory
+        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, ObjectTariffTOHistory, EquipmentHistory, EquipmentHistory2
     },
     props:
     {
@@ -118,7 +120,9 @@ export default {
                 case "LSList":
                     
                     return {
-                        list: {func: "LSList", FirmID: info.FirmID, ObjectID: info.ObjectID}
+                        list: {func: "LSList", FirmID: info.FirmID, ObjectID: info.ObjectID},
+                        
+                        state: {func: "ObjectHardWorkTariffState", FirmID: info.FirmID, ObjectID: info.ObjectID}
                     };
                     
                 case "Object":
@@ -183,10 +187,20 @@ export default {
                 case "EquipmentHistory":
                     
                     return {
+                        //history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
+                        
                         history: {func: "ObjectHardDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
                         kits: {func: "GetHardTypes"}
                     };
+                    
+                case "EquipmentHistory2":
+                    
+                    return {
+                        history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
+                        
+                        kits: {func: "GetHardTypes"}
+                    }
                     
                 case "ObjectTariffTOHistory":
                     
