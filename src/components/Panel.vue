@@ -199,7 +199,9 @@ export default {
                     return {
                         history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
                         
-                        kits: {func: "GetHardTypes"}
+                        kits: {func: "GetHardTypes"},
+                        
+                        tariffs: {func: "GetTariffsTO", FirmID: info.FirmID}
                     }
                     
                 case "ObjectTariffTOHistory":

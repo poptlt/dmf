@@ -319,6 +319,8 @@ export const store = new Vuex.Store({
                         
                         commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectTariffTODetails"]);
                         
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffDetails"]);
+                        
                         break;
                         
                     case "ObjectHardWrite":
@@ -329,6 +331,8 @@ export const store = new Vuex.Store({
                         commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardState"]);
 
                         commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardDetails"]);
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffDetails"]);
                         
                         break;
                         
