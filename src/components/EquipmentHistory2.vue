@@ -22,24 +22,19 @@
 
                 <template v-if="action.type == 'hard'">
                     
-                    <template v-if="action.name != '-'">
-                        Монтаж оборудования {{ action.name }}
-                    </template>
+                    {{ action.installation ? 'Монтаж' : 'Демонтаж' }} оборудования
+                    
+                    <template v-if="action.equipmentName">{{ action.equipmentName }}</template>
+                    <template v-else>на комлекте {{ kits[action.kitID].Name }}</template>
 
-                    <template v-else>
-                        Демонтаж оборудования на комплекте {{ kits[action.kitID].Name }}
-                    </template>
-                
-                </template>
-
-                <template v-if="action.type == 'remove'">
-                    Демонтаж оборудования на комплекте {{ action.name }}
                 </template>
 
                 <template v-if="action.type == 'state'">
-                    {{ action.value ? 'Включение' : 'Выключение' }}
-                    оборудования на комлекте 
-                    {{ kits[action.kitID].Name }}
+                    {{ action.value ? 'Включение' : 'Выключение' }} оборудования 
+
+                    <template v-if="action.equipmentName">{{ action.equipmentName }}</template>
+                    <template v-else>на комлекте {{ kits[action.kitID].Name }}</template>
+            
                 </template>
 
                 <template v-if="action.object">
@@ -53,7 +48,7 @@
         <div class="m-2">
         <table class="table">
             <tr v-for="equipment in period.equipment"
-                :style="{'background-color': (equipment.state) ? '#ccffcc' : '#ffcccc'}">
+                :style="{'background-color': (equipment.installed) ? ((equipment.state) ? '#ccffcc' : '#ffcccc') : 'WhiteSmoke'}">
                 <td class="py-1">{{ equipment.name }}</td>
                 <td class="py-1">{{ equipment.value }}</td>
             </tr>
@@ -98,30 +93,29 @@
 
     <table class="table">
         <template v-for="(kit, kitID) in kits">
-            <tr v-if="hard[kitID] != '-'">
-                <td>Комплект {{ kit.Name }}</td>
-                <td>
-                    <button @click="addState(kitID, !state[kitID])"
-                            class="btn btn-sm"
-                            :class="{'btn-success': !state[kitID], 'btn-danger': state[kitID]}">
-                        {{ state[kitID] ? 'Выключить' : 'Включить' }}
-                    </button>
-                </td>
-            </tr>
-
             <tr v-for="(name, ID) in kit.List">
                 <td>{{ name }}</td>
                 <td>
-                    <button v-if="hard[kitID] != ID"
+                    <template v-if="hard[kitID] == ID">
+                        
+                        <button @click="addEquipment(kitID, '-')"
+                                class="btn btn-sm btn-secondary m-1">
+                            Демонтаж
+                        </button>
+                        
+                        <button @click="addState(kitID, !state[kitID])"
+                                class="btn btn-sm"
+                                :class="{'btn-success': !state[kitID], 'btn-danger': state[kitID]}">
+                            {{ state[kitID] ? 'Выключить' : 'Включить' }}
+                        </button>
+                        
+                    </template>
+                    <button v-else
                             @click="addEquipment(kitID, ID)"
                             class="btn btn-sm btn-primary">
                         Установить
                     </button>
-                    <button v-else
-                            @click="addEquipment(kitID, '-')"
-                            class="btn btn-sm btn-secondary">
-                        Демонтаж
-                    </button>
+
                 </td>
             </tr>
         </template>
@@ -145,7 +139,7 @@ export default {
     },
     data: function()
     {
-        console.log(this.kits);
+        console.log(this.history);
         
         let data = {
             periods: [],
@@ -185,7 +179,7 @@ export default {
                 equipment: []
             };
             
-            while(i < this.history.length && this.history[i].Date == date)
+            while(i < this.history.length && this.history[i].Date == date)//действия за текущий период
             {
                 let item = this.history[i], object = undefined;
                 
@@ -219,10 +213,23 @@ export default {
                 }
                 if(item.Comment == "hard")
                 {
+                    let kitID = item.ComplectID;
+                    let equipmentID = item.TypeID;
+                    let installation = true;
+                    
+                    if(equipmentID == "-")
+                    {
+                        installation = false;
+                        equipmentID = data.hard[kitID];
+                    }
+                    
+                    let equipmentName = this.kits[kitID].List[equipmentID];
+                    
                     period.actions.push({
                         type: "hard",
-                        name: item.TypeName,
-                        kitID: item.ComplectID,
+                        installation: installation,
+                        equipmentName: equipmentName,
+                        kitID: kitID,
                         object: object
                     });
                     
@@ -231,9 +238,14 @@ export default {
                 }
                 if(item.Comment == "work")
                 {
+                    let kitID = item.ComplectID;
+                    let equipmentID = data.hard[kitID];
+                    let equipmentName = this.kits[kitID].List[equipmentID];
+                    
                     period.actions.push({
                         type: "state",
-                        kitID: item.ComplectID,
+                        equipmentName: equipmentName,
+                        kitID: kitID,
                         value: item.WorkState,
                         object: object
                     });
@@ -244,17 +256,21 @@ export default {
                 i++;
             }
             
-            for(let kitID in data.hard)
+            for(let kitID in this.kits)//состояние оборудования на текущий период
             {
-                let equipmentID = data.hard[kitID];
-                
-                if(equipmentID != "-")
+                for(let equipmentID in this.kits[kitID].List)
                 {
-                    period.equipment.push({
-                        name: this.kits[kitID].List[equipmentID],
-                        value: price[equipmentID],
-                        state: data.state[kitID]
-                    });
+                    let installed = (data.hard[kitID] == equipmentID);
+                    
+                    if(installed || price[equipmentID] != "-")
+                    {
+                        period.equipment.push({
+                            installed: installed,
+                            name: this.kits[kitID].List[equipmentID],
+                            value: price[equipmentID],
+                            state: data.state[kitID]
+                        });
+                    }
                 }
             }
             
@@ -262,7 +278,7 @@ export default {
         }
         
                 
-        for(let i = data.periods.length - 1; i >= 0; i--)
+        for(let i = data.periods.length - 1; i >= 0; i--)//определяем какие действия с оборудованием можно отменить и начиная с какой даты можно совершать новые
         {
             data.periods[i].actions.forEach((action) => {
                 
