@@ -2,7 +2,7 @@
     <div>
         <div class="d-flex">
             <div style="width: 30px" class="flex-grow-0 flex-shrink-0 d-flex flex-column align-items-start">
-                <div v-if="NodesQnt == 0" style="width: 20px; height: 10px" class="flex-grow-0 border-bottom border-primary"/>
+                <div v-if="!NodesQnt" style="width: 20px; height: 10px" class="flex-grow-0 border-bottom border-primary"/>
                 <template v-else>
                     <div style="width: 20px; height: 20px" class="flex-grow-0 d-flex justify-content-center align-items-center border border-primary rounded-circle text-primary" @click="expand">
 
@@ -21,7 +21,14 @@
             
             <div @click="showObject(object)" style="padding-bottom: 10px; cursor: pointer" class="flex-grow-0">{{Name}}</div>
             <div v-if="LSQnt" class="flex-grow-0 pl-2">
-                <button @click="showLS" class="btn btn-sm btn-primary p-0" style="font-size: inherit">ЛС({{ LSQnt }})</button>
+                <button @click="showLS" class="btn btn-sm btn-primary py-0 px-1" style="font-size: inherit">
+                    {{ LSQnt }}
+                    <span v-if="LSDiffHard" class="badge badge-pill badge-secondary ml-1">{{ LSDiffHard }}</span>
+                    
+                    <span v-if="LSDiffWork" class="badge badge-pill badge-success ml-1">{{ LSDiffWork }}</span>
+                    
+                    <span v-if="LSDiffTariff" class="badge badge-pill badge-warning ml-1">{{ LSDiffTariff }}</span>
+                </button>
             </div>
         </div>
 
@@ -54,9 +61,10 @@ import { mapActions } from 'vuex';
 
 export default {
     name: "TreeVertex",
-    props: ["addPanel", "showObject", "Name", "LSQnt", "NodesQnt", "object"],
+    props: ["addPanel", "showObject", "Name", "LSQnt", "NodesQnt", "object", 
+            "LSDiffHard", "LSDiffWork", "LSDiffTariff"],
     data: function()
-    {
+    {        
         return {
             opened: false,
         }

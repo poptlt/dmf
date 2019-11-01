@@ -6,6 +6,15 @@
                 v-bind="node"
                 :addPanel="addPanel"
                 :showObject="showObject"/>
+    
+    <br>
+    <div style="font-size: 18px">
+        <span class="badge badge-secondary">Отличается оборудование</span>
+        <br>
+        <span class="badge badge-success">Отличается состояние оборудования</span>
+        <br>
+        <span class="badge badge-warning">Отличаются тарифы</span>
+    </div>
 </div>
 
 </template>
