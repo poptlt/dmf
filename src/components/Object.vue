@@ -8,7 +8,7 @@
 
     <Tab :accordionID="accordionID" :visible="true" label="Реквизиты">
 
-        <template v-if="isData([props, tariffTOState, equipmentState])">
+        <template v-if="isData([props, equipmentState])">
 
             <table class="table table-hover">
                 <tbody>
@@ -19,41 +19,79 @@
                 </tbody>
             </table>
 
-
-            <button class="btn btn-sm btn-primary"
-                    @click="showEquipmentHistory2">Новая история по оборудованию и тарифам</button>
-            
+                        
             <div class="d-flex justify-content-between align-items-center">
 
-                <div class="text-center font-weight-bold">Тарифы</div>
-                <button @click="showTariffTOHistory"
-                        class="border btn btn-light btn-sm m-1 flex-grow-0">
-                    <font-awesome-icon icon="edit"/>
-                </button>
-
-            </div>
-            <TariffTOState :data="tariffTOState"
-                           :FirmID="FirmID"
-                           :ObjectID="ObjectID"
-                           :addPanel="addPanel"
-                           :showObject="showObject"/>
-
-
-            <div class="d-flex justify-content-between align-items-center">
-
-                <div class="text-center font-weight-bold">Оборудование</div>
+                <div class="text-center font-weight-bold">Состояние оборудования и тарифов ТО</div>
                 <button @click="showEquipmentHistory"
                         class="border btn btn-light btn-sm m-1 flex-grow-0">
                     <font-awesome-icon icon="edit"/>
                 </button>
 
             </div>
-            <EquipmentState :data="equipmentState"
-                            :FirmID="FirmID"
-                            :ObjectID="ObjectID"/>
+            
+            <table class="table">
+                <template v-for="(equipment, i) in equipmentState">
+                    <tr :style="{'background-color': (equipment.HardState) ? ((equipment.WorkState ? '#ccffcc' : '#ffcccc')) : 'WhiteSmoke'}">
+                        <td>{{ equipment.TypeName }}</td>
+                        <td>{{ equipment.TariffValue }}</td>
+                        <td class="px-0">
+                            <button @click="showEquipmentInfo(i)"
+                                    class="btn btn-link btn-sm">
+                                <font-awesome-icon :icon="(equipmentInfo[i]) ? 'chevron-up' : 'chevron-down'"/>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr v-show="equipmentInfo[i]">
+                        <td colspan="3" class="p-1">
+                            <div v-if="equipment.HardDetails"
+                                 class="p-2">
+                                Установлено {{ dateForClient(equipment.HardDetails.Date, 'day') }}
+                                
+                                <span v-if="equipment.HardDetails.Object.ObjectID != ObjectID">
+                                    на
+                                    <a href="#"
+                                       @click="showObject(equipment.HardDetails.Object)">
+                                        {{ equipment.HardDetails.Object.Name }}
+                                    </a>
+                                </span>
+                            </div>
+                            
+                            <div v-if="equipment.TariffDetails"
+                                 class="p-2">
+                                {{ dateForClient(equipment.TariffDetails.Date, 'day') }} установлен тариф
+                                <a href="#"
+                                   @click="showTariffTO(equipment.TariffDetails)">
+                                    {{ equipment.TariffDetails.TariffName }}
+                                </a>
+                                <span v-if="equipment.TariffDetails.Object.ObjectID != ObjectID">
+                                    на
+                                    <a href="#"
+                                       @click="showObject(equipment.TariffDetails.Object)">
+                                        {{ equipment.TariffDetails.Object.Name }}
+                                    </a>
+                                </span>
+                            </div>
+                            
+                            <div v-if="equipment.WorkDetails"
+                                 class="p-2">
+                                {{ equipment.WorkState ? 'Включено' : 'Выключено' }}
+                                {{ dateForClient(equipment.WorkDetails.Date, 'day') }}
+                                <span v-if="equipment.WorkDetails.Object.ObjectID != ObjectID">
+                                    на
+                                    <a href="#"
+                                       @click="showObject(equipment.WorkDetails.Object)">
+                                        {{ equipment.WorkDetails.Object.Name }}
+                                    </a>
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+            </table>
 
         </template>
-        <NoData v-else :data="[props, tariffTOState, equipmentState]"/>
+        <NoData v-else :data="[props, equipmentState]"/>
 
     </Tab>
 
@@ -136,6 +174,8 @@
 
 <script>
 
+import Vue from 'vue';
+    
 import { mapActions, mapState } from 'vuex';
 
 import State from './State.vue';
@@ -144,10 +184,6 @@ import NoData from './NoData.vue';
     
 import Tab from './ObjectContent/Tab.vue';
 
-    
-import TariffTOState from './ObjectContent/TariffTOState.vue';
-
-import EquipmentState from './ObjectContent/EquipmentState.vue';
     
 import Tariffs from './ObjectContent/Tariffs.vue';
     
@@ -163,16 +199,18 @@ import Receipt from './ObjectContent/Receipt.vue';
 
 export default {
     props: ["FirmID", "ObjectID", "Name", "Type", "Roles",
-            "props", "calcParams", "tariffTOState", "equipmentState", "tariffs", "tariffsTO", "bankAccounts",
+            "props", "calcParams", "equipmentState", "tariffs", "tariffsTO", "bankAccounts",
             "addPanel", "showObject"],
     components:
     {
         NoData, State, Tab,
-        TariffTOState, EquipmentState, Tariffs, TariffsTO, BankAccounts, Turnover, Calculation, Receipt
+        Tariffs, TariffsTO, BankAccounts, Turnover, Calculation, Receipt
     },
     data: function()
     {
         return {
+            equipmentInfo: [],
+            
             accordionID: "id"+(""+Math.random()).substring(2),
 
             urlMessage: "",
@@ -181,21 +219,21 @@ export default {
     methods:
     {
         ...mapActions(["GET_URL"]),
+        showEquipmentInfo: function(i)
+        {
+            Vue.set(this.equipmentInfo, i, (this.equipmentInfo[i]) ? false : true);
+        },
         showHistory: function(AttrType, AttrID, Name)
         {
             this.addPanel("History", this.Name + " " + Name, {AttrType: AttrType, FirmID: this.FirmID, ObjectID: this.ObjectID, AttrID: AttrID});
         },
-        showTariffTOHistory: function()
+        showTariffTO: function({TariffID, TariffName, TariffObject})
         {
-            this.addPanel("ObjectTariffTOHistory", this.Name + " Тарифы ТО", {FirmID: this.FirmID, ObjectID: this.ObjectID});
+            this.addPanel("TariffsTOHistory", TariffObject.Name + " " + TariffName, {FirmID: this.FirmID, TariffID: TariffID});
         },
         showEquipmentHistory: function()
         {
-            this.addPanel("EquipmentHistory", this.Name + " Оборудование", {FirmID: this.FirmID, ObjectID: this.ObjectID});
-        },
-        showEquipmentHistory2: function()
-        {
-            this.addPanel("EquipmentHistory2", this.Name + ", оборудование и тарифы", {FirmID: this.FirmID, ObjectID: this.ObjectID});
+            this.addPanel("EquipmentHistory", this.Name + ", оборудование и тарифы", {FirmID: this.FirmID, ObjectID: this.ObjectID});
         },
         showCalcParams: function()
         {

@@ -44,14 +44,14 @@ export function getPath(data)//куда класть данные во vuex
     {
         return ["Objects", data.FirmID, data.FirmID, "GetBankAccounts"];
     }
-    if(data.func == "ObjectTariffTOState")
+    /*if(data.func == "ObjectTariffTOState")
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectTariffTOState"];
     }
     if(data.func == "ObjectHardState")
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectHardState"];
-    }
+    }*/
     if(data.func == "GetLSTurnover")
     {
         return ["Objects", data.FirmID, data.LSID, "GetLSTurnover", data.year];
@@ -81,14 +81,14 @@ export function getPath(data)//куда класть данные во vuex
     {
         return ["Objects", data.FirmID, data.FirmID, "TariffsTO", data.TariffID, "TariffTOValueDetails"];
     }
-    if(data.func == "ObjectTariffTODetails")
+    /*if(data.func == "ObjectTariffTODetails")
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectTariffTODetails"];
     }
     if(data.func == "ObjectHardDetails")
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectHardDetails"];
-    }
+    }*/
     if(data.func == "ObjectHardWorkTariffDetails")
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectHardWorkTariffDetails"];
@@ -150,14 +150,14 @@ export function getQuery(data)//что спрашивать у сервера
     {
         return ["GetBankAccounts", data.FirmID];
     }
-    if(data.func == "ObjectTariffTOState")
+    /*if(data.func == "ObjectTariffTOState")
     {
         return ["ObjectTariffTOState", data.FirmID, data.ObjectID];
     }
     if(data.func == "ObjectHardState")
     {
         return ["ObjectHardState", data.FirmID, data.ObjectID];
-    }
+    }*/
     if(data.func == "GetLSTurnover")
     {
         return ["GetLSTurnover", data.LSID, data.year];
@@ -186,14 +186,14 @@ export function getQuery(data)//что спрашивать у сервера
     {
         return ["TariffTOValueDetails", data.FirmID, data.TariffID];
     }
-    if(data.func == "ObjectTariffTODetails")
+    /*if(data.func == "ObjectTariffTODetails")
     {
         return ["ObjectTariffTODetails", data.FirmID, data.ObjectID];
     }
     if(data.func == "ObjectHardDetails")
     {
         return ["ObjectHardDetails", data.FirmID, data.ObjectID];
-    }
+    }*/
     if(data.func == "ObjectHardWorkTariffDetails")
     {
         return ["ObjectHardWorkTariffDetails", data.FirmID, data.ObjectID];

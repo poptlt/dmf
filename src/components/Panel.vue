@@ -56,12 +56,8 @@ import TariffsTOHistory from './TariffsTOHistory.vue'
 import Document from './Document.vue'
 
 import CalcParams from './CalcParams.vue'
-
-import ObjectTariffTOHistory from './ObjectTariffTOHistory.vue'
-
-import EquipmentHistory from './EquipmentHistory.vue'
     
-import EquipmentHistory2 from './EquipmentHistory2.vue'
+import EquipmentHistory from './EquipmentHistory.vue'
 
 import { mapState, mapMutations } from 'vuex';
 
@@ -70,7 +66,7 @@ export default {
     {
         State, NoData,
         
-        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, ObjectTariffTOHistory, EquipmentHistory, EquipmentHistory2
+        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, EquipmentHistory
     },
     props:
     {
@@ -132,9 +128,7 @@ export default {
 
                         calcParams: {func: "GetObjectCalcParams", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
-                        tariffTOState: {func: "ObjectTariffTOState", FirmID: info.FirmID, ObjectID: info.ObjectID},
-
-                        equipmentState: {func: "ObjectHardState", FirmID: info.FirmID, ObjectID: info.ObjectID}
+                        equipmentState: {func: "ObjectHardWorkTariffState", FirmID: info.FirmID, ObjectID: info.ObjectID}
                     };
                     
                     if(info.Type == "Firm")
@@ -184,7 +178,7 @@ export default {
                         type: {func: "GetHardTypes"}
                     }
                     
-                case "EquipmentHistory":
+                /*case "EquipmentHistory":
                     
                     return {
                         //history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
@@ -192,9 +186,9 @@ export default {
                         history: {func: "ObjectHardDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
                         kits: {func: "GetHardTypes"}
-                    };
+                    };*/
                     
-                case "EquipmentHistory2":
+                case "EquipmentHistory":
                     
                     return {
                         history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
@@ -204,13 +198,13 @@ export default {
                         tariffs: {func: "GetTariffsTO", FirmID: info.FirmID}
                     }
                     
-                case "ObjectTariffTOHistory":
+                /*case "ObjectTariffTOHistory":
                     
                     return {
                         history: {func: "ObjectTariffTODetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
                         tariffs: {func: "GetTariffsTO", FirmID: info.FirmID}
-                    };
+                    };*/
             }
         }
     },

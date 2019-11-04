@@ -223,7 +223,7 @@ export const store = new Vuex.Store({
                 data = data.data;
                                 
                 queries.forEach((query, i) => {
-
+                    
                     if(data[i].DMF_ERROR)
                     {
                         console.log(query);

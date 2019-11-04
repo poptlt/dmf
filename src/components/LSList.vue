@@ -1,13 +1,11 @@
 <template>
 <div>
     <table class="table">
-        <tbody>
-            <tr v-for="equipment in state"
-                :style="{'background-color': (equipment.WorkState) ? '#ccffcc' : '#ffcccc'}">
-                <td>{{ equipment.TypeName }}</td>
-                <td>{{ equipment.TariffValue }}</td>
-            </tr>
-        </tbody>
+        <tr v-for="equipment in state"
+            :style="{'background-color': (equipment.HardState) ? ((equipment.WorkState ? '#ccffcc' : '#ffcccc')) : 'WhiteSmoke'}">
+            <td>{{ equipment.TypeName }}</td>
+            <td>{{ equipment.TariffValue }}</td>
+        </tr>
     </table>
     
     <table class="table table-borderless">
@@ -23,14 +21,14 @@
                 <tr v-if="LS.IndividualState">
                 <td colspan="3">
                     <table class="table">
-                        <tbody>
+                        
                         <tr v-for="equipment in LS.IndividualState"
                             class="border-top"
-                            :style="{'background-color': (equipment.WorkState) ? '#ccffcc' : '#ffcccc'}">
-                            <td>{{ equipment.TypeName }}</td>
-                            <td>{{ equipment.TariffValue }}</td>
+                            :style="{'background-color': (equipment.HardState) ? ((equipment.WorkState ? '#ccffcc' : '#ffcccc')) : 'WhiteSmoke'}">
+                            <td class="p-1">{{ equipment.TypeName }}</td>
+                            <td class="p-1">{{ equipment.TariffValue }}</td>
                         </tr>
-                        </tbody>
+                        
                     </table>
                 </td>
                 </tr>
@@ -44,12 +42,6 @@
 <script>
 
 export default {
-    props: ["FirmID", "ObjectID", "addPanel", "showObject", "list", "state"],
-    data: function()
-    {
-        console.log(this.list);
-        
-        return {};
-    }
+    props: ["FirmID", "ObjectID", "addPanel", "showObject", "list", "state"]
 }
 </script>

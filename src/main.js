@@ -74,7 +74,12 @@ Vue.mixin({
         },
         
         dateForClient: (date, type) => {
-                        
+            
+            if(typeof(date) == "string")
+            {
+                date = new Date(Date.parse(date));
+            }
+            
             let year = date.getFullYear(), month = date.getMonth(), day = date.getDate();
             
             if(type == "month")
