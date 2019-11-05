@@ -99,7 +99,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1, Object: 1, History: 1, TariffsTOHistory: 1, Document: 1, CalcParams: 2, ObjectTariffTOHistory: 1, EquipmentHistory: 1, EquipmentHistory2: 1
+                Tree: 1, LSList: 1, Object: 1, History: 1, TariffsTOHistory: 1, Document: 1, CalcParams: 2, EquipmentHistory: 1
             },
             searchStr: "",
             searchList: [],
@@ -185,7 +185,9 @@ export default {
         },
         deletePanel: function(i)
         {
-            while(this.panels.length>i) this.panels.pop();
+            this.panels.splice(i, 1);
+            
+            //while(this.panels.length>i) this.panels.pop();
         },
         testing: function()
         {
