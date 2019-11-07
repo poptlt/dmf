@@ -59,6 +59,7 @@
         </div>
     </div>
 
+    <template v-if="tariffs.length">
     <center class="bg-secondary text-white p-2">Новый тариф</center>
     
     <div class="d-flex align-items-center px-1 py-3">
@@ -83,6 +84,7 @@
         </select>
 
     </div>
+    </template>
 
     <center class="bg-secondary text-white p-2">Оборудование</center>
     
@@ -142,10 +144,12 @@ export default {
     },
     data: function()
     {
+        console.log(this.kits);
+        
         let data = {
             periods: [],
             ru: ru,
-            newTariff: this.tariffs[0].TariffID,
+            newTariff: this.tariffs.length ? this.tariffs[0].TariffID : undefined,
             tariffDate: new Date(),
             equipmentDate: new Date(),
             
