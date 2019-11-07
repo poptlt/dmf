@@ -36,43 +36,52 @@
         </template>
     </div>-->
 
-    <div>
-        <div class="d-flex align-items-center justify-content-around">
-        
-            <button @click="year-=1"
-                    class="btn btn-link">
-                <font-awesome-icon icon="caret-left"/>
-            </button>
-            
-            <div class="flex-grow-0">{{ year }}</div>
-            
-            <button @click="year+=1"
-                    class="btn btn-link">
-                <font-awesome-icon icon="caret-right"/>
-            </button>
-            
+<State ref="state">
+    
+    <div class="d-flex align-items-center">
+        <div class="p-1">Начальная задолжность: </div>
+        <Number :NoNegative="false" :Digits="10" :DigitsAfterPoint="2" @change="changeStartBalance" class="m-1"/>
+        <div>
+            <button v-if="startBalance !== undefined" @click="writeStartBalance" class="btn btn-primary btn-sm">Установить</button>
         </div>
-        <template v-if="isData([data])">
-            
-
-            <div class="m-2">Начальное сальдо: {{ data.BeginSaldo }}</div>
-
-            <table class="table table-hover">
-                <tr v-for="item in data.Moving"
-                    @click="(item.Doc) ? showDoc(item.Doc) : null"
-                    :style="{'background-color': item.Type ? '#ffcccc' : '#ccffcc'}">
-                    <td>{{ dateForClient(new Date(Date.parse(item.Date)), 'day') }}</td>
-                    <td>{{ item.Summ }}</td>
-                    <td>{{ item.Text }}</td>
-                </tr>
-            </table>
-
-            <div class="m-2">Конечное сальдо: {{ data.EndSaldo }}</div>
-
-        </template>
-        <NoData v-else :data="[data]"/>
     </div>
 
+    <div class="d-flex align-items-center justify-content-around">
+
+        <button @click="year-=1"
+                class="btn btn-link">
+            <font-awesome-icon icon="caret-left"/>
+        </button>
+
+        <div class="flex-grow-0">{{ year }}</div>
+
+        <button @click="year+=1"
+                class="btn btn-link">
+            <font-awesome-icon icon="caret-right"/>
+        </button>
+
+    </div>
+    <template v-if="isData([data])">
+
+
+        <div class="m-2">Начальное сальдо: {{ data.BeginSaldo }}</div>
+
+        <table class="table table-hover">
+            <tr v-for="item in data.Moving"
+                @click="(item.Doc) ? showDoc(item.Doc) : null"
+                :style="{'background-color': item.Type ? '#ffcccc' : '#ccffcc'}">
+                <td>{{ dateForClient(new Date(Date.parse(item.Date)), 'day') }}</td>
+                <td>{{ item.Summ }}</td>
+                <td>{{ item.Text }}</td>
+            </tr>
+        </table>
+
+        <div class="m-2">Конечное сальдо: {{ data.EndSaldo }}</div>
+
+    </template>
+    <NoData v-else :data="[data]"/>
+        
+</State>
 </template>
 
 <script>
@@ -81,18 +90,21 @@ import { mapActions, mapState } from 'vuex';
 
 import NoData from '../NoData.vue';
     
-//import Number from '../Inputs/Number.vue';
+import State from '../State.vue';
+    
+import Number from '../Inputs/Number.vue';
 
 export default {
     props: ["FirmID", "LSID", "addPanel"],
     components:
     {
-        NoData
+        NoData, State, Number
     },
     data: function()
     {
         return {
-            year: (new Date()).getFullYear()
+            year: (new Date()).getFullYear(),
+            startBalance: undefined
         }
     },
     computed:
@@ -106,10 +118,42 @@ export default {
     },
     methods:
     {
+        ...mapActions(["SEND_DATA"]),
         showDoc: function({DocID = undefined, Name})
         {
             if(DocID) this.addPanel("Document", Name, {DocumentID: DocID});
-        }
+        },
+        changeStartBalance: function(val)
+        {
+            this.startBalance = val;
+        },
+        writeStartBalance: function()
+        {            
+            let change = this.$refs.state.change;
+            
+            function accepted()
+            {
+                change("show");
+            }
+
+            function rejected(message)
+            {
+                change("error", "Произошла ошибка при установке начальной задолжности: " + message);
+            }
+            
+            change("changing", "Установка начальной задолжности");
+            
+            this.SEND_DATA({
+                query: {
+                    func: "SetLSBalance",
+                    FirmID: this.FirmID,
+                    LSID: this.LSID,
+                    value: this.startBalance
+                },
+                accepted: accepted,
+                rejected: rejected
+            });
+        },
     }
     
     /*props: ["turnover", "balance", "FirmID", "ObjectID", "addPanel"],

@@ -295,6 +295,10 @@ export function getQuery(data)//что спрашивать у сервера
         case "ObjectHardWorkDelete":
             
             return ["ObjectHardWorkDelete", data.FirmID, data.ObjectID, data.date, data.kitID];
+            
+        case "SetLSBalance":
+            
+            return ["SetLSBalance", data.LSID, data.value];
     }
 }
 

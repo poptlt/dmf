@@ -336,6 +336,12 @@ export const store = new Vuex.Store({
                         
                         break;
                         
+                    case "SetLSBalance":
+                        
+                        commit('CLEAR_TURNOVER', {FirmID: query.FirmID, LSID: query.LSID});
+                        
+                        break;
+                        
                 }
                 
                 accepted();
