@@ -45,6 +45,8 @@
             <button v-if="startBalance !== undefined" @click="writeStartBalance" class="btn btn-primary btn-sm">Установить</button>
         </div>
     </div>
+    
+    <button class="btn btn-primary" @click="newDoc">Новый документ</button>
 
     <div class="d-flex align-items-center justify-content-around">
 
@@ -111,6 +113,10 @@ export default {
     {
         data: function()
         {
+            console.log(this.vuexLoad({
+                data: {func: "GetLSTurnover", FirmID: this.FirmID, LSID: this.LSID, year: this.year}
+            }).data);
+            
             return this.vuexLoad({
                 data: {func: "GetLSTurnover", FirmID: this.FirmID, LSID: this.LSID, year: this.year}
             }).data;
@@ -119,9 +125,23 @@ export default {
     methods:
     {
         ...mapActions(["SEND_DATA"]),
-        showDoc: function({DocID = undefined, Name})
+        showDoc: function({DocID = undefined, Name, Type, Object})
         {
-            if(DocID) this.addPanel("Document", Name, {DocumentID: DocID});
+            if(DocID)
+            {
+                if(Type == "LSBalanceChange")
+                {
+                    this.addPanel("EditableDocument", Name, {DocumentID: DocID, FirmID: Object.FirmID, ObjectID: Object.ObjectID, type: "LSBalanceChange"});
+                }
+                else
+                {
+                    this.addPanel("Document", Name, {DocumentID: DocID, FirmID: Object.FirmID, ObjectID: Object.ObjectID});
+                }
+            }
+        },
+        newDoc: function()
+        {
+            this.addPanel("EditableDocument", "Новый документ", {DocumentID: "", FirmID: this.FirmID, ObjectID: this.LSID, type: "LSBalanceChange"});
         },
         changeStartBalance: function(val)
         {

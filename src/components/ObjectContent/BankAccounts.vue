@@ -1,5 +1,12 @@
 <template>
 <div>
+    <center>
+        <button @click="loadPaymentFile"
+                class="border btn btn-light btn-sm m-2">
+            Загрузить платежи из файла
+        </button>
+    </center>
+    
     <div v-for="(account, i) in data" class="border rounded m-2">
 
         <Tab :accordionID="accordionID" :label="account.BankAccountNumber" :visible="i==0">
@@ -42,6 +49,10 @@ export default {
         showDocument: function(ID)
         {
             this.addPanel("Document", "", {DocumentID: ID});
+        },
+        loadPaymentFile: function()
+        {
+            this.addPanel("PaymentFile", "Загрузить платежи из файла", {});
         }
     }
 }

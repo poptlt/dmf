@@ -342,6 +342,15 @@ export const store = new Vuex.Store({
                         
                         break;
                         
+                    case "LSBalanceChangeWrite":
+                    case "LSBalanceChangeDelete":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.LSID, "Documents", query.DocumentID, "GetDoc"]);
+                                                
+                        commit('CLEAR_TURNOVER', {FirmID: query.FirmID, LSID: query.LSID});
+                        
+                        break;
+                        
                 }
                 
                 accepted();

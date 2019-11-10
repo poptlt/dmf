@@ -28,7 +28,12 @@
 <script>
         
 export default {
-    props: ["FirmID", "DocumentID", "document", "setHeader"],
+    props: ["document", "setHeader"],
+    data: function()
+    {
+        console.log(this.document);
+        return {};
+    },
     computed:
     {
         created: function()

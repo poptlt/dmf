@@ -107,7 +107,7 @@ export function getPath(data)//куда класть данные во vuex
     //документ
     if(data.func == "GetDoc")
     {
-        return ["Objects", data.FirmID, data.FirmID, "Documents", data.DocumentID, "GetDoc"];
+        return ["Objects", data.FirmID, data.ObjectID, "Documents", data.DocumentID, "GetDoc"];
     }
 }
 
@@ -296,9 +296,18 @@ export function getQuery(data)//что спрашивать у сервера
             
             return ["ObjectHardWorkDelete", data.FirmID, data.ObjectID, data.date, data.kitID];
             
+        
         case "SetLSBalance":
             
             return ["SetLSBalance", data.LSID, data.value];
+            
+        case "LSBalanceChangeWrite":
+            
+            return ["LSBalanceChangeWrite", data.data];
+            
+        case "LSBalanceChangeDelete":
+            
+            return ["LSBalanceChangeDelete", data.DocumentID];
     }
 }
 
