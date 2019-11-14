@@ -72,7 +72,7 @@ export default {
         Datepicker
     },
     data: function()
-    {
+    {        
         let data = {
             ru: ru,
             editable: []

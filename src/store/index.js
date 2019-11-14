@@ -258,7 +258,7 @@ export const store = new Vuex.Store({
         
         SEND_DATA: ({commit, dispatch}, {query, accepted, rejected}) => {
             
-            let resolve = () => {
+            let resolve = (data) => {
                 
                 switch(query.func)
                 {
@@ -345,15 +345,23 @@ export const store = new Vuex.Store({
                     case "LSBalanceChangeWrite":
                     case "LSBalanceChangeDelete":
                         
-                        commit('CLEAR', ["Objects", query.FirmID, query.LSID, "Documents", query.DocumentID, "GetDoc"]);
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "Documents", query.DocumentID, "GetDoc"]);
                                                 
                         commit('CLEAR_TURNOVER', {FirmID: query.FirmID, LSID: query.LSID});
                         
                         break;
                         
+                    case "BankPaymentWrite":
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "Documents", query.DocumentID, "GetDoc"]);
+                        
+                        if(query.LS) commit('CLEAR_TURNOVER', {FirmID: query.FirmID, LSID: query.LS.ObjectID});
+                        
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "GetBankAccounts"]);
+                        
                 }
                 
-                accepted();
+                accepted(data.data);
             };
             
             let reject = (data) => {

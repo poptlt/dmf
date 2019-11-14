@@ -14,7 +14,7 @@
             <center class="p-2 font-weight-bold">Неопознанные платежи:</center>
             <table class="table table-hover">
                 <tbody>
-                    <tr v-for="payment in account.FailPayments" @click="showDocument(payment.DocID)">
+                    <tr v-for="payment in account.FailPayments" @click="showDocument(payment.Doc)">
                         <td>
                             <div class="d-flex flex-wrap">
                                 <div class="flex-grow-0 p-2">{{ payment.Date }}</div>
@@ -42,13 +42,14 @@ export default {
     props: ["data", "addPanel"],
     data: function()
     {
+        console.log(this.data);
         return { accordionID: "id"+(""+Math.random()).substring(2) }
     },
     methods:
     {
-        showDocument: function(ID)
+        showDocument: function({DocID, Name, Object})
         {
-            this.addPanel("Document", "", {DocumentID: ID});
+            this.addPanel("BankPayment", Name, {DocumentID: DocID, FirmID: Object.FirmID, ObjectID: Object.ObjectID});
         },
         loadPaymentFile: function()
         {

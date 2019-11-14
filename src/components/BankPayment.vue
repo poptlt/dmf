@@ -1,0 +1,200 @@
+<template>
+<div>
+    <table class="table">
+        <tr>
+            <td>Вид БПД</td>
+            <td v-if="PaymentType != 'ПрочиеРасходы'">
+                <select v-model="PaymentType" class="form-control">
+                    <option value="ПлатежЛС">Платеж ЛС</option>
+                    <option value="НераспознанныйПриход">Нераспознанный приход</option>
+                    <option value="ПриходОтПС">Приход от ПС</option>
+                    <option value="ПрочиеПриходы">Прочие приходы</option>
+                </select>
+            </td>
+            <td v-else>Прочие расходы</td>
+        </tr>
+        
+        <template v-if="PaymentType == 'ПлатежЛС'">
+            <tr>
+                <td>Лицевой счет</td>
+                <td>
+                    <template v-if="LS !== undefined">
+                        <div v-if="LS === null">Выполняется поиск...</div>
+                        <div v-else-if="typeof(LS) == 'object'">{{ LS.Name }}</div>
+                        <div v-else class="alert alert-danger p-1 m-0">{{ LS }}</div>
+                    </template>
+
+                    <button @click="findLS('number')" class="btn btn-sm btn-primary m-1">Поиск по номеру</button>
+                    <button @click="findLS('adress')" class="btn btn-sm btn-primary m-1">Поиск по адресу</button>
+
+                </td>
+            </tr>
+            <tr><td>Плательщик</td><td>{{ payer }}</td></tr>
+        </template>
+
+        <tr v-if="PaymentType == 'ПриходОтПС'">
+            <td>Договор</td>
+            <td>
+                <select v-model="accord" class="form-control">
+                    <option v-for="item in accords" :value="item.PSAccordID">
+                        {{ item.PSAccordName }}
+                    </option>
+                </select>
+            </td>
+        </tr>
+
+        <tr><td>Номер</td><td>{{ document.Number }}</td></tr>
+            
+        <tr><td>Дата</td><td>{{ dateForClient(document.Date, 'day') }}</td></tr>
+        
+        <tr><td>Сумма</td><td>{{ document.Summ }}</td></tr>
+        
+        <tr><td>Тип</td><td>{{ document.TypeFromBank }}</td></tr>
+        
+        <tr v-if="document.PayerAccount">
+            <td>РС плательщика</td><td>{{ document.PayerAccount }}</td>
+        </tr>
+        
+        <tr v-if="document.ReceiverAccount">
+            <td>РС получателя</td><td>{{ document.ReceiverAccount }}</td>
+        </tr>
+        
+        <tr><td>Назначение платежа</td><td>{{ document.Comment }}</td></tr>        
+    </table>
+
+    <center>
+        <button v-if="filled"
+                @click="save"
+                class="btn btn-primary flex-grow-0">
+            Сохранить
+        </button>
+    </center>
+    
+    <div class="px-2 mt-2">
+        Реквизиты из банковской выгрузки
+        <button @click="showBankFile = showBankFile ? false : true"
+                class="btn btn-link btn-sm">
+            <font-awesome-icon :icon="showBankFile ? 'chevron-up' : 'chevron-down'"/>
+        </button>
+    </div>
+    <table v-show="showBankFile" class="table">
+        <tr v-for="item in document.BankFile">
+            <td>{{ item.Key }}</td>
+            <td>{{ item.Value }}</td>
+        </tr>
+    </table>
+    
+</div>
+</template>
+
+<script>
+    
+import { mapActions } from 'vuex';
+    
+export default {
+    props: ["FirmID", "DocumentID", "document", "accords"],
+    data: function()
+    {        
+        let data = {
+            
+            PaymentType: this.document.PaymentType,
+            LS: this.document.LS ? this.document.LS : undefined,
+            
+            showBankFile: false,
+            
+            accord: this.document.PSAccordID ? this.document.PSAccordID : this.accords[0].PSAccordID
+        };
+        
+        this.document.BankFile.forEach((item) => {
+            
+            if(item.Key == "Плательщик") data.payer = item.Value;
+        });
+        
+        return data;
+    },
+    computed:
+    {
+        filled()
+        {
+            if(this.PaymentType == "ПлатежЛС" && (this.LS === null || typeof(this.LS) != "object"))
+            {
+                return false;
+            }
+            else return true;
+        }
+    },
+    methods:
+    {
+        ...mapActions(["SEND_DATA"]),
+        findLS(type)
+        {
+            let th = this;
+            
+            function accepted(data)
+            {
+                th.LS = data;
+            }
+            
+            function rejected(message)
+            {
+                th.LS = message;
+            }
+            
+            this.LS = null;
+            
+            let str = document.getSelection().toString();
+            
+            if(!str) str = this.document.Comment; 
+                        
+            this.SEND_DATA({
+                query: {
+                    func: (type == "number") ? "FindLSNumber" : "FindLSAdress",
+                    FirmID: this.FirmID,
+                    string: str
+                },
+                accepted: accepted,
+                rejected: rejected
+            });
+        },
+        save()
+        {
+            let doc = {
+                DocID: this.DocumentID,
+                PaymentType: this.PaymentType
+            };
+            
+            if(this.PaymentType == "ПлатежЛС") doc.LSID = this.LS.ObjectID;
+            
+            if(this.PaymentType == "ПриходОтПС") doc.PSAccordID = this.accord;
+            
+            let change = this.$parent.change;
+                        
+            function accepted()
+            {
+                change("done", "Документ изменен");
+            }
+
+            function rejected(message)
+            {
+                change("error", "Произошла ошибка при изменении документа: " + message);
+            }
+            
+            change("changing", "Изменение документа");
+            
+            this.SEND_DATA({
+                query: {
+                    func: "BankPaymentWrite",
+                    data: doc,
+                    FirmID: this.FirmID
+                },
+                accepted: accepted,
+                rejected: rejected
+            });
+        }
+    }
+}
+</script>
+
+<style>
+    
+</style>

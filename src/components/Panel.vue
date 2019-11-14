@@ -17,7 +17,8 @@
                     :addPanel="addPanel"
                     :showObject="showObject"/>
             
-            <PaymentFile v-else-if="type == 'PaymentFile'" :FirmID="info.FirmID"/>
+            <PaymentFile v-else-if="type == 'PaymentFile'"
+                         :addPanel="addPanel"/>
             
             <State v-else ref="state">
                 
@@ -64,6 +65,8 @@ import EquipmentHistory from './EquipmentHistory.vue'
 import PaymentFile from './PaymentFile.vue'
     
 import EditableDocument from './EditableDocument.vue'
+    
+import BankPayment from './BankPayment.vue'
 
 import { mapState, mapMutations } from 'vuex';
 
@@ -72,7 +75,7 @@ export default {
     {
         State, NoData,
         
-        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, EquipmentHistory, PaymentFile, EditableDocument
+        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, EquipmentHistory, PaymentFile, EditableDocument, BankPayment
     },
     props:
     {
@@ -187,6 +190,14 @@ export default {
                     }
                     
                     return res;
+                    
+                case "BankPayment":
+                    
+                    return {
+                        document: {func: "GetDoc", FirmID: info.FirmID, DocumentID: info.DocumentID},
+                        
+                        accords: {func: "PSAccordsList", FirmID: info.FirmID}
+                    }
                     
                 case "TariffsTOHistory":
                     

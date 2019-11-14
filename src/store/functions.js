@@ -107,7 +107,13 @@ export function getPath(data)//куда класть данные во vuex
     //документ
     if(data.func == "GetDoc")
     {
-        return ["Objects", data.FirmID, data.ObjectID, "Documents", data.DocumentID, "GetDoc"];
+        return ["Objects", data.FirmID, data.FirmID, "Documents", data.DocumentID, "GetDoc"];
+    }
+    
+    //соглашения
+    if(data.func == "PSAccordsList")
+    {
+        return ["Objects", data.FirmID, data.FirmID, "PSAccordsList"];
     }
 }
 
@@ -215,6 +221,12 @@ export function getQuery(data)//что спрашивать у сервера
         return ['GetDoc', data.DocumentID];
     }
     
+    //соглашения
+    if(data.func == "PSAccordsList")
+    {
+        return ["PSAccordsList", data.FirmID];
+    }
+    
     //изменение истории
     switch(data.func)
     {
@@ -296,11 +308,12 @@ export function getQuery(data)//что спрашивать у сервера
             
             return ["ObjectHardWorkDelete", data.FirmID, data.ObjectID, data.date, data.kitID];
             
-        
+        //установка начального баланса ЛС
         case "SetLSBalance":
             
             return ["SetLSBalance", data.LSID, data.value];
             
+        //редактирование/создание/удаление документов
         case "LSBalanceChangeWrite":
             
             return ["LSBalanceChangeWrite", data.data];
@@ -308,6 +321,25 @@ export function getQuery(data)//что спрашивать у сервера
         case "LSBalanceChangeDelete":
             
             return ["LSBalanceChangeDelete", data.DocumentID];
+            
+        case "BankPaymentWrite":
+            
+            return ["BankPaymentWrite", data.data];
+          
+            
+        //загрузка платежей из банковского файла
+        case "CreateBankPayment":
+                        
+            return ["ExecFunctions", data.docs];
+        
+        //поиск ЛС по номеру и адресу
+        case "FindLSNumber":
+            
+            return ["FindLSNumber", data.FirmID, data.string];
+            
+        case "FindLSAdress":
+            
+            return ["FindLSAdress", data.FirmID, data.string];
     }
 }
 

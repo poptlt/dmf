@@ -46,7 +46,11 @@
         </div>
     </div>
     
-    <button class="btn btn-primary" @click="newDoc">Новый документ</button>
+    <center>
+        <button class="btn btn-primary" @click="newDoc">
+            Новый документ
+        </button>
+    </center>
 
     <div class="d-flex align-items-center justify-content-around">
 
@@ -132,6 +136,10 @@ export default {
                 if(Type == "LSBalanceChange")
                 {
                     this.addPanel("EditableDocument", Name, {DocumentID: DocID, FirmID: Object.FirmID, ObjectID: Object.ObjectID, type: "LSBalanceChange"});
+                }
+                else if(Type == "BankPayment")
+                {
+                    this.addPanel("BankPayment", Name, {DocumentID: DocID, FirmID: Object.FirmID, ObjectID: Object.ObjectID});
                 }
                 else
                 {
