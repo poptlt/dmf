@@ -1,5 +1,4 @@
 <template>
-<div>
 <State ref="state">
     
     <input v-if="!submitted"
@@ -10,45 +9,10 @@
     
     <template v-if="accounts.length">
         
-    <center v-if="!submitted">
+    <center v-if="!submitted" class="m-1">
         <button @click="sendFile" class="btn btn-primary">Записать</button>
     </center>
-        
-    <template v-if="submitted">
-        
-        <div class="text-center font-weight-bold">Нераспознанные платежи</div>
-        
-        <div v-for="doc in unrecognized" class="p-2">
-        <table class="table border rounded">
-            <tr>
-                <td>Счет</td><td>{{ doc.account }}</td>
-            </tr>
-            <tr v-if="doc['Дата']">
-                <td>Дата</td><td>{{ doc['Дата'] }}</td>
-            </tr>
-            <tr v-if="doc['Номер']">
-                <td>Номер</td><td>{{ doc['Номер'] }}</td>
-            </tr>
-            <tr v-if="doc['Сумма']">
-                <td>Сумма</td><td>{{ doc['Сумма'] }}</td>
-            </tr>
-            <tr v-if="doc['ТипДокумента']">
-                <td>Тип</td><td>{{ doc['ТипДокумента'] }}</td>
-            </tr>
-            <tr v-if="doc['НазначениеПлатежа']">
-                <td>Назначение Платежа</td><td>{{ doc['НазначениеПлатежа'] }}</td>
-            </tr>
-            <tr>
-                <td colspan="2" class="p-1 text-center">
-                    <button @click="showDoc(doc.Doc)"
-                            class="btn btn-primary btn-sm">
-                        Редактировать
-                    </button>
-                </td>
-            </tr>
-        </table>
-        </div>
-    </template>
+
         
     <div class="d-flex align-items-center">
         
@@ -75,7 +39,7 @@
                 
                 <div class="text-center font-weight-bold">Информация по счету</div>
                 
-                <button @click="showAccountInfo(i)"
+                <button @click="flip(accountInfo, i)"
                         class="flex-grow-0 m-1 btn btn-link btn-sm">
                     <font-awesome-icon :icon="accountInfo[i] ? 'chevron-up' : 'chevron-down'"/>
                 </button>
@@ -91,32 +55,46 @@
             
             <div class="text-center font-weight-bold m-2">Платежи</div>
             
-            <div v-for="doc in account.docs" class=" p-2">
-            <table class="table border rounded">
-                <tr v-if="doc['Дата']">
-                    <td>Дата</td><td>{{ doc['Дата'] }}</td>
-                </tr>
-                <tr v-if="doc['Номер']">
-                    <td>Номер</td><td>{{ doc['Номер'] }}</td>
-                </tr>
-                <tr v-if="doc['Сумма']">
-                    <td>Сумма</td><td>{{ doc['Сумма'] }}</td>
-                </tr>
-                <tr v-if="doc['ТипДокумента']">
-                    <td>Тип</td><td>{{ doc['ТипДокумента'] }}</td>
-                </tr>
-                <tr v-if="doc['НазначениеПлатежа']">
-                    <td>Назначение Платежа</td><td>{{ doc['НазначениеПлатежа'] }}</td>
-                </tr>
-                <tr v-if="doc.Doc">
-                    <td colspan="2" class="p-1 text-center">
-                        <button @click="showDoc(doc.Doc)"
-                                class="btn btn-primary btn-sm">
-                            Редактировать
-                        </button>
-                    </td>
-                </tr>
-            </table>
+            <div v-for="(doc, j) in account.docs"
+                 
+                 :style="{'background-color': (doc.recognized === undefined) ? 'white' : (doc.recognized ? '#ccffcc' : '#ffcccc')}"
+                 
+                 class="border-top">
+                
+                <div class="d-flex">
+                    <div @click="doc.Doc ? showDoc(doc.Doc) : false"
+                         class="d-flex flex-wrap p-2">
+                        
+                        <div class="flex-grow-0 p-2">
+                            {{ (doc['ПолучательРасчСчет'] == account['РасчСчет']) ? '+' : '-' }}
+                        </div>
+                        <div v-if="doc['Дата']" class="flex-grow-0 p-2">
+                            {{ doc['Дата'] }}
+                        </div>
+                        <div v-if="doc['Номер']" class="flex-grow-0 p-2">
+                            № {{ doc['Номер'] }}
+                        </div>
+                        <div v-if="doc['Сумма']" class="flex-grow-0 p-2">
+                            {{ doc['Сумма'] }} руб.
+                        </div>
+                        <div v-if="doc['НазначениеПлатежа']" class="flex-grow-0 p-2">
+                            {{ doc['НазначениеПлатежа'] }}
+                        </div>
+                        
+                    </div>
+                    <button @click="flip(docInfo[i], j)"
+                            class="flex-grow-0 m-1 btn btn-link btn-sm">
+                        <font-awesome-icon :icon="docInfo[i][j] ? 'chevron-up' : 'chevron-down'"/>
+                    </button>
+                </div>
+                <table v-show="docInfo[i][j]" class="table">
+                    <template v-for="(val, prop) in doc">
+                    <tr v-if="prop != 'ПорядковыйНомер' && prop != 'Doc' && prop != 'recognized'">
+                        <td>{{ prop }}</td><td>{{ val }}</td>
+                    </tr>
+                    </template>
+                </table>
+            
             </div>
             
         </Tab>
@@ -124,7 +102,6 @@
     </template>
 
 </State>
-</div>
 </template>
 
 <script>
@@ -150,18 +127,17 @@ export default {
             showInfo: false,
             accounts: [],
             accountInfo: [],
+            docInfo: [],
             accordionID: "id"+(""+Math.random()).substring(2),
-            
             submitted: false,
-            unrecognized: []
         };
     },
     methods:
     {
         ...mapActions(["SEND_DATA"]),
-        showAccountInfo(i)
+        flip(arr, i)
         {
-            Vue.set(this.accountInfo, i, (this.accountInfo[i]) ? false : true);
+            Vue.set(arr, i, arr[i] ? false : true);
         },
         showDoc({DocID, Name, Object})
         {
@@ -201,6 +177,7 @@ export default {
             
             this.info = {};
             this.accounts = [];
+            this.docInfo = [];
             
             let account = undefined, doc = undefined;
                         
@@ -228,6 +205,8 @@ export default {
                 {
                     this.accounts.push(account);
                     account = undefined;
+                    
+                    this.docInfo.push([]);
                 }
                 else if(key == "СекцияДокумент")
                 {
@@ -276,8 +255,6 @@ export default {
                     else account.docs[i]["ПорядковыйНомер"] = 0;
                 }
             });
-            
-            console.log(this.accounts);
         },
         sendFile()
         {
@@ -293,30 +270,26 @@ export default {
             function accepted(data)
             {
                 change("show");
-                console.log("accepted");
-                console.log(data);
                 
                 let i = 0;
                 
                 th.accounts.forEach((account) => {
-                
-                    let docs = [];
-                    
+                                    
                     account.docs.forEach((doc) => {
                         
                         doc.Doc = data[i].Doc;
-                        
-                        if(data[i].Recognized) docs.push(doc);
-                        else
-                        {
-                            doc.account = account["РасчСчет"];
-                            th.unrecognized.push(doc);
-                        }
+                        doc.recognized = data[i].Recognized;
                         i++;
-                        //toServer.push(["CreateBankPayment", doc, account["РасчСчет"]]);
                     });
                     
-                    Vue.set(account, "docs", docs);
+                    function comp(doc1, doc2)
+                    {
+                        if(doc1.recognized == doc2.recognized) return 0;
+                        else if(!doc1.recognized) return -1;
+                        else return 1;
+                    }
+                    
+                    account.docs.sort(comp);
                 });
                 
                 th.submitted = true;
