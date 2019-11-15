@@ -36,7 +36,11 @@
 
                         <div v-if="searchMessage" class="p-2">{{ searchMessage }}</div>
                         <div v-else style="overflow: auto">
-                            <div v-for="item in searchList" @click="showLS(item.LSName, item.FirmID, item.LSID)" class="p-2 border-bottom">{{ item.LSName }}</div>
+                            <div v-for="item in searchList"
+                                 @click="showLS(item)"
+                                 class="p-2 border-bottom">
+                                {{ item.Name }}
+                            </div>
                         </div>
                     </div>
                     
@@ -217,13 +221,13 @@ export default {
             
             this.FIND_LS({str: this.searchStr, func: func, timestamp: this.searchTimestamp});
         },
-        showLS: function(Name, FirmID, LSID)
+        showLS: function(data)
         {
             this.$refs.searchMenu.hide(true);
             
             this.searchStr = "", this.searchMessage = "Ничего не найдено";
-            
-            this.addPanel("Object", Name, {FirmID: FirmID, ObjectID: LSID, ObjectType: "LS"});
+                        
+            this.showObject(data);
         },
         goToPage: function(url)
         {

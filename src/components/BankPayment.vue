@@ -29,6 +29,25 @@
 
                 </td>
             </tr>
+            <tr>
+                <td><font-awesome-icon icon="search"/></td>
+                <td>
+                    <input type="text"
+                           @input="LSsearch"
+                           v-model="adress"
+                           class="form-control"/>
+                    
+                    <div v-if="searchMessage">{{ searchMessage }}</div>
+                    
+                    <div v-else style="max-height: 300px; overflow: auto">
+                        <div v-for="item in LSList"
+                             @click="LS = item"
+                             class="p-2 border-top">
+                            {{ item.Name }}
+                        </div>
+                    </div>
+                </td>
+            </tr>
             <tr><td>Плательщик</td><td>{{ payer }}</td></tr>
         </template>
 
@@ -43,14 +62,15 @@
             </td>
         </tr>
 
-        <tr><td>Номер</td><td>{{ document.Number }}</td></tr>
-            
-        <tr><td>Дата</td><td>{{ dateForClient(document.Date, 'day') }}</td></tr>
-        
-        <tr><td>Сумма</td><td>{{ document.Summ }}</td></tr>
-        
-        <tr><td>Тип</td><td>{{ document.TypeFromBank }}</td></tr>
-        
+        <tr><td>Назначение платежа</td><td>{{ document.Comment }}</td></tr>
+
+        <tr><td colspan="2">
+            {{ dateForClient(document.Date, 'day') }} 
+            {{ document.Summ }} руб. 
+            {{ document.TypeFromBank }} 
+            № {{ document.Number }}
+        </td></tr>
+
         <tr v-if="document.PayerAccount">
             <td>РС плательщика</td><td>{{ document.PayerAccount }}</td>
         </tr>
@@ -59,7 +79,7 @@
             <td>РС получателя</td><td>{{ document.ReceiverAccount }}</td>
         </tr>
         
-        <tr><td>Назначение платежа</td><td>{{ document.Comment }}</td></tr>        
+                
     </table>
 
     <center>
@@ -102,7 +122,12 @@ export default {
             
             showBankFile: false,
             
-            accord: this.document.PSAccordID ? this.document.PSAccordID : this.accords[0].PSAccordID
+            accord: this.document.PSAccordID ? this.document.PSAccordID : this.accords[0].PSAccordID,
+            
+            adress: "",
+            LSList: [],
+            searchMessage: "Ничего не найдено",
+            searchTimestamp: undefined,
         };
         
         this.document.BankFile.forEach((item) => {
@@ -125,7 +150,7 @@ export default {
     },
     methods:
     {
-        ...mapActions(["SEND_DATA"]),
+        ...mapActions(["SEND_DATA", "FIND_LS"]),
         findLS(type)
         {
             let th = this;
@@ -155,6 +180,26 @@ export default {
                 accepted: accepted,
                 rejected: rejected
             });
+        },
+        LSsearch()
+        {
+            this.searchTimestamp = new Date();
+            
+            let th = this;
+            
+            function func(data, timestamp)
+            {
+                if(timestamp == th.searchTimestamp)
+                {
+                    if(Array.isArray(data))
+                    {
+                        th.searchMessage = "", th.LSList = data;
+                    }
+                    else th.searchMessage = data;
+                }
+            }
+            
+            this.FIND_LS({str: this.adress, func: func, timestamp: this.searchTimestamp});
         },
         save()
         {

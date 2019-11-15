@@ -44,6 +44,10 @@ export function getPath(data)//куда класть данные во vuex
     {
         return ["Objects", data.FirmID, data.FirmID, "GetBankAccounts"];
     }
+    if(data.func == "FailPayments")
+    {
+        return ["Objects", data.FirmID, data.FirmID, "BankAccounts", data.AccountID, "FailPayments"];
+    }
     /*if(data.func == "ObjectTariffTOState")
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectTariffTOState"];
@@ -155,6 +159,10 @@ export function getQuery(data)//что спрашивать у сервера
     if(data.func == "GetBankAccounts")
     {
         return ["GetBankAccounts", data.FirmID];
+    }
+    if(data.func == "FailPayments")
+    {
+        return ["FailPayments", data.AccountID];
     }
     /*if(data.func == "ObjectTariffTOState")
     {
@@ -340,6 +348,15 @@ export function getQuery(data)//что спрашивать у сервера
         case "FindLSAdress":
             
             return ["FindLSAdress", data.FirmID, data.string];
+            
+        case "FindLS":
+            
+            return ["FindLS", data.string];
+            
+        //запрос баланса по расчетному счету
+        case "BankAccountTurnover":
+            
+            return ["BankAccountTurnover", data.AccountID, data.ldate, data.rdate];
     }
 }
 

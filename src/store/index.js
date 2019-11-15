@@ -357,7 +357,7 @@ export const store = new Vuex.Store({
                         
                         if(query.LS) commit('CLEAR_TURNOVER', {FirmID: query.FirmID, LSID: query.LS.ObjectID});
                         
-                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "GetBankAccounts"]);
+                        commit('CLEAR', ["Objects", query.FirmID, query.FirmID, "BankAccounts"]);
                         
                 }
                 

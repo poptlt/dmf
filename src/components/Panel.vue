@@ -238,7 +238,7 @@ export default {
     },
     methods:
     {
-        ...mapMutations(['DESTROY_TREE', 'CLEAR_TURNOVER']),
+        ...mapMutations(['DESTROY_TREE', 'CLEAR_TURNOVER', 'CLEAR']),
         remove: function()
         {
             this.$emit('delete');
@@ -251,6 +251,8 @@ export default {
             if(this.type == "Object")
             {
                 this.CLEAR_TURNOVER({FirmID: this.info.FirmID, LSID: this.info.ObjectID});
+                
+                this.CLEAR(["Objects", this.info.FirmID, this.info.FirmID, "BankAccounts"]);
             }
         },
         setHeader: function(header)

@@ -66,7 +66,7 @@
                          class="d-flex flex-wrap p-2">
                         
                         <div class="flex-grow-0 p-2">
-                            {{ (doc['ПолучательРасчСчет'] == account['РасчСчет']) ? '+' : '-' }}
+                            <font-awesome-icon :icon="(doc['ПолучательРасчСчет'] == account['РасчСчет']) ? 'plus' : 'minus'"/>
                         </div>
                         <div v-if="doc['Дата']" class="flex-grow-0 p-2">
                             {{ doc['Дата'] }}
@@ -142,6 +142,36 @@ export default {
         showDoc({DocID, Name, Object})
         {
             this.addPanel("BankPayment", Name, {DocumentID: DocID, FirmID: Object.FirmID});
+        },
+        docComp(doc1, doc2)
+        {
+            function f(date)
+            {
+                return date.substr(6, 4)+date.substr(3, 2)+date.substr(0, 2);
+            }
+            
+            if(doc1.recognized == doc2.recognized)
+            {
+                let x = f(doc1['Дата']), y = f(doc2['Дата']);
+                
+                if(x==y)
+                {
+                    let keys = ["ТипДокумента", "ПлательщикСчет", "Номер"];
+                    
+                    for(let i=0; i<keys.length; i++)
+                    {
+                        let key = keys[i];
+                        if(doc1[key] < doc2[key]) return -1;
+                        if(doc1[key] > doc2[key]) return 1;
+                    }
+                    
+                    return 0;
+                }
+                else if(x<y) return -1;
+                else return 1;
+            }
+            else if(!doc1.recognized) return -1;
+            else return 1;
         },
         changeFile()
         {
@@ -228,27 +258,13 @@ export default {
             
             this.accounts.forEach((account) => {
                 
-                function compare(doc1, doc2)
-                {
-                    let keys = ["ТипДокумента", "ПлательщикСчет", "Дата", "Номер"];
-                    
-                    for(let i=0; i<keys.length; i++)
-                    {
-                        let key = keys[i];
-                        if(doc1[key] < doc2[key]) return -1;
-                        if(doc1[key] > doc2[key]) return 1;
-                    }
-                    
-                    return 0;
-                }
-                
-                account.docs.sort(compare);
+                account.docs.sort(this.docComp);
                 
                 account.docs[0]["ПорядковыйНомер"] = 0;
                 
                 for(let i=1; i<account.docs.length; i++)
                 {
-                    if(compare(account.docs[i-1], account.docs[i]) == 0)
+                    if(this.docComp(account.docs[i-1], account.docs[i]) == 0)
                     {
                         account.docs[i]["ПорядковыйНомер"] = account.docs[i-1]["ПорядковыйНомер"] + 1;
                     }
@@ -282,14 +298,7 @@ export default {
                         i++;
                     });
                     
-                    function comp(doc1, doc2)
-                    {
-                        if(doc1.recognized == doc2.recognized) return 0;
-                        else if(!doc1.recognized) return -1;
-                        else return 1;
-                    }
-                    
-                    account.docs.sort(comp);
+                    account.docs.sort(th.docComp);
                 });
                 
                 th.submitted = true;

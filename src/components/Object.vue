@@ -143,11 +143,24 @@
     </Tab>
 
     <Tab v-if="Type == 'Firm'" :accordionID="accordionID" label="Расчётные счета">
-
-        <BankAccounts v-if="isData([bankAccounts])"
-                      :data="bankAccounts"
-                      :FirmID="FirmID"
-                      :addPanel="addPanel"/>
+        
+        <center>
+            <button @click="loadPaymentFile"
+                    class="border btn btn-light btn-sm m-2">
+                Загрузить платежи из файла
+            </button>
+        </center>
+        
+        <div v-if="isData([bankAccounts])" class="m-2">
+            <Tab v-for="(account, i) in bankAccounts"
+                 :accordionID="accountsAccordionID"
+                 :label="account.BankAccountName"
+                 :visible="i==0">
+                <BankAccount :ID="account.BankAccountID"
+                             :FirmID="FirmID"
+                             :addPanel="addPanel"/>
+            </Tab>
+        </div>
         <NoData v-else :data="[bankAccounts]"/>
 
     </Tab>
@@ -189,7 +202,7 @@ import Tariffs from './ObjectContent/Tariffs.vue';
     
 import TariffsTO from './ObjectContent/TariffsTO.vue';
 
-import BankAccounts from './ObjectContent/BankAccounts.vue';
+import BankAccount from './ObjectContent/BankAccount.vue';
 
 import Turnover from './ObjectContent/Turnover.vue';
 
@@ -204,14 +217,16 @@ export default {
     components:
     {
         NoData, State, Tab,
-        Tariffs, TariffsTO, BankAccounts, Turnover, Calculation, Receipt
+        Tariffs, TariffsTO, BankAccount, Turnover, Calculation, Receipt
     },
     data: function()
-    {
+    {        
         return {
             equipmentInfo: [],
             
             accordionID: "id"+(""+Math.random()).substring(2),
+            
+            accountsAccordionID: "id"+(""+Math.random()).substring(2),
 
             urlMessage: "",
         }
@@ -238,6 +253,10 @@ export default {
         showCalcParams: function()
         {
             this.addPanel("CalcParams", this.Name + ": Параметры расчета дочерних", {FirmID: this.FirmID, ObjectID: this.ObjectID});
+        },
+        loadPaymentFile: function()
+        {
+            this.addPanel("PaymentFile", "Загрузить платежи из файла", {});
         },
         getUrl: function()
         {
