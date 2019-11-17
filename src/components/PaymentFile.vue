@@ -62,7 +62,7 @@
                  class="border-top">
                 
                 <div class="d-flex">
-                    <div @click="doc.Doc ? showDoc(doc.Doc) : false"
+                    <div @click="doc.Doc ? (showDoc(doc.Doc), account.docs.splice(j, 1)) : false"
                          class="d-flex flex-wrap p-2">
                         
                         <div class="flex-grow-0 p-2">
@@ -280,11 +280,13 @@ export default {
                 
                 account.docs.forEach((doc) => { toServer.push(["CreateBankPayment", doc, account["РасчСчет"]]); });
             });
-            
+                        
             let change = this.$refs.state.change, th = this;
             
             function accepted(data)
             {
+                console.log(data.length);
+                
                 change("show");
                 
                 let i = 0;

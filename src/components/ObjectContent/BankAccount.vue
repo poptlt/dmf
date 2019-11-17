@@ -183,7 +183,10 @@ export default {
                     if(item.Type) th.sumTrue += item.Summ;
                     else th.sumFalse += item.Summ;
                 });
-                                
+                
+                th.sumTrue = th.sumTrue.toFixed(2);
+                th.sumFalse = th.sumFalse.toFixed(2);
+                
                 change("show");
                 th.turnover = data;
             }

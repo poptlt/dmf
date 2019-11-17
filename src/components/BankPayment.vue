@@ -1,5 +1,13 @@
 <template>
 <div>
+    <center>
+        <button v-if="filled"
+                @click="save"
+                class="btn btn-primary m-2">
+            Сохранить
+        </button>
+    </center>
+    
     <table class="table">
         <tr>
             <td>Вид БПД</td>
@@ -82,13 +90,6 @@
                 
     </table>
 
-    <center>
-        <button v-if="filled"
-                @click="save"
-                class="btn btn-primary flex-grow-0">
-            Сохранить
-        </button>
-    </center>
     
     <div class="px-2 mt-2">
         Реквизиты из банковской выгрузки
