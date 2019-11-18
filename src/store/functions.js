@@ -338,7 +338,7 @@ export function getQuery(data)//что спрашивать у сервера
         //загрузка платежей из банковского файла
         case "CreateBankPayment":
                         
-            return ["ExecFunctions", data.docs];
+            return ["CreateBankPayment", data.document, data.account];
         
         //поиск ЛС по номеру и адресу
         case "FindLSNumber":

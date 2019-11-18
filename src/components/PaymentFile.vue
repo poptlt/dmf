@@ -10,7 +10,7 @@
     <template v-if="accounts.length">
         
     <center v-if="!submitted" class="m-1">
-        <button @click="sendFile" class="btn btn-primary">Записать</button>
+        <button @click="sendDoc(0, 0)" class="btn btn-primary">Записать</button>
     </center>
 
         
@@ -64,6 +64,12 @@
                 <div class="d-flex">
                     <div @click="doc.Doc ? (showDoc(doc.Doc), account.docs.splice(j, 1)) : false"
                          class="d-flex flex-wrap p-2">
+                        
+                        <div v-if="doc.error"
+                             class="flex-grow-0 p-2 text-danger">
+                            <font-awesome-icon icon="exclamation-triangle"/>
+                            {{ doc.error }}
+                        </div>
                         
                         <div class="flex-grow-0 p-2">
                             <font-awesome-icon :icon="(doc['ПолучательРасчСчет'] == account['РасчСчет']) ? 'plus' : 'minus'"/>
@@ -272,55 +278,56 @@ export default {
                 }
             });
         },
-        sendFile()
+        sendDoc(accNum, docNum)
         {
-            let toServer = [];
+            if(this.accounts[accNum].docs.length == docNum) accNum++, docNum=0;
             
-            this.accounts.forEach((account) => {
-                
-                account.docs.forEach((doc) => { toServer.push(["CreateBankPayment", doc, account["РасчСчет"]]); });
-            });
-                        
             let change = this.$refs.state.change, th = this;
             
-            function accepted(data)
+            if(accNum == this.accounts.length)
             {
-                console.log(data.length);
-                
-                change("show");
-                
-                let i = 0;
-                
-                th.accounts.forEach((account) => {
-                                    
-                    account.docs.forEach((doc) => {
-                        
-                        doc.Doc = data[i].Doc;
-                        doc.recognized = data[i].Recognized;
-                        i++;
-                    });
-                    
-                    account.docs.sort(th.docComp);
+                this.accounts.forEach((account) => {
+                    account.docs.sort(this.docComp);
                 });
                 
-                th.submitted = true;
+                this.submitted = true;
+                
+                change("show");
             }
-            
-            function rejected(message)
+            else
             {
-                change("error", message);
+                function accepted(data)
+                {
+                    let doc = th.accounts[accNum].docs[docNum];
+                    
+                    doc.Doc = data.Doc;
+                    doc.recognized = data.Recognized;
+                    
+                    th.sendDoc(accNum, docNum+1);
+                }
+                
+                function rejected(message)
+                {
+                    let doc = th.accounts[accNum].docs[docNum];
+                    
+                    doc.error = message;
+                    
+                    th.sendDoc(accNum, docNum+1);
+                }
+                
+                change("changing", "Запись платежей");
+            
+                this.SEND_DATA({
+                    query: {
+                        func: "CreateBankPayment",
+                        document: this.accounts[accNum].docs[docNum],
+                        account: this.accounts[accNum]["РасчСчет"]
+                    },
+                    accepted: accepted,
+                    rejected: rejected
+                });
+                
             }
-            
-            change("changing", "Запись платежей");
-            
-            this.SEND_DATA({
-                query: {
-                    func: "CreateBankPayment",
-                    docs: toServer
-                },
-                accepted: accepted,
-                rejected: rejected
-            });
         }
     }
 }
