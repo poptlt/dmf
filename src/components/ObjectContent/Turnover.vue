@@ -39,7 +39,7 @@
 <State ref="state">
     
     <div class="d-flex align-items-center">
-        <div class="p-1">Начальная задолжность: </div>
+        <div class="p-1">Начальная задолженность: </div>
         <Number :NoNegative="false" :Digits="10" :DigitsAfterPoint="2" @change="changeStartBalance" class="m-1"/>
         <div>
             <button v-if="startBalance !== undefined" @click="writeStartBalance" class="btn btn-primary btn-sm">Установить</button>
@@ -69,8 +69,15 @@
     </div>
     <template v-if="isData([data])">
 
-
-        <div class="m-2">Начальное сальдо: {{ data.BeginSaldo }}</div>
+        <table class="table">
+            <tr><td>Начальная задолженность</td><td>{{ data.BeginSaldo }}</td></tr>
+            
+            <tr><td>Всего начислено</td><td>{{ sumTrue }}</td></tr>
+            
+            <tr><td>Всего оплачено</td><td>{{ sumFalse }}</td></tr>
+            
+            <tr><td>Конечная задолженность</td><td>{{ data.EndSaldo }}</td></tr>
+        </table>
 
         <table class="table table-hover">
             <tr v-for="item in data.Moving"
@@ -81,8 +88,6 @@
                 <td>{{ item.Text }}</td>
             </tr>
         </table>
-
-        <div class="m-2">Конечное сальдо: {{ data.EndSaldo }}</div>
 
     </template>
     <NoData v-else :data="[data]"/>
@@ -124,7 +129,25 @@ export default {
             return this.vuexLoad({
                 data: {func: "GetLSTurnover", FirmID: this.FirmID, LSID: this.LSID, year: this.year}
             }).data;
-        }
+        },
+        sumTrue: function()
+        {
+            let res = 0;
+            this.data.Moving.forEach((item) => {
+                
+                if(item.Type) res += item.Summ;
+            });
+            return res.toFixed(2);
+        },
+        sumFalse: function()
+        {
+            let res = 0;
+            this.data.Moving.forEach((item) => {
+                
+                if(!item.Type) res += item.Summ;
+            });
+            return res.toFixed(2);
+        },
     },
     methods:
     {

@@ -1,73 +1,81 @@
 <template>
 <div>
-    <div class="d-flex flex-wrap">
-        <div class="d-flex">
-            <div class="m-1 flex-grow-0" style="width: 20px">с</div>
-
-            <Datepicker v-model="ldate"
-                        @selected="ldateChanged"
-                        :monday-first="true"
-                        :language="ru"
-                        :format="dateFormatter"
-                        minimum-view="day"
-                        :bootstrap-styling="true"
-                        class="m-1"
-                        style="min-width: 300px"/>
-        </div>
-        <div class="d-flex">
-            <div class="m-1 flex-grow-0" style="width: 20px">по</div>
-
-            <Datepicker v-model="rdate"
-                        @selected="rdateChanged"
-                        :monday-first="true"
-                        :language="ru"
-                        :format="dateFormatter"
-                        minimum-view="day"
-                        :bootstrap-styling="true"
-                        class="m-1"
-                        style="min-width: 300px"/>
-        </div>
+    <div @click="showAll = showAll ? false : true"
+         class="bg-secondary text-white p-2 text-center mt-2">
+        ОСВ
     </div>
-    <State ref="state">
-        
-    <center>
-        <button @click="getTurnover" class="btn btn-primary m-2">
-            Получить
-        </button>
-    </center>
-        
-    <div v-if="typeof(turnover) == 'string'"
-         class="alert alert-danger">
-        {{ turnover }}
-    </div>
-    <div v-else-if="turnover">
-        
-        <table class="table">
-            <tr><td>Начальный остаток</td><td>{{ turnover.BeginSaldo }}</td></tr>
-            
-            <tr><td>Конечный остаток</td><td>{{ turnover.EndSaldo }}</td></tr>
-            
-            <tr><td>Всего поступило</td><td>{{ sumTrue }}</td></tr>
-            
-            <tr><td>Всего списано</td><td>{{ sumFalse }}</td></tr>
-        </table>
+    
+    <div v-show="showAll">
+        <div class="d-flex flex-wrap">
+            <div class="d-flex">
+                <div class="m-1 flex-grow-0" style="width: 20px">с</div>
 
-        <div v-for="item in turnover.Moving"
-             @click="(item.Doc) ? showDoc(item.Doc) : null"
-             class="d-flex flex-wrap p-2 border-top"
-             :style="{'background-color': item.Type ? '#ccffcc' : '#ffcccc'}">
-            
-            <div v-if="item.FailPayment" class="flex-grow-0 p-2">
-                <font-awesome-icon class="text-danger" icon="exclamation-triangle"/>
+                <Datepicker v-model="ldate"
+                            @selected="ldateChanged"
+                            :monday-first="true"
+                            :language="ru"
+                            :format="dateFormatter"
+                            minimum-view="day"
+                            :bootstrap-styling="true"
+                            class="m-1"
+                            style="min-width: 300px"/>
             </div>
-            <div class="flex-grow-0 p-2">{{ dateForClient(item.Date, 'day') }}</div>
-            <div class="flex-grow-0 p-2">{{ item.Summ }} руб.</div>
-            <div class="flex-grow-0 p-2">{{ item.Text }}</div>
+            <div class="d-flex">
+                <div class="m-1 flex-grow-0" style="width: 20px">по</div>
+
+                <Datepicker v-model="rdate"
+                            @selected="rdateChanged"
+                            :monday-first="true"
+                            :language="ru"
+                            :format="dateFormatter"
+                            minimum-view="day"
+                            :bootstrap-styling="true"
+                            class="m-1"
+                            style="min-width: 300px"/>
+            </div>
         </div>
         
+        <State ref="state">
+
+        <center>
+            <button @click="getTurnover" class="btn btn-primary m-2">
+                Получить
+            </button>
+        </center>
+
+        <div v-if="typeof(turnover) == 'string'"
+             class="alert alert-danger">
+            {{ turnover }}
+        </div>
+        <div v-else-if="turnover">
+
+            <table class="table">
+                <tr><td>Начальный остаток</td><td>{{ turnover.BeginSaldo }}</td></tr>
+
+                <tr><td>Всего поступило</td><td>{{ sumTrue }}</td></tr>
+
+                <tr><td>Всего списано</td><td>{{ sumFalse }}</td></tr>
+
+                <tr><td>Конечный остаток</td><td>{{ turnover.EndSaldo }}</td></tr>
+            </table>
+
+            <div v-for="item in turnover.Moving"
+                 @click="(item.Doc) ? showDoc(item.Doc) : null"
+                 class="d-flex flex-wrap p-2 border-top"
+                 :style="{'background-color': item.Type ? '#ccffcc' : '#ffcccc'}">
+
+                <div v-if="item.FailPayment" class="flex-grow-0 p-2">
+                    <font-awesome-icon class="text-danger" icon="exclamation-triangle"/>
+                </div>
+                <div class="flex-grow-0 p-2">{{ dateForClient(item.Date, 'day') }}</div>
+                <div class="flex-grow-0 p-2">{{ item.Summ }} руб.</div>
+                <div class="flex-grow-0 p-2">{{ item.Text }}</div>
+            </div>
+
+        </div>
+
+        </State>
     </div>
-        
-    </State>
     
     <div @click="showFailed = showFailed ? false : true"
          class="bg-secondary text-white p-2 text-center mt-2">
@@ -132,6 +140,7 @@ export default {
             rdate: new Date(),
             
             showFailed: false,
+            showAll: true,
             
             turnover: undefined,
             sumTrue: 0,
