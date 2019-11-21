@@ -49,7 +49,7 @@
                     
                     <div v-else style="max-height: 300px; overflow: auto">
                         <div v-for="item in LSList"
-                             @click="LS = item"
+                             @click="LSselect(item)"
                              class="p-2 border-top">
                             {{ item.Name }}
                         </div>
@@ -133,7 +133,15 @@ export default {
         
         this.document.BankFile.forEach((item) => {
             
-            if(item.Key == "Плательщик") data.payer = item.Value;
+            if(item.Key == "Плательщик")
+            {
+                data.payer = item.Value;
+                
+                while(data.payer.includes("//"))
+                {
+                    data.payer = data.payer.replace("//", " ");
+                }
+            }
         });
         
         return data;
@@ -201,6 +209,13 @@ export default {
             }
             
             this.FIND_LS({str: this.adress, func: func, timestamp: this.searchTimestamp});
+        },
+        LSselect(LS)
+        {
+            this.LS = LS;
+            this.adress = "";
+            this.LSList = [];
+            this.searchMessage = "Ничего не найдено";
         },
         save()
         {

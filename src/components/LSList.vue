@@ -42,6 +42,6 @@
 <script>
 
 export default {
-    props: ["FirmID", "ObjectID", "addPanel", "showObject", "list", "state"]
+    props: ["FirmID", "ObjectID", "addPanel", "showObject", "list", "state"],
 }
 </script>

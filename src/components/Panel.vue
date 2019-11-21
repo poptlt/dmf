@@ -2,7 +2,7 @@
 
     <div style="height: 100%" class="d-flex flex-column">
         <div class="flex-grow-0 d-flex align-items-start bg-primary">
-            <div class="p-1 text-light" style="font-size: 18px">{{ header }}</div>
+            <div class="p-1 text-light" style="font-size: 18px">{{ label }}</div>
             <button @click="reload" class="flex-grow-0 m-1 bg-light btn btn-outline-primary btn-sm">
                 <font-awesome-icon icon="sync-alt" fixed-width/>
             </button>
@@ -28,7 +28,7 @@
                            v-bind="combine(info, vuexLoad(queries))"
                            :addPanel="addPanel"
                            :showObject="showObject"
-                           :setHeader="setHeader"/>
+                           :setLabel="setLabel"/>
                     
                 <NoData v-else :data="vuexLoad(queries)"/>
                     
@@ -98,12 +98,6 @@ export default {
         addPanel: {},
         showObject: {}
 
-    },
-    data: function()
-    {
-        return {
-            header: this.label
-        }
     },
     computed:
     {
@@ -255,9 +249,9 @@ export default {
                 this.CLEAR(["Objects", this.info.FirmID, this.info.FirmID, "BankAccounts"]);
             }
         },
-        setHeader: function(header)
+        setLabel: function(label)
         {
-            this.header = header;
+            this.$emit("setLabel", label)
         },
         combine: function(info, data)
         {

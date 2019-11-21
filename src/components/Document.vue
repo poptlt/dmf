@@ -28,7 +28,7 @@
 <script>
         
 export default {
-    props: ["document", "setHeader"],
+    props: ["document", "setLabel"],
     data: function()
     {
         console.log(this.document);
@@ -38,7 +38,7 @@ export default {
     {
         created: function()
         {
-            this.setHeader(this.document.Name);
+            this.setLabel(this.document.Name);
             
             return true;
         }

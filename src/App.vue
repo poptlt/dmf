@@ -67,11 +67,13 @@
 
             <div class="flex-fill row m-0" style="overflow: hidden">
                 <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border p-0" style="height: 100%">
-                    <Panel :label="panel.label"
+                    <Panel ref="panels"
+                           :label="panel.label"
                            :main="i==0"
                            :type="panel.type"
                            :info="panel.info"
                            v-on:delete="deletePanel(i)"
+                           @setLabel="function(label){ setLabel(i, label) }"
                            :addPanel="addPanel"
                            :showObject="showObject"/>
                 </div>
@@ -82,6 +84,9 @@
 </template>
 
 <script>
+    
+import Vue from 'vue'
+    
 import { mapActions, mapState} from 'vuex'
 
 import AuthDmf from './components/AuthDMF.vue'
@@ -190,8 +195,10 @@ export default {
         deletePanel: function(i)
         {
             this.panels.splice(i, 1);
-            
-            //while(this.panels.length>i) this.panels.pop();
+        },
+        setLabel(i, label)
+        {
+            Vue.set(this.panels[i], "label", label);
         },
         testing: function()
         {
