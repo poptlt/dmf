@@ -1,5 +1,9 @@
 <template>
 <div>
+    <div v-if="data.Summ" class="p-1">
+        Начальный остаток: {{ data.Summ }} руб. на {{ dateForClient(data.Date, 'day') }}
+    </div>
+    
     <div @click="showAll = showAll ? false : true"
          class="bg-secondary text-white p-2 text-center mt-2">
         ОСВ
@@ -129,9 +133,10 @@ export default {
     {
         NoData, State, Datepicker
     },
-    props: ["ID", "FirmID", "addPanel"],
+    props: ["ID", "FirmID", "data", "addPanel"],
     data: function()
-    {        
+    {
+        console.log(this.data);
         return {
         
             ru: ru,

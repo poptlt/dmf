@@ -357,6 +357,7 @@ export function getQuery(data)//что спрашивать у сервера
         case "BankAccountTurnover":
             
             return ["BankAccountTurnover", data.AccountID, data.ldate, data.rdate];
+            
     }
 }
 

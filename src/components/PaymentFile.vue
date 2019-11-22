@@ -46,9 +46,20 @@
             </div>
             <table v-show="accountInfo[i]" class="table">
                 <template v-for="(val, key) in account">
-                    <tr v-if="key != 'docs'">
+                    <tr v-if="key != 'docs' && key != 'BABalance'">
+                        
                         <td>{{ key }}</td>
-                        <td>{{ val }}</td>
+                        
+                        <td v-if="key == 'НачальныйОстаток' && account.BABalance">
+                            <span :class="{'text-success': (account.BABalance.same === true),
+                                          'text-danger': (account.BABalance.same === false)}">
+                                {{ val }}
+                            </span>
+                            <span v-if="account.BABalance.error" class="text-danger">
+                                {{ account.BABalance.error }}
+                            </span>
+                        </td>
+                        <td v-else>{{ val }}</td>
                     </tr>
                 </template>
             </table>
@@ -111,7 +122,7 @@
 </template>
 
 <script>
-
+    
 import { mapActions } from 'vuex';
     
 import Vue from 'vue';
@@ -140,7 +151,7 @@ export default {
     },
     methods:
     {
-        ...mapActions(["SEND_DATA"]),
+        ...mapActions(["SEND_DATA", "SERVER_REQUEST2"]),
         flip(arr, i)
         {
             Vue.set(arr, i, arr[i] ? false : true);
@@ -193,7 +204,6 @@ export default {
                     
                     parse(event.target.result);
                     
-                    change("show");
                 };
 
                 reader.onerror = function(event) {
@@ -277,6 +287,60 @@ export default {
                     else account.docs[i]["ПорядковыйНомер"] = 0;
                 }
             });
+            
+            let change = this.$refs.state.change;
+            
+            if(this.accounts.length)
+            {
+                let queries = [];
+                
+                this.accounts.forEach((account) => {
+                    
+                    queries.push(["GetBABeginBalance", account["РасчСчет"]]);
+                    
+                    let date = account["ДатаНачала"];
+                    
+                    date = new Date(date.substr(6, 4), date.substr(3, 2)-1, date.substr(0, 2));
+                    
+                    date = this.dateForServer(date, "month");
+                    
+                    queries.push(["GetBABalance", account["РасчСчет"], date]);
+                });
+                
+                let th = this;
+                
+                function ready(data)
+                {                    
+                    for(let i=0; i<th.accounts.length; i++)
+                    {
+                        let add = {};
+                        
+                        if(data[i*2])
+                        {
+                            if(data[i*2].DMF_ERROR) add.error = data[i*2].message;
+                            else
+                            {
+                                if(data[i*2+1].DMF_ERROR) add.error = data[i*2+1].message;
+                                else
+                                {
+                                    if(data[i*2+1] == th.accounts[i]["НачальныйОстаток"]) add.same = true;
+                                    else add.same = false;
+                                }
+                            }
+                        }
+                                                
+                        Vue.set(th.accounts[i], "BABalance", add);
+                    }
+                    
+                    change("show");
+                }
+                
+                this.SERVER_REQUEST2({
+                    toServer: ["ExecFunctions", queries],
+                    accepted: ready,
+                });
+            }
+            else change("show");
         },
         sendDoc(accNum, docNum)
         {

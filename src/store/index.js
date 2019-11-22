@@ -604,7 +604,28 @@ export const store = new Vuex.Store({
                     else {reject(error)}
                 });
         },
-
+        SERVER_REQUEST2: ({dispatch}, {toServer, accepted, rejected}) => {
+            
+            let resolve = (data) => { accepted(data.data) }, reject;
+            
+            if(toServer[0] == "ExecFunctions")
+            {
+                reject = (data) => {
+                    
+                    let res = [];
+                    
+                    toServer[1].forEach((query) => { res.push(toDMFerror(data)); });
+                    
+                    accepted(res);
+                }
+            }
+            else
+            {
+                reject = (data) => { rejected(toDMFerror(data).message); };
+            }
+            
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+        }
     }
 })
 

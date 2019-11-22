@@ -158,6 +158,7 @@
                  :visible="i==0">
                 <BankAccount :ID="account.BankAccountID"
                              :FirmID="FirmID"
+                             :data="account"
                              :addPanel="addPanel"/>
             </Tab>
         </div>
@@ -220,7 +221,7 @@ export default {
         Tariffs, TariffsTO, BankAccount, Turnover, Calculation, Receipt
     },
     data: function()
-    {        
+    {
         return {
             equipmentInfo: [],
             
