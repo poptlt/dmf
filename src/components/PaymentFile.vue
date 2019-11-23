@@ -35,6 +35,17 @@
              :label="account['РасчСчет']"
              :visible="i==0">
             
+            <template v-if="account.BABalance">
+                
+                <div v-if="account.BABalance.same === false" class="alert alert-danger">
+                    Внимание, не совпал начальный остаток!
+                </div>
+                <div v-if="account.BABalance.error" class="alert alert-danger">
+                    Не удалось узнать начальный остаток, {{ account.BABalance.error }}
+                </div>
+                
+            </template>
+            
             <div class="d-flex align-items-center">
                 
                 <div class="text-center font-weight-bold">Информация по счету</div>
