@@ -361,19 +361,17 @@ export const store = new Vuex.Store({
                         
                 }
                 
-                accepted(data.data);
+                accepted(data);
             };
             
-            let reject = (data) => {
-                
-                console.log(data);
-                
-                rejected( (toDMFerror(data)).message);
+            let reject = (message) => {
+                                
+                rejected(message);
             }
             
             console.log(getQuery(query));
             
-            dispatch('SERVER_REQUEST', {toServer: getQuery(query), resolve: resolve, reject: reject});
+            dispatch('SERVER_REQUEST3', {toServer: getQuery(query), accepted: resolve, rejected: reject});
         },
         
         //осталась от старого баланса для лицевого счета
@@ -604,9 +602,9 @@ export const store = new Vuex.Store({
                     else {reject(error)}
                 });
         },
-        SERVER_REQUEST2: ({dispatch}, {toServer, accepted, rejected}) => {
+        SERVER_REQUEST2: ({state, dispatch, commit}, {toServer, accepted, rejected, url = "func"}) => {
             
-            let resolve = (data) => { accepted(data.data) }, reject;
+            /*let resolve = (data) => { accepted(data.data) }, reject;
             
             if(toServer[0] == "ExecFunctions")
             {
@@ -624,9 +622,152 @@ export const store = new Vuex.Store({
                 reject = (data) => { rejected(toDMFerror(data).message); };
             }
             
-            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});
+            dispatch('SERVER_REQUEST', {toServer: toServer, resolve: resolve, reject: reject});*/
+            
+            
+            
+            // создаем промис для ожидания восстановления пользовательской сессии
+            let waitAuth = new Promise((resolve) => {
+                let timer = setInterval(() => {
+                    if (state.AuthState) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 500);
+            });
+
+            let data = {'exec':JSON.stringify(toServer)};
+
+            let sendURL = (process.env.NODE_ENV == 'production') ? '/'+url : 'http://dev2.dmf.su/'+url;
+            
+            // делаем запрос на сервер
+            return Axios({method: "post", timeout: 15000, url: sendURL, data: data, withCredentials: true})
+                // при удачном исходе отдаем результат
+                .then(response => {
+                
+                    response = response.data;
+                
+                    response.forEach((ans) => {
+                        
+                        if(typeof(ans) == "object" && ans.DMF_ERROR)
+                        {
+                            if(ans.DMF_ERROR.Log !== undefined) console.log(ans.DMF_ERROR.Log);
+                            
+                            ans.message = ans.DMF_ERROR.Message;
+                            
+                            ans.DMF_ERROR = true;
+                        }
+                    });
+                
+                    accepted(response);
+                })
+                // при ошибке
+                .catch(error => {
+                    // проверяем, не отсутствие ли авторизации
+                    if (error.response && error.response.status == 403) {
+                        // если авторизации нет, то сбрасываем переменную, чтобы появилась форма авторизации
+                        commit('SET_AUTH', false);
+                        // и ждем появления авторизации
+                        waitAuth
+                            .then(() => {
+                                // после чего опять отправляем тот же запрос
+                                dispatch('SERVER_REQUEST2', {toServer: toServer, accepted: accepted, rejected: rejected, url: url});
+                            })
+                    }
+                    // если ошибка не связана с авторизацией, то отправляем ее на обработку
+                    else
+                    {
+                        let res = [];
+                        for(let i=0; i<toServer[1].length; i++) res.push(toDMFerror(error));
+                        
+                        accepted(res);
+                    }
+                });
+        },
+        SERVER_REQUEST3: ({dispatch}, {toServer, accepted, rejected}) => {
+            
+            let solo = false;
+            
+            if(toServer[0] != "ExecFunctions")
+            {
+                toServer = ["ExecFunctions", [toServer]], solo = true;
+            }
+            
+            dispatch('SERVER_REQUEST2', {toServer: toServer, accepted: ready});
+            
+            let result = [];
+            
+            function ready(data)
+            {
+                console.log(data);
+                if(!result.length) result = data;
+                else
+                {
+                    let ptr = 0;
+                    for(let i=0; i<result.length; i++)
+                    {
+                        if(typeof(result[i]) == "object" && result[i].DMF_PROCESS_ID)
+                        {
+                            if(typeof(data[ptr]) != "object" || !data[ptr].DMF_PROCESS_ACTIVE)
+                            {
+                                result[i] = data[ptr];
+                            }
+                            ptr++;
+                        }
+                    }
+                }
+                
+                let queries = [];
+                result.forEach((query) => {
+                    
+                    if(typeof(query) == "object" && query.DMF_PROCESS_ID)
+                    {
+                        queries.push(["CheckProcess", query.DMF_PROCESS_ID]);
+                    }
+                });
+                
+                if(queries.length)
+                {
+                    setTimeout(function(){
+                        
+                        dispatch('SERVER_REQUEST2', {toServer: ["ExecFunctions", queries], accepted: ready});
+                    }, 1000);
+                }
+                else
+                {
+                    if(solo)
+                    {
+                        if(typeof(result[0]) == "object" && result[0].DMF_ERROR)
+                        {
+                            rejected(result[0].message);
+                        }
+                        else accepted(result[0]);
+                    }
+                    else accepted(result);
+                }
+            }
         }
     }
 })
 
 setInterval(function(){store.dispatch('RELOAD_BACKGROUND');}, 5000);
+
+/*let xx=0;
+
+function testf()
+{
+    xx++;
+    console.log(xx);
+    setTimeout(testf, 1000);
+}*/
+
+let ar = [];
+
+function f(a)
+{
+    a=["1"];
+}
+
+f(ar);
+
+console.log(ar);
