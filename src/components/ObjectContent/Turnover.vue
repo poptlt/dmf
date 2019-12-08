@@ -38,19 +38,23 @@
 
 <State ref="state">
     
-    <div class="d-flex align-items-center">
-        <div class="p-1">Начальная задолженность: </div>
-        <Number :NoNegative="false" :Digits="10" :DigitsAfterPoint="2" @change="changeStartBalance" class="m-1"/>
-        <div>
-            <button v-if="startBalance !== undefined" @click="writeStartBalance" class="btn btn-primary btn-sm">Установить</button>
+    <template v-if="showFor(Roles, 'FirmAdmin', 'FirmAdminTest', 'AddFirmAdmin')">
+
+        <div class="d-flex align-items-center">
+            <div class="p-1">Начальная задолженность: </div>
+            <Number :NoNegative="false" :Digits="10" :DigitsAfterPoint="2" @change="changeStartBalance" class="m-1"/>
+            <div>
+                <button v-if="startBalance !== undefined" @click="writeStartBalance" class="btn btn-primary btn-sm">Установить</button>
+            </div>
         </div>
-    </div>
-    
-    <center>
-        <button class="btn btn-primary" @click="newDoc">
-            Новый документ
-        </button>
-    </center>
+
+        <center>
+            <button class="btn btn-primary" @click="newDoc">
+                Новый документ
+            </button>
+        </center>
+
+    </template>
 
     <div class="d-flex align-items-center justify-content-around">
 
@@ -106,7 +110,7 @@ import State from '../State.vue';
 import Number from '../Inputs/Number.vue';
 
 export default {
-    props: ["FirmID", "LSID", "addPanel"],
+    props: ["FirmID", "LSID", "Roles", "addPanel"],
     components:
     {
         NoData, State, Number

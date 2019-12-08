@@ -17,7 +17,9 @@
             </div>
             <div>
                 <template v-if="action.type == 'tariff'">
-                    Установка тарифа
+
+                    {{ action.installed ? 'Установка тарифа' : 'Изменение значения тарифа' }}
+
                     <a href="#" @click="showTariffTO(action.ID, action.name, action.firmName)">
                         {{ action.name }}
                     </a>
@@ -144,7 +146,7 @@ export default {
     },
     data: function()
     {
-        console.log(this.kits);
+        console.log(this.history);
         
         let data = {
             periods: [],
@@ -199,10 +201,11 @@ export default {
                             name: item.TariffName,
                             ID: item.TariffID,
                             firmName: item.TariffObject.Name,
-                            object: object
+                            object: object,
+                            installed: item.TariffInstall
                         };
                         
-                        if(object === undefined)
+                        if(object === undefined && item.TariffInstall)
                         {
                             t.remove = {
                                 type: "tariff",

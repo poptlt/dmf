@@ -190,6 +190,7 @@ export default {
         },
         showObject: function({FirmID, ObjectID, Name, Type, Roles})
         {
+            console.log(Roles);
             this.addPanel("Object", Name, {FirmID: FirmID, ObjectID: ObjectID, Name: Name, Type: Type, Roles: Roles});
         },
         deletePanel: function(i)

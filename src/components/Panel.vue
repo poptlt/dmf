@@ -129,11 +129,18 @@ export default {
                     res = {
                         props: {func: "GetObjectProps", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
-                        calcParams: {func: "GetObjectCalcParams", FirmID: info.FirmID, ObjectID: info.ObjectID},
+                        //calcParams: {func: "GetObjectCalcParams", FirmID: info.FirmID, ObjectID: info.ObjectID},//FirmAdmin FirmAdminTest AddFirmAdmin
 
-                        equipmentState: {func: "ObjectHardWorkTariffState", FirmID: info.FirmID, ObjectID: info.ObjectID}
+                        //equipmentState: {func: "ObjectHardWorkTariffState", FirmID: info.FirmID, ObjectID: info.ObjectID}//FirmAdmin FirmAdminTest AddFirmAdmin
                     };
                     
+                    if(this.showFor(info.Roles, "FirmAdmin", "FirmAdminTest", "AddFirmAdmin"))
+                    {
+                        res.calcParams = {func: "GetObjectCalcParams", FirmID: info.FirmID, ObjectID: info.ObjectID};//FirmAdmin FirmAdminTest AddFirmAdmin
+
+                        res.equipmentState = {func: "ObjectHardWorkTariffState", FirmID: info.FirmID, ObjectID: info.ObjectID};//FirmAdmin FirmAdminTest AddFirmAdmin
+                    }
+
                     if(info.Type == "Firm")
                     {
                         res.tariffs = {func: "GetTariffs", FirmID: info.FirmID};
@@ -142,7 +149,9 @@ export default {
                         
                         res.bankAccounts = {func: "GetBankAccounts", FirmID: info.FirmID};
                     }
-                                        
+
+                    console.log(res);
+
                     return res;
                     
                 case "History":

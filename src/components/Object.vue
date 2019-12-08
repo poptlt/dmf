@@ -1,6 +1,7 @@
 <template>
 <div>
-    <div v-if="Type == 'LS'" class="d-flex align-items-center">
+    <div v-if="Type == 'LS' && showFor(Roles, 'FirmAdmin', 'FirmAdminTest', 'AddFirmAdmin')"
+         class="d-flex align-items-center">
         <button @click="getUrl" class="flex-grow-0 border btn btn-light btn-sm m-2">Получить url</button>
         <div>{{ urlMessage }}</div>
         <div hidden ref="link">link</div>
@@ -8,17 +9,18 @@
 
     <Tab :accordionID="accordionID" :visible="true" label="Реквизиты">
 
-        <template v-if="isData([props, equipmentState])">
+        <table v-if="isData([props])"
+               class="table table-hover">
+            <tbody>
+                <tr v-for="item in props" @click="(item.Editable) ? showHistory('Props', item.PropID, item.PropName) : false">
+                    <td>{{ item.PropName }}</td>
+                    <td>{{ item.Value }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <NoData v-else :data="[props]"/>
 
-            <table class="table table-hover">
-                <tbody>
-                    <tr v-for="item in props" @click="(item.Editable) ? showHistory('Props', item.PropID, item.PropName) : false">
-                        <td>{{ item.PropName }}</td>
-                        <td>{{ item.Value }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
+        <template v-if="showFor(Roles, 'FirmAdmin', 'FirmAdminTest', 'AddFirmAdmin')">
                         
             <div class="d-flex justify-content-between align-items-center">
 
@@ -30,7 +32,8 @@
 
             </div>
             
-            <table class="table">
+            <table v-if="isData([equipmentState])"
+                   class="table">
                 <template v-for="(equipment, i) in equipmentState">
                     <tr :style="{'background-color': (equipment.HardState) ? ((equipment.WorkState ? '#ccffcc' : '#ffcccc')) : 'WhiteSmoke'}">
                         <td>{{ equipment.TypeName }}</td>
@@ -89,13 +92,14 @@
                     </tr>
                 </template>
             </table>
+            <NoData v-else :data="[props, equipmentState]"/>
 
         </template>
-        <NoData v-else :data="[props, equipmentState]"/>
 
     </Tab>
 
-    <Tab :accordionID="accordionID" label="Параметры расчетов">
+    <Tab v-if="showFor(Roles, 'FirmAdmin', 'FirmAdminTest', 'AddFirmAdmin')"
+         :accordionID="accordionID" label="Параметры расчетов">
 
         <template v-if="isData([calcParams])">
 
@@ -168,17 +172,22 @@
 
     <Tab v-if="Type == 'LS'" :accordionID="accordionID" label="Баланс">
 
-        <Turnover :FirmID="FirmID" :LSID="ObjectID" :addPanel="addPanel"/>
+        <Turnover :FirmID="FirmID"
+                  :LSID="ObjectID"
+                  :Roles="Roles"
+                  :addPanel="addPanel"/>
 
     </Tab>
 
-    <Tab :accordionID="accordionID" label="Начисления">
+    <Tab v-if="showFor(Roles, 'FirmAdmin', 'FirmAdminTest', 'AddFirmAdmin')"
+         :accordionID="accordionID" label="Начисления">
 
         <Calculation :FirmID="FirmID" :ObjectID="ObjectID"/>
 
     </Tab>
 
-    <Tab :accordionID="accordionID" label="Квитанция">
+    <Tab v-if="showFor(Roles, 'FirmAdmin', 'FirmAdminTest', 'AddFirmAdmin')"
+         :accordionID="accordionID" label="Квитанция">
 
         <Receipt :FirmID="FirmID" :ObjectID="ObjectID"/>
 
@@ -222,6 +231,7 @@ export default {
     },
     data: function()
     {
+        console.log(this.props);
         return {
             equipmentInfo: [],
             

@@ -153,6 +153,18 @@ Vue.mixin({
                 }
             }
             return true;
+        },
+
+        showFor: (Roles, ...canSee) => {
+
+            for(let i=0; i<Roles.length; i++)
+            {
+                for(let j=0; j<canSee.length; j++)
+                {
+                    if(Roles[i] == canSee[j]) return true;
+                }
+            }
+            return false;
         }
     },
     /*computed: {
