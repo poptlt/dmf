@@ -123,6 +123,11 @@ function setObjectsValue(root, object, value) {
     }
 }
 
+function isObject(x)
+{
+    return (x != null && typeof(x) == "object");
+}
+
 export const store = new Vuex.Store({
   state: {
       AuthState: true,
@@ -646,10 +651,10 @@ export const store = new Vuex.Store({
                 .then(response => {
                 
                     response = response.data;
-                
+
                     response.forEach((ans) => {
                         
-                        if(typeof(ans) == "object" && ans.DMF_ERROR)
+                        if(isObject(ans) && ans.DMF_ERROR)
                         {
                             if(ans.DMF_ERROR.Log !== undefined) console.log(ans.DMF_ERROR.Log);
                             
@@ -658,7 +663,7 @@ export const store = new Vuex.Store({
                             ans.DMF_ERROR = true;
                         }
                     });
-                
+
                     accepted(response);
                 })
                 // при ошибке
@@ -706,9 +711,9 @@ export const store = new Vuex.Store({
                     let ptr = 0;
                     for(let i=0; i<result.length; i++)
                     {
-                        if(typeof(result[i]) == "object" && result[i].DMF_PROCESS_ID)
+                        if(isObject(result[i]) && result[i].DMF_PROCESS_ID)//шел процесс
                         {
-                            if(typeof(data[ptr]) != "object" || !data[ptr].DMF_PROCESS_ACTIVE)
+                            if(!isObject(data[ptr]) || !data[ptr].DMF_PROCESS_ACTIVE)//процесс завершился
                             {
                                 result[i] = data[ptr];
                             }
@@ -720,9 +725,9 @@ export const store = new Vuex.Store({
                 let queries = [];
                 result.forEach((query) => {
                     
-                    if(typeof(query) == "object" && query.DMF_PROCESS_ID)
+                    if(isObject(query) && query.DMF_PROCESS_ID)//если еще идет процесс
                     {
-                        queries.push(["CheckProcess", query.DMF_PROCESS_ID]);
+                        queries.push(["CheckProcess", query.DMF_PROCESS_ID]);//значит надо спрашивать
                     }
                 });
                 
@@ -737,7 +742,7 @@ export const store = new Vuex.Store({
                 {
                     if(solo)
                     {
-                        if(typeof(result[0]) == "object" && result[0].DMF_ERROR)
+                        if(isObject(result[0]) && result[0].DMF_ERROR)
                         {
                             rejected(result[0].message);
                         }
