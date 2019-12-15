@@ -94,6 +94,9 @@
             </table>
             <NoData v-else :data="[props, equipmentState]"/>
 
+            <EquipmentState v-if="isData([equipmentState2])"
+                            :data="equipmentState2"/>
+
         </template>
 
     </Tab>
@@ -207,6 +210,8 @@ import NoData from './NoData.vue';
     
 import Tab from './ObjectContent/Tab.vue';
 
+
+import EquipmentState from './EquipmentState.vue';
     
 import Tariffs from './ObjectContent/Tariffs.vue';
     
@@ -222,16 +227,15 @@ import Receipt from './ObjectContent/Receipt.vue';
 
 export default {
     props: ["FirmID", "ObjectID", "Name", "Type", "Roles",
-            "props", "calcParams", "equipmentState", "tariffs", "tariffsTO", "bankAccounts",
+            "props", "calcParams", "equipmentState", "equipmentState2", "tariffs", "tariffsTO", "bankAccounts",
             "addPanel", "showObject"],
     components:
     {
         NoData, State, Tab,
-        Tariffs, TariffsTO, BankAccount, Turnover, Calculation, Receipt
+        EquipmentState, Tariffs, TariffsTO, BankAccount, Turnover, Calculation, Receipt
     },
     data: function()
     {
-        console.log(this.props);
         return {
             equipmentInfo: [],
             

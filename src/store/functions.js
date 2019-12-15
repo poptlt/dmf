@@ -22,6 +22,10 @@ export function getPath(data)//куда класть данные во vuex
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectHardWorkTariffState"];
     }
+    if(data.func == "ObjectHardWorkTariffState2")
+    {
+        return ["Objects", data.FirmID, data.ObjectID, "ObjectHardWorkTariffState2"];
+    }
 
     //инфа по объекту
     if(data.func == "GetObjectProps")
@@ -137,6 +141,10 @@ export function getQuery(data)//что спрашивать у сервера
     if(data.func == "ObjectHardWorkTariffState")
     {
         return ["ObjectHardWorkTariffState", data.FirmID, data.ObjectID];
+    }
+    if(data.func == "ObjectHardWorkTariffState2")
+    {
+        return ["ObjectHardWorkTariffState2", data.FirmID, data.ObjectID];
     }
 
     //инфа по объекту

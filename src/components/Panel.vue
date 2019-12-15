@@ -139,6 +139,8 @@ export default {
                         res.calcParams = {func: "GetObjectCalcParams", FirmID: info.FirmID, ObjectID: info.ObjectID};//FirmAdmin FirmAdminTest AddFirmAdmin
 
                         res.equipmentState = {func: "ObjectHardWorkTariffState", FirmID: info.FirmID, ObjectID: info.ObjectID};//FirmAdmin FirmAdminTest AddFirmAdmin
+
+                        res.equipmentState2 = {func: "ObjectHardWorkTariffState2", FirmID: info.FirmID, ObjectID: info.ObjectID};
                     }
 
                     if(info.Type == "Firm")
@@ -223,7 +225,7 @@ export default {
                     
                     return {
                         history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
-                        
+
                         kits: {func: "GetHardTypes"},
                         
                         tariffs: {func: "GetTariffsTO", FirmID: info.FirmID}
