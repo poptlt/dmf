@@ -32,7 +32,7 @@
 
             </div>
             
-            <table v-if="isData([equipmentState])"
+            <!--<table v-if="isData([equipmentState])"
                    class="table">
                 <template v-for="(equipment, i) in equipmentState">
                     <tr :style="{'background-color': (equipment.HardState) ? ((equipment.WorkState ? '#ccffcc' : '#ffcccc')) : 'WhiteSmoke'}">
@@ -92,10 +92,16 @@
                     </tr>
                 </template>
             </table>
-            <NoData v-else :data="[props, equipmentState]"/>
+            <NoData v-else :data="[props, equipmentState]"/>-->
 
-            <EquipmentState v-if="isData([equipmentState2])"
-                            :data="equipmentState2"/>
+            <EquipmentState v-if="isData([equipmentState2, tariffsTO])"
+                            :data="equipmentState2"
+                            :FirmID="FirmID"
+                            :ObjectID="ObjectID"
+                            :tariffs="tariffsTO"
+                            :addPanel="addPanel"
+                            :showObject="showObject"/>
+            <NoData v-else :data="[equipmentState2, tariffsTO]"/>
 
         </template>
 
@@ -236,6 +242,8 @@ export default {
     },
     data: function()
     {
+        //console.log(this.$refs.equipmentState);
+
         return {
             equipmentInfo: [],
             
@@ -249,6 +257,7 @@ export default {
     methods:
     {
         ...mapActions(["GET_URL"]),
+
         showEquipmentInfo: function(i)
         {
             Vue.set(this.equipmentInfo, i, (this.equipmentInfo[i]) ? false : true);

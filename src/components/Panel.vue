@@ -129,6 +129,8 @@ export default {
                     res = {
                         props: {func: "GetObjectProps", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
+                        tariffsTO: {func: "GetTariffsTO", FirmID: info.FirmID}
+
                         //calcParams: {func: "GetObjectCalcParams", FirmID: info.FirmID, ObjectID: info.ObjectID},//FirmAdmin FirmAdminTest AddFirmAdmin
 
                         //equipmentState: {func: "ObjectHardWorkTariffState", FirmID: info.FirmID, ObjectID: info.ObjectID}//FirmAdmin FirmAdminTest AddFirmAdmin
@@ -147,7 +149,7 @@ export default {
                     {
                         res.tariffs = {func: "GetTariffs", FirmID: info.FirmID};
                         
-                        res.tariffsTO = {func: "GetTariffsTO", FirmID: info.FirmID};
+                        //res.tariffsTO = {func: "GetTariffsTO", FirmID: info.FirmID};
                         
                         res.bankAccounts = {func: "GetBankAccounts", FirmID: info.FirmID};
                     }

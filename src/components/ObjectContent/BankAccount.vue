@@ -136,7 +136,6 @@ export default {
     props: ["ID", "FirmID", "data", "addPanel"],
     data: function()
     {
-        console.log(this.data);
         return {
         
             ru: ru,

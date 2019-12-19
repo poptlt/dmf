@@ -146,7 +146,7 @@ export default {
     },
     data: function()
     {
-        console.log(this.history);
+        //console.log(this.history);
         
         let data = {
             periods: [],

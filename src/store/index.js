@@ -12,7 +12,7 @@ function urlFunc() {
 
 function urlAuth() {
     if (process.env.NODE_ENV == 'production') {return '/func/login'}
-    else {return 'http://dev2.dmf.su/func/login'}
+    else {return 'http://dev.dmf.su/func/login'}
 }
 
 function toDMFerror(error) {
@@ -319,26 +319,17 @@ export const store = new Vuex.Store({
                         
                     case "ObjectTariffTOWrite":
                     case "ObjectTariffTODelete":
-                        
-                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectTariffTOState"]);
-                        
-                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectTariffTODetails"]);
-                        
-                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffDetails"]);
-                        
-                        break;
-                        
                     case "ObjectHardWrite":
                     case "ObjectHardDelete":
                     case "ObjectHardWorkWrite":
                     case "ObjectHardWorkDelete":
-                        
-                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardState"]);
 
-                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardDetails"]);
-                        
                         commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffDetails"]);
                         
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffState"]);
+
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffState2"]);
+
                         break;
                         
                     case "SetLSBalance":
@@ -582,7 +573,7 @@ export const store = new Vuex.Store({
             //let url = "http://dev2.dmf.su/func";
             let data = {'exec':JSON.stringify(toServer)};
 
-            let sendURL = (process.env.NODE_ENV == 'production') ? '/'+url : 'http://dev2.dmf.su/'+url;
+            let sendURL = (process.env.NODE_ENV == 'production') ? '/'+url : 'http://dev.dmf.su/'+url;
 
             // делаем запрос на сервер
             return Axios({method: "post", timeout: 15000, url: sendURL/*urlFunc()*/, data: data, withCredentials: true})
@@ -643,7 +634,7 @@ export const store = new Vuex.Store({
 
             let data = {'exec':JSON.stringify(toServer)};
 
-            let sendURL = (process.env.NODE_ENV == 'production') ? '/'+url : 'http://dev2.dmf.su/'+url;
+            let sendURL = (process.env.NODE_ENV == 'production') ? '/'+url : 'http://dev.dmf.su/'+url;
             
             // делаем запрос на сервер
             return Axios({method: "post", timeout: 15000, url: sendURL, data: data, withCredentials: true})
