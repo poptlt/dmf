@@ -85,6 +85,10 @@ export function getPath(data)//куда класть данные во vuex
     {
         return ["Objects", data.FirmID, data.ObjectID, "ObjectHardWorkTariffDetails"];
     }
+    if(data.func == "ObjectHardWorkTariffDetails2")
+    {
+        return ["Objects", data.FirmID, data.ObjectID, "ObjectHardWorkTariffDetails2"];
+    }
 
     //типы
     if(data.func == "GetHardTypes")
@@ -187,6 +191,10 @@ export function getQuery(data)//что спрашивать у сервера
     if(data.func == "ObjectHardWorkTariffDetails")
     {
         return ["ObjectHardWorkTariffDetails", data.FirmID, data.ObjectID];
+    }
+    if(data.func == "ObjectHardWorkTariffDetails2")
+    {
+        return ["ObjectHardWorkTariffDetails2", data.FirmID, data.ObjectID];
     }
 
     //типы

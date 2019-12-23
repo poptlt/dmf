@@ -30,6 +30,10 @@
                     <font-awesome-icon icon="edit"/>
                 </button>
 
+                <button @click="showEquipmentHistory2"
+                        class="border btn btn-light btn-sm m-1 flex-grow-0">
+                    2
+                </button>
             </div>
             
             <!--<table v-if="isData([equipmentState])"
@@ -95,12 +99,11 @@
             <NoData v-else :data="[props, equipmentState]"/>-->
 
             <EquipmentState v-if="isData([equipmentState2, tariffsTO])"
+                            :editable="true"
                             :data="equipmentState2"
                             :FirmID="FirmID"
                             :ObjectID="ObjectID"
-                            :tariffs="tariffsTO"
-                            :addPanel="addPanel"
-                            :showObject="showObject"/>
+                            :tariffs="tariffsTO"/>
             <NoData v-else :data="[equipmentState2, tariffsTO]"/>
 
         </template>
@@ -273,6 +276,10 @@ export default {
         showEquipmentHistory: function()
         {
             this.addPanel("EquipmentHistory", this.Name + ", оборудование и тарифы", {FirmID: this.FirmID, ObjectID: this.ObjectID});
+        },
+        showEquipmentHistory2: function()
+        {
+            this.addPanel("EquipmentHistory2", this.Name + ", оборудование и тарифы", {FirmID: this.FirmID, ObjectID: this.ObjectID});
         },
         showCalcParams: function()
         {

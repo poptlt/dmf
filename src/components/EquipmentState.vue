@@ -5,20 +5,21 @@
     <tr :style="{'background-color': (kit.Value) ? ((kit.State ? '#ccffcc' : '#ffcccc')) : 'WhiteSmoke'}">
         <td>{{ (kit.Value) ? kit.Value.Name : kit.ComplectName }}</td>
         <td>
-            <button @click="changeTariff1()"
+            <button v-if="editable"
+                    @click="changeTariff1()"
                     class="btn btn-sm"
                     :style="{'font-size': '16px'}">
-                {{ kit.Tariff ? kit.Tariff.Value : '-' }}
+                {{ kit.TariffValue ? kit.TariffValue : '-' }}
             </button>
+            <div v-else>{{ kit.TariffValue ? kit.TariffValue : '-' }}</div>
         </td>
-        <td class="px-0">
-            <button v-if="kit.Value"
+        <td class="text-right">
+            <button v-if="kit.Value && editable"
                     @click="changeState(kit.ComplectID, !kit.State, kit.Value.Name)"
                     class="btn btn-sm">
                 <font-awesome-icon :icon="kit.State ? 'toggle-on' : 'toggle-off'" size="lg"/>
             </button>
-        </td>
-        <td class="px-0">
+
             <button @click="showInfo(i)"
                     class="btn btn-link btn-sm">
                 <font-awesome-icon :icon="info[i] ? 'chevron-up' : 'chevron-down'"/>
@@ -26,7 +27,7 @@
         </td>
     </tr>
     <tr v-show="info[i]">
-        <td colspan="4" class="p-0">
+        <td colspan="3" class="p-0">
             <div v-if="kit.ValueData" class="p-2">
 
                 <font-awesome-icon v-if="kit.ValueData.Object.ObjectID == ObjectID"
@@ -36,8 +37,8 @@
                                    class="mx-2 text-danger"
                                    style="cursor: pointer"/>
 
-                {{ kit.Value ? 'Установлено' : 'Демонтаж' }}
                 {{ dateForClient(kit.ValueData.Date, 'day') }}
+                {{ kit.Value ? 'установлено' : 'демонтаж' }}
                 <span v-if="kit.ValueData.Object.ObjectID != ObjectID">
                     на
                     <a href="#"
@@ -65,30 +66,30 @@
                     </a>
                 </span>
             </div>
-            <div v-if="kit.Tariff" class="p-2">
+            <div v-for="(tariff, ID) in kit.TariffData" class="p-2">
 
-                <font-awesome-icon v-if="kit.Tariff.Object.ObjectID == ObjectID && kit.Tariff.Set"
-                                   @click="remove('tariff', kit.Tariff.Date, kit.Tariff.Tariff.ID)"
+                <font-awesome-icon v-if="tariff.Object.ObjectID == ObjectID && tariff.Set"
+                                   @click="remove('tariff', tariff.Date, ID)"
                                    icon="times"
                                    size="lg"
                                    class="mx-2 text-danger"
                                    style="cursor: pointer"/>
 
-                {{ dateForClient(kit.Tariff.Date, 'day') }}
-                {{ kit.Tariff.Set ? 'установлен тариф' : 'изменено значение тарифа' }}
+                {{ dateForClient(tariff.Date, 'day') }}
+                {{ tariff.Set ? 'установлен тариф' : 'изменено значение тарифа' }}
                 <a href="#"
-                   @click="showTariff(kit.Tariff.Tariff)">
-                    {{ kit.Tariff.Tariff.Name }}
+                   @click="showTariff(tariff.Tariff)">
+                    {{ tariff.Tariff.Name }}
                 </a>
-                <span v-if="kit.Tariff.Object.ObjectID != ObjectID">
-                {{ kit.Tariff.Set ? 'на' : 'установленного на' }}
+                <span v-if="tariff.Object.ObjectID != ObjectID">
+                {{ tariff.Set ? 'на' : 'установленного на' }}
                     <a href="#"
-                       @click="showObject(kit.Tariff.Object)">
-                        {{ kit.Tariff.Object.Name }}
+                       @click="showObject(tariff.Object)">
+                        {{ tariff.Object.Name }}
                     </a>
                 </span>
             </div>
-            <table class="table">
+            <table v-if="editable" class="table">
                 <tr v-for="equipment in kit.Types">
                     <td>{{equipment.Name}}</td>
                     <td>
@@ -156,14 +157,15 @@ import { mapActions } from 'vuex';
 import State from './State.vue';
 
 export default {
-    props: ["FirmID", "ObjectID", "data", "tariffs", "addPanel", "showObject"],
+    props: ["FirmID", "ObjectID", "data", "tariffs", "date", "editable"],
+    inject: ["addPanel", "showObject"],
     components:
     {
         Datepicker, State
     },
     data ()
     {
-        console.log(this.data);
+        //console.log(this.data);
 
         let data = {
             ru: ru,
@@ -186,16 +188,52 @@ export default {
 
             for(let key in item) cur[key] = item[key];
 
-            if(item.Value)
+            if(this.date)
             {
-                item.Types.forEach((equipment) => {
-
-                    if(equipment.ID == item.Value.ID) cur.Tariff = equipment.Tariff;
-                });
+                if(cur.ValueData && cur.ValueData.Date != this.date)
+                {
+                    delete cur.ValueData;
+                }
+                if(cur.StateData && cur.StateData.Date != this.date)
+                {
+                    delete cur.StateData;
+                }
             }
+
+
+            cur.TariffData = {};
+
+            item.Types.forEach((equipment) => {
+
+                if(equipment.Tariff)
+                {
+                    if(this.date)
+                    {
+                        if(equipment.Tariff.Date == this.date)
+                        {
+                            cur.TariffData[equipment.Tariff.Tariff.ID] = equipment.Tariff;
+                        }
+                    }
+                    else
+                    {
+                        if(item.Value && equipment.ID == item.Value.ID)
+                        {
+                            cur.TariffData[equipment.Tariff.Tariff.ID] = equipment.Tariff;
+                        }
+                    }
+
+                    if(item.Value && equipment.ID == item.Value.ID)
+                    {
+                        cur.TariffValue = equipment.Tariff.Value;
+                    }
+                }
+
+            });
 
             data.kits.push(cur);
         });
+
+        //console.log(data.kits);
 
         return data;
     },

@@ -1,86 +1,84 @@
 <template>
-    <div id="app" style="height: 100%; font-size: 16px">
-        
-        
-        
-        <auth-dmf/>
+<div id="app" style="height: 100%; font-size: 16px">
 
-        <div v-if="AuthState" class="d-flex flex-column" style="height: 100%">
-            
-            <div class="flex-grow-0 d-flex bg-info p-2">
+    <auth-dmf/>
 
-                <b-dropdown ref="panelsMenu" :class="displayClass.link[0]" size="sm" boundary="window" no-caret class="flex-grow-0 mr-2">
-                    <template slot="button-content">
-                        <font-awesome-icon icon="bars"/>
-                    </template>
-                    <div style="max-width: 80vw; max-height: 70vh; overflow: auto" class="bg-white">
-                        <template v-for="(panel, i) in panels">
+    <div v-if="AuthState" class="d-flex flex-column" style="height: 100%">
 
-                            <hr v-if="i" :class="displayClass.link[i]" class="m-0">
-                            <div @click="showPanel(i)" v-bind:class="displayClass.link[i]" class="p-3">
-                                {{ panel.label }}
-                            </div>
+        <div class="flex-grow-0 d-flex bg-info p-2">
 
-                        </template>
-                    </div>
-                </b-dropdown>
-                
-                <b-dropdown ref="searchMenu" size="sm" boundary="window" no-caret class="flex-grow-0" @shown="focus">
-                    <template slot="button-content">
-                        <font-awesome-icon icon="search"/>
-                    </template>
-                    <div style="max-width: 80vw; max-height: 70vh" class="d-flex flex-column bg-white">
-                        <div class="p-2">
-                            <input ref="searchInput" v-model="searchStr" @input="search" type="text" class="form-control">
+            <b-dropdown ref="panelsMenu" :class="displayClass.link[0]" size="sm" boundary="window" no-caret class="flex-grow-0 mr-2">
+                <template slot="button-content">
+                    <font-awesome-icon icon="bars"/>
+                </template>
+                <div style="max-width: 80vw; max-height: 70vh; overflow: auto" class="bg-white">
+                    <template v-for="(panel, i) in panels">
+
+                        <hr v-if="i" :class="displayClass.link[i]" class="m-0">
+                        <div @click="showPanel(i)" v-bind:class="displayClass.link[i]" class="p-3">
+                            {{ panel.label }}
                         </div>
 
-                        <div v-if="searchMessage" class="p-2">{{ searchMessage }}</div>
-                        <div v-else style="overflow: auto">
-                            <div v-for="item in searchList"
-                                 @click="showLS(item)"
-                                 class="p-2 border-bottom">
-                                {{ item.Name }}
-                            </div>
-                        </div>
-                    </div>
-                    
-                </b-dropdown>
-
-                <button @click="testing" class="flex-grow-0 btn btn-secondary btn-sm ml-2">TEST</button>
-
-                <div></div>
-
-                <button class="flex-grow-0 btn btn-secondary btn-sm" @click="goToPage('/')">
-                    <!--<img style="height: 20px" src="home_house_icon_124019.png">-->
-                    <font-awesome-icon icon="home"/>
-                </button>
-
-                <button class="btn btn-secondary btn-sm flex-grow-0 ml-2" @click="goToPage('/profile')">
-                    <font-awesome-icon icon="user"/>
-                </button>
-
-                <button class="btn btn-secondary btn-sm flex-grow-0 ml-2" @click="goToPage('/logout')">
-                    <font-awesome-icon icon="sign-out-alt"/>
-                </button>
-                
-            </div>
-
-            <div class="flex-fill row m-0" style="overflow: hidden">
-                <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border p-0" style="height: 100%">
-                    <Panel ref="panels"
-                           :label="panel.label"
-                           :main="i==0"
-                           :type="panel.type"
-                           :info="panel.info"
-                           v-on:delete="deletePanel(i)"
-                           @setLabel="function(label){ setLabel(i, label) }"
-                           :addPanel="addPanel"
-                           :showObject="showObject"/>
+                    </template>
                 </div>
-            </div>
+            </b-dropdown>
+
+            <b-dropdown ref="searchMenu" size="sm" boundary="window" no-caret class="flex-grow-0" @shown="focus">
+                <template slot="button-content">
+                    <font-awesome-icon icon="search"/>
+                </template>
+                <div style="max-width: 80vw; max-height: 70vh" class="d-flex flex-column bg-white">
+                    <div class="p-2">
+                        <input ref="searchInput" v-model="searchStr" @input="search" type="text" class="form-control">
+                    </div>
+
+                    <div v-if="searchMessage" class="p-2">{{ searchMessage }}</div>
+                    <div v-else style="overflow: auto">
+                        <div v-for="item in searchList"
+                             @click="showLS(item)"
+                             class="p-2 border-bottom">
+                            {{ item.Name }}
+                        </div>
+                    </div>
+                </div>
+
+            </b-dropdown>
+
+            <button @click="testing" class="flex-grow-0 btn btn-secondary btn-sm ml-2">TEST</button>
+
+            <div></div>
+
+            <button class="flex-grow-0 btn btn-secondary btn-sm" @click="goToPage('/')">
+                <!--<img style="height: 20px" src="home_house_icon_124019.png">-->
+                <font-awesome-icon icon="home"/>
+            </button>
+
+            <button class="btn btn-secondary btn-sm flex-grow-0 ml-2" @click="goToPage('/profile')">
+                <font-awesome-icon icon="user"/>
+            </button>
+
+            <button class="btn btn-secondary btn-sm flex-grow-0 ml-2" @click="goToPage('/logout')">
+                <font-awesome-icon icon="sign-out-alt"/>
+            </button>
 
         </div>
+
+        <div class="flex-fill row m-0" style="overflow: hidden">
+            <div v-for="(panel, i) in panels" v-bind:class="displayClass.panel[i]" class="border p-0" style="height: 100%">
+                <Panel ref="panels"
+                       :label="panel.label"
+                       :main="i==0"
+                       :type="panel.type"
+                       :info="panel.info"
+                       v-on:delete="deletePanel(i)"
+                       @setLabel="function(label){ setLabel(i, label) }"
+                       :addPanel="addPanel"
+                       :showObject="showObject"/>
+            </div>
+        </div>
+
     </div>
+</div>
 </template>
 
 <script>
@@ -99,6 +97,13 @@ export default {
     {
         AuthDmf, Panel
     },
+    provide: function()
+    {
+        return {
+            addPanel: this.addPanel,
+            showObject: this.showObject,
+        };
+    },
     data: function()
     {
         return {
@@ -108,7 +113,7 @@ export default {
             ],
             widths:
             {
-                Tree: 1, LSList: 1, Object: 1, History: 1, TariffsTOHistory: 1, Document: 1, CalcParams: 2, EquipmentHistory: 1, PaymentFile: 2, EditableDocument: 1, BankPayment: 1
+                Tree: 1, LSList: 1, Object: 1, History: 1, TariffsTOHistory: 1, Document: 1, CalcParams: 2, EquipmentHistory: 1, EquipmentHistory2: 1, PaymentFile: 2, EditableDocument: 1, BankPayment: 1
             },
             searchStr: "",
             searchList: [],

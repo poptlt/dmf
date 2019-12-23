@@ -326,6 +326,8 @@ export const store = new Vuex.Store({
 
                         commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffDetails"]);
                         
+                        commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffDetails2"]);
+
                         commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffState"]);
 
                         commit('CLEAR', ["Objects", query.FirmID, query.ObjectID, "ObjectHardWorkTariffState2"]);

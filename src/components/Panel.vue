@@ -62,6 +62,8 @@ import CalcParams from './CalcParams.vue'
     
 import EquipmentHistory from './EquipmentHistory.vue'
     
+import EquipmentHistory2 from './EquipmentHistory2.vue'
+
 import PaymentFile from './PaymentFile.vue'
     
 import EditableDocument from './EditableDocument.vue'
@@ -75,7 +77,7 @@ export default {
     {
         State, NoData,
         
-        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, EquipmentHistory, PaymentFile, EditableDocument, BankPayment
+        Tree, LSList, Object, History, TariffsTOHistory, Document, CalcParams, EquipmentHistory, EquipmentHistory2, PaymentFile, EditableDocument, BankPayment
     },
     props:
     {
@@ -212,21 +214,21 @@ export default {
                         data: {func: "TariffTOValueDetails", FirmID: info.FirmID, TariffID: info.TariffID},
                         type: {func: "GetHardTypes"}
                     }
-                    
-                /*case "EquipmentHistory":
-                    
-                    return {
-                        //history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
-                        
-                        history: {func: "ObjectHardDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
-                        kits: {func: "GetHardTypes"}
-                    };*/
-                    
                 case "EquipmentHistory":
                     
                     return {
                         history: {func: "ObjectHardWorkTariffDetails", FirmID: info.FirmID, ObjectID: info.ObjectID},
+
+                        kits: {func: "GetHardTypes"},
+
+                        tariffs: {func: "GetTariffsTO", FirmID: info.FirmID}
+                    }
+                    
+                case "EquipmentHistory2":
+                    
+                    return {
+                        history: {func: "ObjectHardWorkTariffDetails2", FirmID: info.FirmID, ObjectID: info.ObjectID},
 
                         kits: {func: "GetHardTypes"},
                         
