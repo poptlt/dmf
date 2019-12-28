@@ -20,7 +20,8 @@
                 <font-awesome-icon :icon="kit.State ? 'toggle-on' : 'toggle-off'" size="lg"/>
             </button>
 
-            <button @click="showInfo(i)"
+            <button v-if="editable || kit.ValueData || kit.StateData || Object.keys(kit.TariffData).length"
+                    @click="showInfo(i)"
                     class="btn btn-link btn-sm">
                 <font-awesome-icon :icon="info[i] ? 'chevron-up' : 'chevron-down'"/>
             </button>
@@ -116,7 +117,7 @@
           v-model="dialog"
           content-class="bg-white p-2 m-1"
           max-width="350px">
-    <div class="d-flex pb-2">
+    <div class="d-flex align-items-start pb-2">
         <div class="text-center">{{ dialogTitle }}</div>
         <button @click="dialog=false"
                 class="btn btn-sm btn-danger flex-grow-0">
@@ -158,7 +159,7 @@ import State from './State.vue';
 
 export default {
     props: ["FirmID", "ObjectID", "data", "tariffs", "date", "editable"],
-    inject: ["addPanel", "showObject"],
+    inject: ["addPanel", "showObject", "confirm"],
     components:
     {
         Datepicker, State
@@ -232,8 +233,6 @@ export default {
 
             data.kits.push(cur);
         });
-
-        //console.log(data.kits);
 
         return data;
     },
@@ -344,46 +343,47 @@ export default {
         },
         remove(type, date, val)
         {
-            let ok = confirm("Вы уверены, что хотите удалить запись?");
-
-            if(!ok) return;
-
-            let change = this.$refs.state.change;
-
-            function accepted()
+            function remove()
             {
-                change("show");
+                let change = this.$refs.state.change;
+
+                function accepted()
+                {
+                    change("show");
+                }
+
+                function rejected(message)
+                {
+                    change("error", "Произошла ошибка при удалении записи: " + message);
+                }
+
+                change("changing", "Удаление записи");
+
+                let query = {
+                    FirmID: this.FirmID,
+                    ObjectID: this.ObjectID,
+                    date: date
+                };
+
+                if(type == "tariff")
+                {
+                    query.func = "ObjectTariffTODelete";
+                    query.value = val;
+                }
+                else
+                {
+                    query.func = (type == "equipment") ? "ObjectHardDelete" : "ObjectHardWorkDelete";
+                    query.kitID = val;
+                }
+
+                this.SEND_DATA({
+                    query: query,
+                    accepted: accepted,
+                    rejected: rejected
+                });
             }
 
-            function rejected(message)
-            {
-                change("error", "Произошла ошибка при удалении записи: " + message);
-            }
-
-            change("changing", "Удаление записи");
-
-            let query = {
-                FirmID: this.FirmID,
-                ObjectID: this.ObjectID,
-                date: date
-            };
-
-            if(type == "tariff")
-            {
-                query.func = "ObjectTariffTODelete";
-                query.value = val;
-            }
-            else
-            {
-                query.func = (type == "equipment") ? "ObjectHardDelete" : "ObjectHardWorkDelete";
-                query.kitID = val;
-            }
-
-            this.SEND_DATA({
-                query: query,
-                accepted: accepted,
-                rejected: rejected
-            });
+            this.confirm("Вы уверены, что хотите удалить запись?", remove.bind(this));
         }
     }
 }

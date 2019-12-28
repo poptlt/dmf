@@ -749,23 +749,3 @@ export const store = new Vuex.Store({
 })
 
 setInterval(function(){store.dispatch('RELOAD_BACKGROUND');}, 5000);
-
-/*let xx=0;
-
-function testf()
-{
-    xx++;
-    console.log(xx);
-    setTimeout(testf, 1000);
-}*/
-
-let ar = [];
-
-function f(a)
-{
-    a=["1"];
-}
-
-f(ar);
-
-console.log(ar);

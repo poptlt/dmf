@@ -1,6 +1,6 @@
 <template>
 <div id="app" style="height: 100%; font-size: 16px">
-
+<v-app style="height: 100%">
     <auth-dmf/>
 
     <div v-if="AuthState" class="d-flex flex-column" style="height: 100%">
@@ -78,6 +78,26 @@
         </div>
 
     </div>
+
+    <v-dialog data-app
+              v-model="confirm.show"
+              content-class="bg-white p-2 m-1"
+              max-width="300px">
+        <div class="text-center mb-3">{{ confirm.question }}</div>
+        <div class="d-flex justify-content-around">
+            <button @click="confirm.show=false; confirm.confirmed()"
+                    class="flex-grow-0 btn btn-success">
+                Да
+            </button>
+            <button @click="confirm.show=false"
+                    class="flex-grow-0 btn btn-danger">
+                Нет
+            </button>
+        </div>
+
+    </v-dialog>
+
+</v-app>
 </div>
 </template>
 
@@ -102,6 +122,7 @@ export default {
         return {
             addPanel: this.addPanel,
             showObject: this.showObject,
+            confirm: this.confirmation
         };
     },
     data: function()
@@ -120,7 +141,14 @@ export default {
             searchMessage: "Ничего не найдено",
             searchTimestamp: undefined,
 
-            url: (process.env.NODE_ENV == 'production') ? '' : 'http://dev2.dmf.su'
+            url: (process.env.NODE_ENV == 'production') ? '' : 'http://dev2.dmf.su',
+
+            confirm:
+            {
+                show: false,
+                question: "",
+                confirmed: function(){}
+            }
         }
     },
     computed:
@@ -245,6 +273,12 @@ export default {
         goToPage: function(url)
         {
             window.location.replace(this.url + url);
+        },
+        confirmation(question, func)
+        {
+            this.confirm.show = true;
+            this.confirm.question = question;
+            this.confirm.confirmed = func;
         }
 
     },
